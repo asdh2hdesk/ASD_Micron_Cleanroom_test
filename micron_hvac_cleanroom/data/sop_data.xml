@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ════════════════════════════════════════════════════════════
+             SOP 001-03 — AIR VELOCITY AND CFM MEASUREMENT
+             Source: MHPL-VL-001-03-AIR VELOCITY AND CFM MEASURMENT.pdf
+             Pages: 12 (6 SOP + 6 Annexures)
+        ════════════════════════════════════════════════════════════ -->
+        <record id="sop_air_velocity_cfm" model="micron.sop.template">
+            <field name="name">AIR VELOCITY AND CFM MEASURMENT</field>
+            <field name="sop_no">MHPL/VL/001-03</field>
+            <field name="code">MHPL-VL-001</field>
+            <field name="revision">03</field>
+            <field name="supersedes">MHPL/VL/001-02</field>
+            <field name="test_type">air_velocity</field>
+            <field name="state">approved</field>
+            <field name="date_prepared">2025-09-16</field>
+            <field name="effective_date">2025-10-10</field>
+            <field name="next_review_date">2027-10-09</field>
+            <field name="total_pages">6</field>
+            <field name="prepared_by">Validation Engineer</field>
+            <field name="prepared_by_date">2025-09-16</field>
+            <field name="checked_by">Anjamel</field>
+            <field name="checked_by_date">2025-09-17</field>
+            <field name="approved_by">A.M. Wani</field>
+            <field name="approved_by_date">2025-09-22</field>
+            <!-- Acceptance values for programmatic evaluation -->
+            <field name="min_value">0.36</field>
+            <field name="max_value">0.54</field>
+            <field name="unit">m/s</field>
+            <field name="purpose" type="html"><p>
+To establish a standardized procedure for validating air velocity and airflow (CFM) measurements
+to ensure accuracy and reliability in HVAC systems, cleanrooms, laboratories, or other controlled
+environments.
+            </p></field>
+            <field name="scope" type="html"><p>
+This SOP applies to all personnel performing air velocity and CFM measurements using
+anemometers, airflow hoods, or other approved instruments in Micron HVAC Pvt. Ltd.
+            </p></field>
+            <field name="responsibilities" type="html"><p>
+Validation Engineer, Service Engineer and Service Technician
+            </p></field>
+            <field name="definitions" type="html"><p>
+<b>Air change rate:</b> Rate of air change expressed as air change per unit time and calculated by
+dividing the volume of air delivered in the time unit by the volume of the space.
+            </p></field>
+            <field name="procedure" type="html">
+<h4>5.1. Air velocity test in the area using anemometer</h4>
+<ol>
+  <li>Ensure that the AHU system of the area is ON condition.</li>
+  <li>Observe that HVAC system should be started before 30 minutes and the conditions should be in stable then the test shall be processed further.</li>
+  <li>Remove the diffuser/Grill before taking reading, if applicable.</li>
+  <li>Define the measuring plane perpendicular to the supply airflow and dividing it into grid cells of equal area. The minimum number of measuring points (grid cells) should be determined by given formula; if applicable,<br/>
+      <b>N = √10 × A</b><br/>
+      Where,<br/>
+      N is the minimum number of measuring points (grid cells; N should be rounded up to a whole number);<br/>
+      A is the measured area in m².
+  </li>
+  <li>However, in good industry practice, additional points typically <b>5 points</b> (center plus four corners) are taken to improve accuracy and assess airflow uniformity, thereby ensuring robust compliance with ISO requirements.</li>
+  <li>Ensure vane type anemometer is calibrated.</li>
+  <li>Measurement of supply airflow velocity from individual supply outlet is necessary to determine the airflow from each outlet.</li>
+  <li>The airflow velocity should be measured at approximately 150 mm to 300 mm from the filter face or grill at each grid cells.</li>
+  <li>Take the five reading of Velocity and calculate average velocity of each Supply grills / filters. Measuring time at each position should be at least 10 seconds and the minimum, maximum and average values during that period should be recorded.</li>
+  <li>Air flow volume at each Supply air filters / Perforated grills should be evaluated as,<br/>
+      <b>Q = Σ (Vc × Ac)</b><br/>
+      Where,<br/>
+      Q is the total air flow volume.<br/>
+      Vc is the Average air flow velocity at each cell center.<br/>
+      Ac is the area of each filter.
+  </li>
+  <li>Record the same Annexure I (F/VL/001/01-02).</li>
+  <li>You will be authorized to perform the activity in accordance with the client's Protocol/SOP only after successfully completing the required training on the client's documents.</li>
+</ol>
+
+<h4>5.2. Flow rate test in the area using Air Capture Hood</h4>
+<ol>
+  <li>Ensure that the AHU system of the area is ON condition.</li>
+  <li>Observe that HVAC system should be started before 30 minutes and the conditions should be in stable then the test shall be processed further.</li>
+  <li>Ensure the Air Capture Hood is calibrated.</li>
+  <li>Type / record the filters/grill/diffuser ID in the hood manometers.</li>
+  <li>The Air flow hood opening should be placed completely over the grill/diffuser/filter, and the face of the hood should be seated against a flat surface to prevent air bypass and inaccurate readings.</li>
+  <li>While using Air flow hood with flow meter, the air flow volume at each final supply air grill/Diffuser/filter should be measured at the discharge end of the hood. Measuring time at each position should be at least 10 seconds &amp; save the data in manometers.</li>
+  <li>Connect the printer to manometer and take printouts &amp; affix them in Annexure-V (F/VL/001/05-01). (Print Requirement depends on Costumers).</li>
+  <li>Record the results in Annexure III (F/VL/001/03-02).</li>
+</ol>
+
+<h4>5.3. Calculation of air change rate per hour (ACPH)</h4>
+<ol>
+  <li>Calculate number of air change rate using following formula.</li>
+  <li>Air change rate / Hr. (ACPH) = <b>[Total air flow volume (CFM) / Total Volume of area (Ft³)] × 60</b></li>
+  <li>Air change rate for ISO Class-6 area should not be less than 60 per hour, ISO Class-7 area should not be less than 40 per hour &amp; ISO Class-8 area should not be less than 20 per hour &amp; Average Velocity Required for ISO Class-5 90±20% FPM (72 to 108 FPM) or 0.45 ± 20% m/s (0.36 to 0.54 m/s) or as per customer's protocol.</li>
+  <li>Record the same Annexure III (F/VL/001/03-02).</li>
+</ol>
+
+<h4>5.4. Frequency</h4>
+<ol>
+  <li>Once in six months for ISO Class-5, 6 and 7, Once in a year for ISO Class-8.</li>
+</ol>
+
+<h4>5.5. Air flow volume measurement in the supply air duct</h4>
+<ol>
+  <li>Insert the anemometer into the duct and measure air velocity at five different points.</li>
+</ol>
+            </field>
+            <field name="acceptance_criteria_html" type="html">
+<table>
+  <thead>
+    <tr><th>ISO Class</th><th>Minimum Velocity / ACPH</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>ISO Class 5</td><td>0.45 ± 20% m/s (0.36 to 0.54 m/s) or 90 ± 20% FPM</td></tr>
+    <tr><td>ISO Class 6</td><td>Not less than 60 ACPH</td></tr>
+    <tr><td>ISO Class 7</td><td>Not less than 40 ACPH</td></tr>
+    <tr><td>ISO Class 8</td><td>Not less than 20 ACPH</td></tr>
+  </tbody>
+</table>
+<p>Result: Meets / Does Not Meet Validation Acceptance Criteria As Per ISO 14644-3:2019 (E)</p>
+            </field>
+            <field name="frequency" type="html"><ul>
+  <li>Once in six months for ISO Class-5, 6 and 7.</li>
+  <li>Once in a year for ISO Class-8.</li>
+</ul></field>
+            <field name="references" type="html"><ul>
+  <li>ISO 14644-3:2019 (E) — Cleanrooms and associated controlled environments</li>
+  <li>Client Protocol / SOP</li>
+  <li>F/VL/001/01-02 — Annexure I (Air Velocity Raw Data)</li>
+  <li>F/VL/001/03-02 — Annexure III (CFM / ACPH Data)</li>
+  <li>F/VL/001/05-01 — Annexure V (Hood Printout Affixing)</li>
+</ul></field>
+            <field name="abbreviations" type="html"><table>
+  <tr><td><b>HVAC</b></td><td>Heating, Ventilation and Air Conditioning</td></tr>
+  <tr><td><b>CFM</b></td><td>Cubic Feet per Minute</td></tr>
+  <tr><td><b>ACPH</b></td><td>Air Changes Per Hour</td></tr>
+  <tr><td><b>FPM</b></td><td>Feet Per Minute</td></tr>
+  <tr><td><b>AHU</b></td><td>Air Handling Unit</td></tr>
+  <tr><td><b>SOP</b></td><td>Standard Operating Procedure</td></tr>
+  <tr><td><b>ISO</b></td><td>International Organization for Standardization</td></tr>
+  <tr><td><b>N</b></td><td>Minimum number of measuring points</td></tr>
+  <tr><td><b>A</b></td><td>Area of filter / grill in m²</td></tr>
+  <tr><td><b>Vc</b></td><td>Average air flow velocity at cell center</td></tr>
+  <tr><td><b>Ac</b></td><td>Area of each filter</td></tr>
+</table></field>
+        </record>
+
+        <!-- Revision History for SOP 001 -->
+        <record id="sop_rev_001_01" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_air_velocity_cfm"/>
+            <field name="revision">01</field>
+            <field name="date">2022-01-01</field>
+            <field name="description">Initial release</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_001_02" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_air_velocity_cfm"/>
+            <field name="revision">02</field>
+            <field name="date">2024-01-01</field>
+            <field name="description">Added Air Capture Hood procedure (Section 5.2) and ACPH calculation formula</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_001_03" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_air_velocity_cfm"/>
+            <field name="revision">03</field>
+            <field name="date">2025-09-16</field>
+            <field name="description">Updated acceptance criteria table with ISO class-wise ACPH limits; added N=√10×A formula for measuring point calculation; expanded 5-point measurement guidance</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+
+
+        <!-- ════════════════════════════════════════════════════════════
+             SOP 002-02 — HEPA FILTER INTEGRITY TEST
+             Source: MHPL-VL-002-02-HEPA FILTER INTEGRITY TEST.pdf
+             Pages: 9 (5 SOP + 4 Annexures)
+        ════════════════════════════════════════════════════════════ -->
+        <record id="sop_hepa_filter_integrity" model="micron.sop.template">
+            <field name="name">HEPA FILTER INTEGRITY TEST</field>
+            <field name="sop_no">MHPL/VL/002-02</field>
+            <field name="code">MHPL-VL-002</field>
+            <field name="revision">02</field>
+            <field name="supersedes">MHPL/VL/002-01</field>
+            <field name="test_type">filter_integrity</field>
+            <field name="state">approved</field>
+            <field name="date_prepared">2025-09-15</field>
+            <field name="effective_date">2025-10-10</field>
+            <field name="next_review_date">2027-10-09</field>
+            <field name="total_pages">5</field>
+            <field name="prepared_by">Validation Engineer</field>
+            <field name="prepared_by_date">2025-09-15</field>
+            <field name="checked_by">Anjamel</field>
+            <field name="checked_by_date">2025-09-17</field>
+            <field name="approved_by">A.M. Wani</field>
+            <field name="approved_by_date">2025-09-22</field>
+            <!-- NMT 0.01% leakage -->
+            <field name="min_value">0.0</field>
+            <field name="max_value">0.01</field>
+            <field name="unit">% leakage</field>
+            <field name="purpose" type="html"><p>
+The HEPA filter integrity test ensures that cleanroom filters are undamaged, properly installed and
+functioning effectively, preventing airborne contamination and supporting the maintenance of
+controlled environmental conditions.
+            </p></field>
+            <field name="scope" type="html"><p>
+This procedure applies to integrity testing of all sub-0.3µ HEPA filters in cleanrooms, AHUs, RLAF
+units, and LAF cabinets, ensuring proper function and required air cleanliness in controlled
+environments.
+            </p></field>
+            <field name="responsibilities" type="html"><p>
+Validation Engineer, Service Engineer, Service Technician.
+            </p></field>
+            <field name="definitions" type="html"><p>
+<b>Filter integrity test:</b> It is used to detect and locate leaks in high-efficiency air filters (HEPA/ULPA)
+to ensure they are functioning correctly and providing the required level of particulate filtration in a
+controlled environment.
+            </p></field>
+            <field name="procedure" type="html">
+<h4>5.1. HEPA Filter Integrity Test by using Photometer:</h4>
+<ol>
+  <li>The HEPA filter integrity test is performed to ensure that the terminal and plenum-mounted HEPA filters are free from leaks and functioning correctly to maintain cleanroom classification.</li>
+  <li>The test is conducted under "At rest" or "As built" conditions to eliminate interference from personnel or operation.</li>
+  <li>Prior to testing, the air handling unit (AHU) must be operational for at least 30 min to allow stabilization.</li>
+  <li>Ensure the aerosol photometer is calibrated.</li>
+  <li>Ensure the pressure gauge is calibrated before testing and record the same.</li>
+  <li>Introduce the aerosol (PAO or DEHS) upstream of the HEPA filter using the aerosol generator. The upstream challenge concentration should be maintained between <b>20 to 80 µg/L</b> and verified using the photometer in upstream mode.</li>
+  <li>Scan the downstream face of the HEPA filter with the photometer probe, covering the entire filter face and all seals and frames at a scanning speed of approximately 50 mm/sec.</li>
+  <li>The probe should be held at a distance of approximately 25 mm from the filter face and moved in overlapping strokes.</li>
+  <li>Any point showing a photometer reading of more than 0.01% of the upstream challenge concentration should be noted as a potential leak.</li>
+  <li>Record upstream (before) and downstream (after) concentrations for each filter in Annexure I.</li>
+  <li>Calculate leakage as: <b>Leakage (%) = [Downstream Concentration / Upstream Concentration] × 100</b></li>
+  <li>You will be authorized to perform the activity in accordance with the client's Protocol/SOP only after successfully completing the required training on the client's documents.</li>
+</ol>
+            </field>
+            <field name="acceptance_criteria_html" type="html"><p>
+<b>Acceptance Criteria:</b> As per ISO 14644-3:2019 (E):<br/>
+Leakage should be Not More Than (NMT) <b>0.01%</b> of upstream challenge concentration.<br/>
+Any reading above 0.01% indicates a filter leak and the filter must be repaired or replaced.
+</p>
+<table>
+  <thead>
+    <tr><th>Parameter</th><th>Acceptance Limit</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Upstream Challenge Concentration</td><td>20 to 80 µg/L</td></tr>
+    <tr><td>Downstream Leakage</td><td>NMT 0.01% of upstream</td></tr>
+    <tr><td>Scanning Speed</td><td>~50 mm/sec</td></tr>
+    <tr><td>Probe Distance from Filter</td><td>~25 mm</td></tr>
+  </tbody>
+</table></field>
+            <field name="frequency" type="html"><ul>
+  <li>Once in six months for ISO Class-5, 6 and 7.</li>
+  <li>Once in a year for ISO Class-8.</li>
+  <li>After filter replacement or any maintenance event affecting the filter.</li>
+</ul></field>
+            <field name="references" type="html"><ul>
+  <li>ISO 14644-3:2019 (E) — Cleanrooms test methods</li>
+  <li>EU GMP Annex 1 — Manufacture of Sterile Products</li>
+  <li>IEST-RP-CC007 — Testing ULPA Filters</li>
+  <li>Client Protocol / SOP</li>
+</ul></field>
+            <field name="abbreviations" type="html"><table>
+  <tr><td><b>HEPA</b></td><td>High Efficiency Particulate Air (filter)</td></tr>
+  <tr><td><b>ULPA</b></td><td>Ultra Low Penetration Air (filter)</td></tr>
+  <tr><td><b>PAO</b></td><td>Poly Alpha Olefin (challenge aerosol)</td></tr>
+  <tr><td><b>DEHS</b></td><td>Di-Ethyl Hexyl Sebacate (challenge aerosol)</td></tr>
+  <tr><td><b>AHU</b></td><td>Air Handling Unit</td></tr>
+  <tr><td><b>RLAF</b></td><td>Reverse Laminar Air Flow</td></tr>
+  <tr><td><b>LAF</b></td><td>Laminar Air Flow</td></tr>
+  <tr><td><b>NMT</b></td><td>Not More Than</td></tr>
+</table></field>
+        </record>
+
+        <!-- Revision History for SOP 002 -->
+        <record id="sop_rev_002_01" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_hepa_filter_integrity"/>
+            <field name="revision">01</field>
+            <field name="date">2023-01-01</field>
+            <field name="description">Initial release</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_002_02" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_hepa_filter_integrity"/>
+            <field name="revision">02</field>
+            <field name="date">2025-09-15</field>
+            <field name="description">Added leakage calculation formula; expanded photometer scanning procedure; updated upstream challenge concentration range to 20-80 µg/L; added pressure gauge calibration requirement</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+
+
+        <!-- ════════════════════════════════════════════════════════════
+             SOP 003-02 — PARTICLE COUNT TEST
+             Source: MHPL-VL-003-02-PARTICLE COUNT TEST..pdf
+             Pages: 10 (8 SOP + 2 Annexures)
+        ════════════════════════════════════════════════════════════ -->
+        <record id="sop_particle_count" model="micron.sop.template">
+            <field name="name">PARTICLE COUNT TEST</field>
+            <field name="sop_no">MHPL/VL/003-02</field>
+            <field name="code">MHPL-VL-003</field>
+            <field name="revision">02</field>
+            <field name="supersedes">MHPL/VL/003-01</field>
+            <field name="test_type">particle_count</field>
+            <field name="state">approved</field>
+            <field name="date_prepared">2025-09-17</field>
+            <field name="effective_date">2025-10-10</field>
+            <field name="next_review_date">2027-10-09</field>
+            <field name="total_pages">8</field>
+            <field name="prepared_by">Validation Engineer</field>
+            <field name="prepared_by_date">2025-09-17</field>
+            <field name="checked_by">Anjamel</field>
+            <field name="checked_by_date">2025-09-17</field>
+            <field name="approved_by">A.M. Wani</field>
+            <field name="approved_by_date">2025-09-22</field>
+            <!-- ISO 8 limits as default; actual evaluated per iso_class in model -->
+            <field name="min_value">0.0</field>
+            <field name="max_value">3520000.0</field>
+            <field name="unit">particles/m³ (0.5µm, ISO 8)</field>
+            <field name="purpose" type="html"><p>
+To define the procedure for airborne particle count testing in controlled areas to verify cleanroom
+classification as per design and regulatory requirements, ensuring compliance with ISO standards
+and validation of HVAC system performance.
+            </p></field>
+            <field name="scope" type="html"><p>
+This procedure applies to the classification of air cleanliness in controlled areas based on airborne
+particle concentration, as per ISO 14644 requirements. It covers particle sizes from 0.1 µm to 5
+µm, measured using Light Scattering Airborne Particle Counters (LSAPC) at designated sampling
+locations. The procedure does not cover ultrafine particles (&lt;0.1 µm), macro particles (&gt;5 µm), or
+characterization of physical, chemical, radiological, viable, or other particle properties.
+            </p></field>
+            <field name="responsibilities" type="html"><p>
+Validation Engineer / Service Engineer / Service Technician.
+            </p></field>
+            <field name="definitions" type="html">
+<h4>4.1. Terms &amp; definition</h4>
+<p>For the purposes of this document, the following terms and definitions apply.</p>
+<p><b>4.1.1 Cleanroom:</b> A room within which the concentration of airborne particles is controlled and
+classified, and which is constructed and operated in a manner to minimize the introduction,
+generation, and retention of particles inside the room, with other relevant parameters (such as
+temperature, humidity, and pressure) controlled as necessary.</p>
+<p><b>4.1.2 Clean zone:</b> A defined space within which the concentration of airborne particles is controlled
+and classified, and which is constructed and operated to minimize the introduction, generation, and
+retention of particles. A clean zone may be an entire cleanroom, a part of a cleanroom, or a separate
+enclosure supplied with clean air.</p>
+            </field>
+            <field name="procedure" type="html">
+<h4>5.1. Non-Viable Particle Count Test (NVPC)</h4>
+<ol>
+  <li>Ensure that the AHU system of the area is ON condition and has been running for at least 30 minutes before testing.</li>
+  <li>Ensure the particle counter (LSAPC) is calibrated and within calibration due date.</li>
+  <li>Set the particle counter parameters:
+    <ul>
+      <li>Flow Rate: 28.3 LPM (1.0 CFM)</li>
+      <li>Sampling Time: 1 minute per location</li>
+      <li>Sampling Volume: 0.0283 m³/min</li>
+      <li>Channels: 0.5 µm and 5.0 µm</li>
+    </ul>
+  </li>
+  <li>Determine sampling locations (L1, L2, L3, L4, L5) at approximately 900 mm above floor level (breathing zone), representing typical working positions.</li>
+  <li>Minimum number of sampling locations (N) is determined by the formula: <b>N = √A</b> where A is the cleanroom area in m².</li>
+  <li>Perform sampling at each location for "At Rest" condition (personnel absent, all equipment operating).</li>
+  <li>If required, perform sampling for "In Operation" condition (during normal operation with maximum personnel).</li>
+  <li>Record counts for 0.5 µm and 5.0 µm channels at each location.</li>
+  <li>Compare with ISO 14644-1 class limits (see Acceptance Criteria table).</li>
+  <li>Record results in Annexure I (F/VL/003/01-02).</li>
+</ol>
+            </field>
+            <field name="acceptance_criteria_html" type="html">
+<p><b>ISO 14644-1:2015 Maximum Permitted Number of Particles per Cubic Meter (particles/m³)</b></p>
+<table>
+  <thead>
+    <tr><th>ISO Class</th><th>0.1 µm</th><th>0.2 µm</th><th>0.3 µm</th><th>0.5 µm</th><th>1.0 µm</th><th>5.0 µm</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><b>ISO 5</b></td><td>100,000</td><td>23,700</td><td>10,200</td><td><b>3,520</b></td><td>832</td><td><b>29</b></td></tr>
+    <tr><td><b>ISO 6</b></td><td>1,000,000</td><td>237,000</td><td>102,000</td><td><b>35,200</b></td><td>8,320</td><td><b>293</b></td></tr>
+    <tr><td><b>ISO 7</b></td><td>—</td><td>—</td><td>—</td><td><b>352,000</b></td><td>83,200</td><td><b>2,930</b></td></tr>
+    <tr><td><b>ISO 8</b></td><td>—</td><td>—</td><td>—</td><td><b>3,520,000</b></td><td>832,000</td><td><b>29,300</b></td></tr>
+    <tr><td><b>ISO 9</b></td><td>—</td><td>—</td><td>—</td><td><b>35,200,000</b></td><td>8,320,000</td><td><b>293,000</b></td></tr>
+  </tbody>
+</table>
+<p>Counts should be equal to or less than the ISO class limit as per ISO 14644-1:2015 (E) or EU GMP Annex 1.</p>
+            </field>
+            <field name="frequency" type="html"><ul>
+  <li>Once in six months for ISO Class-5, 6 and 7.</li>
+  <li>Once in a year for ISO Class-8.</li>
+  <li>After significant changes in cleanroom environment.</li>
+</ul></field>
+            <field name="references" type="html"><ul>
+  <li>ISO 14644-1:2015 — Classification of air cleanliness by particle concentration</li>
+  <li>ISO 14644-2:2015 — Monitoring to provide evidence of cleanroom performance</li>
+  <li>ISO 14644-3:2019 (E) — Test Methods</li>
+  <li>EU GMP Annex 1 — Manufacture of Sterile Products</li>
+</ul></field>
+            <field name="abbreviations" type="html"><table>
+  <tr><td><b>NVPC</b></td><td>Non-Viable Particle Count</td></tr>
+  <tr><td><b>LSAPC</b></td><td>Light Scattering Airborne Particle Counter</td></tr>
+  <tr><td><b>LPM</b></td><td>Litres Per Minute</td></tr>
+  <tr><td><b>CFU</b></td><td>Colony Forming Units</td></tr>
+  <tr><td><b>ISO</b></td><td>International Organization for Standardization</td></tr>
+</table></field>
+        </record>
+
+        <!-- Revision History for SOP 003 -->
+        <record id="sop_rev_003_01" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_particle_count"/>
+            <field name="revision">01</field>
+            <field name="date">2023-06-01</field>
+            <field name="description">Initial release</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_003_02" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_particle_count"/>
+            <field name="revision">02</field>
+            <field name="date">2025-09-17</field>
+            <field name="description">Updated ISO 14644-1:2015 class limits table; added sampling location formula N=√A; clarified At Rest vs In Operation conditions; updated flow rate to 28.3 LPM</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+
+
+        <!-- ════════════════════════════════════════════════════════════
+             SOP 004-02 — RECOVERY STUDY
+             Source: MHPL-VL-004-02-RECOVERY STUDY.pdf
+             Pages: 5 (4 SOP + 1 Annexure)
+        ════════════════════════════════════════════════════════════ -->
+        <record id="sop_recovery_study" model="micron.sop.template">
+            <field name="name">RECOVERY STUDY</field>
+            <field name="sop_no">MHPL/VL/004-02</field>
+            <field name="code">MHPL-VL-004</field>
+            <field name="revision">02</field>
+            <field name="supersedes">MHPL/VL/004-01</field>
+            <field name="test_type">recovery</field>
+            <field name="state">approved</field>
+            <field name="date_prepared">2025-09-17</field>
+            <field name="effective_date">2025-10-10</field>
+            <field name="next_review_date">2027-10-09</field>
+            <field name="total_pages">4</field>
+            <field name="prepared_by">Validation Engineer</field>
+            <field name="prepared_by_date">2025-09-17</field>
+            <field name="checked_by">Anjamel</field>
+            <field name="checked_by_date">2025-09-18</field>
+            <field name="approved_by">A.M. Wani</field>
+            <field name="approved_by_date">2025-09-22</field>
+            <!-- Recovery NMT 15 minutes -->
+            <field name="min_value">0.0</field>
+            <field name="max_value">15.0</field>
+            <field name="unit">minutes</field>
+            <field name="purpose" type="html"><p>
+To define the procedure for conducting a Recovery Study in areas serviced by HVAC systems,
+including cleanrooms, LAF units, and dynamic pass boxes, to evaluate how quickly these areas
+return to specified cleanliness levels after particle loading.
+            </p></field>
+            <field name="scope" type="html"><p>
+This study applies to non-unidirectional airflow cleanrooms only. It evaluates how quickly the room
+recovers to clean conditions after particle contamination, based on air dilution and mixing. It is not
+suitable for unidirectional airflow systems, where particles are removed by one-way airflow. Key
+factors include air distribution, temperature, and obstructions.
+            </p></field>
+            <field name="responsibilities" type="html"><p>
+Validation Engineer / Service Engineer / Service Technician.
+            </p></field>
+            <field name="definitions" type="html"><p>
+<b>Recovery Time:</b><br/>
+The time required for a controlled environment to return to its specified cleanliness class after a
+contamination event.
+            </p></field>
+            <field name="procedure" type="html">
+<h4>5.1. Recovery Test for Classified Area</h4>
+<ol>
+  <li>Ensure the AHU (Air Handling Unit) of the classified area at least 30 minutes before beginning the test to allow stabilization.</li>
+  <li>Record the at-rest airborne particle counts by measuring particles at designated sampling points throughout the room.</li>
+  <li>Select sampling locations that represent actual operational areas, such as typical working positions of personnel at approximately 900 mm (3 feet) above floor level. Also include points in corners and potential dead zones.</li>
+  <li>Generate particles by introducing an aerosol or by having personnel perform a defined activity (e.g., walking in the room for a specific duration). Record start time of generation.</li>
+  <li>Record the particle count during the generation phase to confirm elevated particle levels.</li>
+  <li>Stop particle generation and note the time. This is the start of the recovery period.</li>
+  <li>Continue monitoring particle counts at the sampling locations at defined intervals (e.g., every 1 minute) until particle counts return to the specified class limit.</li>
+  <li>Record the time taken from the stop of generation to when the room returns to the specified ISO class limit — this is the <b>Recovery Time</b>.</li>
+  <li>Record all readings in Annexure I.</li>
+</ol>
+
+<h4>5.2. Instrument Settings</h4>
+<ul>
+  <li>Flow Rate: 28.3 LPM</li>
+  <li>Sampling Volume: 0.0283 m³/min</li>
+  <li>Sampling Time: 1 minute per measurement</li>
+  <li>Channels: 0.5 µm and 5.0 µm</li>
+</ul>
+            </field>
+            <field name="acceptance_criteria_html" type="html"><p>
+<b>Acceptance Criteria:</b> As per ISO 14644-3:2019 (E)<br/>
+Recovery time should be <b>Not More Than (NMT) 15 minutes</b> for the room to return to its specified ISO cleanliness class after particle loading.
+</p>
+<table>
+  <thead><tr><th>Condition</th><th>Limit</th></tr></thead>
+  <tbody>
+    <tr><td>Recovery Period</td><td>NMT 15 minutes</td></tr>
+    <tr><td>Reference Standard</td><td>ISO 14644-3:2019 (E)</td></tr>
+  </tbody>
+</table></field>
+            <field name="frequency" type="html"><ul>
+  <li>Once in six months for ISO Class-5, 6 and 7.</li>
+  <li>Once in a year for ISO Class-8.</li>
+  <li>After significant changes (e.g., AHU modification, room modification).</li>
+</ul></field>
+            <field name="references" type="html"><ul>
+  <li>ISO 14644-3:2019 (E) — Test methods for cleanrooms</li>
+  <li>Client Protocol / SOP</li>
+</ul></field>
+            <field name="abbreviations" type="html"><table>
+  <tr><td><b>AHU</b></td><td>Air Handling Unit</td></tr>
+  <tr><td><b>NMT</b></td><td>Not More Than</td></tr>
+  <tr><td><b>LPM</b></td><td>Litres Per Minute</td></tr>
+  <tr><td><b>LAF</b></td><td>Laminar Air Flow</td></tr>
+</table></field>
+        </record>
+
+        <!-- Revision History for SOP 004 -->
+        <record id="sop_rev_004_01" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_recovery_study"/>
+            <field name="revision">01</field>
+            <field name="date">2023-06-01</field>
+            <field name="description">Initial release</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_004_02" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_recovery_study"/>
+            <field name="revision">02</field>
+            <field name="date">2025-09-17</field>
+            <field name="description">Clarified scope to non-unidirectional airflow only; added particle generation method; defined recovery time measurement start/stop; updated NMT 15 min reference to ISO 14644-3:2019</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+
+
+        <!-- ════════════════════════════════════════════════════════════
+             SOP 005-02 — RH AND TEMPERATURE STUDY
+             Source: MHPL-VL-005-02-RH AND TEMPERATURE STUDY.pdf
+             Pages: 3
+        ════════════════════════════════════════════════════════════ -->
+        <record id="sop_temp_humidity" model="micron.sop.template">
+            <field name="name">RH AND TEMPERATURE AREA STUDY</field>
+            <field name="sop_no">MHPL/VL/005-02</field>
+            <field name="code">MHPL-VL-005</field>
+            <field name="revision">02</field>
+            <field name="supersedes">MHPL/VL/005-01</field>
+            <field name="test_type">temp_humidity</field>
+            <field name="state">approved</field>
+            <field name="date_prepared">2025-09-18</field>
+            <field name="effective_date">2025-10-10</field>
+            <field name="next_review_date">2027-10-09</field>
+            <field name="total_pages">3</field>
+            <field name="prepared_by">Validation Engineer</field>
+            <field name="prepared_by_date">2025-09-18</field>
+            <field name="checked_by">Anjamel</field>
+            <field name="checked_by_date">2025-09-18</field>
+            <field name="approved_by">A.M. Wani</field>
+            <field name="approved_by_date">2025-09-22</field>
+            <!-- Typical pharma cleanroom limits -->
+            <field name="min_value">18.0</field>
+            <field name="max_value">27.0</field>
+            <field name="unit">°C (Temperature) / %RH (Humidity)</field>
+            <field name="purpose" type="html"><p>
+To define a standardized procedure for performing Temperature and Relative Humidity (RH)
+studies as part of HVAC system qualification and environmental validation services. This study
+ensures that controlled areas such as cleanrooms, and storage zones maintain required
+environmental conditions in compliance with regulatory standards WHO and helps identify critical
+temperature or humidity variations.
+            </p></field>
+            <field name="scope" type="html"><p>
+This SOP applies to all temperature- and RH-controlled areas such as warehouses, cold
+rooms, cleanrooms, and stability chambers used for the storage or processing of
+pharmaceutical materials/products.
+            </p></field>
+            <field name="responsibilities" type="html"><p>
+Validation Engineer / Service Engineer / Service Technician.
+            </p></field>
+            <field name="definitions" type="html">
+<p><b>Temperature Mapping:</b><br/>
+A process to determine temperature distribution within a space over time.</p>
+<p><b>RH Mapping:</b><br/>
+A process to determine relative humidity variation within a space over time.</p>
+<p><b>Data Logger:</b><br/>
+A device used to record temperature and RH at defined intervals.</p>
+<p><b>Worst-case Location:</b><br/>
+The location with maximum deviation from the set limits.</p>
+            </field>
+            <field name="procedure" type="html">
+<h4>5.0. Procedure</h4>
+<ol>
+  <li>Ensure that the area and equipment qualification has been completed and that the equipment is in proper running condition.</li>
+  <li>Ensure that the HVAC system is operational and running for at least 30 minutes before testing.</li>
+  <li>Ensure the thermo-hygrometer / data logger is calibrated and within calibration due date.</li>
+  <li>Place the measurement probe at the defined sampling locations (minimum 5 locations for cleanrooms), at approximately 900 mm above floor level.</li>
+  <li>Record the temperature (°C) and relative humidity (%RH) at each location.</li>
+  <li>Wait for at least 5 minutes at each location before recording to allow stabilization.</li>
+  <li>Record readings in Annexure I.</li>
+  <li>Compare each reading against the specified acceptance criteria (as per client protocol or regulatory requirements).</li>
+</ol>
+            </field>
+            <field name="acceptance_criteria_html" type="html">
+<table>
+  <thead><tr><th>Area Type</th><th>Temperature (°C)</th><th>Relative Humidity (%RH)</th></tr></thead>
+  <tbody>
+    <tr><td>General Cleanroom (ISO 7/8)</td><td>18°C to 27°C</td><td>30% to 65%</td></tr>
+    <tr><td>Sterile/Aseptic Area (ISO 5/6)</td><td>18°C to 22°C</td><td>30% to 50%</td></tr>
+    <tr><td>Cold Room / Refrigerated Area</td><td>2°C to 8°C</td><td>As specified</td></tr>
+    <tr><td>Stability Chamber</td><td>As per protocol</td><td>As per protocol</td></tr>
+  </tbody>
+</table>
+<p>Acceptance as per Client Protocol / WHO Guidelines / Regulatory Specifications.</p>
+            </field>
+            <field name="frequency" type="html"><ul>
+  <li>Once in six months for ISO Class-5, 6 and 7.</li>
+  <li>Once in a year for ISO Class-8.</li>
+  <li>After any modification to the HVAC/cooling system.</li>
+</ul></field>
+            <field name="references" type="html"><ul>
+  <li>WHO GMP Guidelines — Temperature &amp; Humidity monitoring</li>
+  <li>EU GMP Annex 1</li>
+  <li>ISO 14644-3:2019 (E)</li>
+  <li>Client Protocol / SOP</li>
+</ul></field>
+            <field name="abbreviations" type="html"><table>
+  <tr><td><b>RH</b></td><td>Relative Humidity</td></tr>
+  <tr><td><b>WHO</b></td><td>World Health Organization</td></tr>
+  <tr><td><b>GMP</b></td><td>Good Manufacturing Practice</td></tr>
+  <tr><td><b>HVAC</b></td><td>Heating, Ventilation and Air Conditioning</td></tr>
+  <tr><td><b>AHU</b></td><td>Air Handling Unit</td></tr>
+</table></field>
+        </record>
+
+        <!-- Revision History for SOP 005 -->
+        <record id="sop_rev_005_01" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_temp_humidity"/>
+            <field name="revision">01</field>
+            <field name="date">2024-01-01</field>
+            <field name="description">Initial release</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+        <record id="sop_rev_005_02" model="micron.sop.revision.history">
+            <field name="sop_id" ref="sop_temp_humidity"/>
+            <field name="revision">02</field>
+            <field name="date">2025-09-18</field>
+            <field name="description">Added acceptance criteria table for different area types; added worst-case location definition; updated scope to include stability chambers; reference to WHO GMP guidelines added</field>
+            <field name="changed_by">Validation Engineer</field>
+        </record>
+
+    </data>
+</odoo>

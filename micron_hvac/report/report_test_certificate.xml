@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_test_certificate_document">
+<t t-call="web.html_container">
+<t t-foreach="docs" t-as="doc">
+<t t-call="web.external_layout">
+
+<div class="page">
+<style>
+  /* ─── Micron HVAC Test Certificate — SAME BASE STYLE AS SOP TEMPLATE ─── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+  /* Document header — identical structure to SOP */
+  .doc-header { display: table; width: 100%; border: 2px solid #1B4F72; margin-bottom: 0; }
+  .dh-logo-cell { display: table-cell; width: 22%; padding: 8px 12px; border-right: 2px solid #1B4F72; vertical-align: middle; }
+  .dh-title-cell { display: table-cell; vertical-align: middle; padding: 6px 12px; }
+  .dh-meta-cell { display: table-cell; width: 30%; border-left: 2px solid #1B4F72; vertical-align: top; }
+  .company-name { font-size: 13pt; font-weight: bold; color: #1B4F72; line-height: 1.2; }
+  .company-sub { font-size: 8pt; color: #555; }
+  .doc-type-label { font-size: 8pt; color: #1B4F72; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .doc-main-title { font-size: 12pt; font-weight: bold; color: #1a1a1a; line-height: 1.3; }
+
+  .meta-table { width: 100%; border-collapse: collapse; height: 100%; }
+  .meta-table td { border-bottom: 1px solid #1B4F72; padding: 4px 8px; font-size: 8pt; }
+  .meta-table td:first-child { background: #EAF2F8; font-weight: bold; color: #1B4F72; white-space: nowrap; }
+  .meta-table tr:last-child td { border-bottom: none; }
+
+  .section-header { background: #1B4F72; color: #fff; font-weight: bold; font-size: 9pt;
+                    padding: 5px 10px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-body { border: 1px solid #BDC3C7; border-top: none; padding: 8px 10px; }
+
+  /* ════ RESULTS TABLE — same structure as SOP param table + actual + status columns ════ */
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+  table.data-table th { background: #2E86C1; color: #fff; padding: 5px 6px; text-align: center;
+                        border: 1px solid #1B4F72; font-weight: bold; font-size: 8pt; }
+  table.data-table td { padding: 4px 6px; border: 1px solid #BDC3C7; vertical-align: middle; }
+  table.data-table tr:nth-child(even) td { background: #F2F9FF; }
+  .col-seq   { width: 3%; text-align: center; }
+  .col-code  { width: 6%; text-align: center; }
+  .col-param { width: 18%; }
+  .col-unit  { width: 6%; text-align: center; }
+  .col-val   { width: 8%; text-align: center; }
+  .col-tol   { width: 10%; text-align: center; }
+  .col-actual { width: 9%; text-align: center; font-weight: bold; font-size: 9pt; }
+  .col-dev   { width: 7%; text-align: center; }
+  .col-status { width: 7%; text-align: center; }
+  .col-remark { width: 12%; font-size: 7.5pt; }
+
+  /* Result status cells */
+  .status-pass { background: #1e8449 !important; color: #fff; font-weight: bold; border-radius: 3px; padding: 3px 6px; display: inline-block; font-size: 8pt; }
+  .status-fail { background: #C0392B !important; color: #fff; font-weight: bold; border-radius: 3px; padding: 3px 6px; display: inline-block; font-size: 8pt; }
+  .status-na   { background: #7F8C8D !important; color: #fff; border-radius: 3px; padding: 3px 6px; display: inline-block; font-size: 8pt; }
+  .status-cond { background: #E67E22 !important; color: #fff; font-weight: bold; border-radius: 3px; padding: 3px 6px; display: inline-block; font-size: 8pt; }
+
+  /* Overall result banner */
+  .result-banner-pass { background: #1e8449; color: #fff; text-align: center; padding: 10px;
+                        font-size: 16pt; font-weight: bold; letter-spacing: 2px; margin: 10px 0; }
+  .result-banner-fail { background: #C0392B; color: #fff; text-align: center; padding: 10px;
+                        font-size: 16pt; font-weight: bold; letter-spacing: 2px; margin: 10px 0; }
+  .result-banner-conditional { background: #E67E22; color: #fff; text-align: center; padding: 10px;
+                                font-size: 16pt; font-weight: bold; letter-spacing: 2px; margin: 10px 0; }
+  .result-banner-none { background: #95A5A6; color: #fff; text-align: center; padding: 10px;
+                        font-size: 14pt; font-weight: bold; margin: 10px 0; }
+
+  /* Approval / signature block */
+  .sig-table { width: 100%; border-collapse: collapse; }
+  .sig-table th { background: #1B4F72; color: #fff; padding: 5px 8px; font-size: 8.5pt; border: 1px solid #1B4F72; }
+  .sig-table td { border: 1px solid #BDC3C7; padding: 6px 8px; font-size: 8pt; vertical-align: top; }
+  .sig-table .sign-row td { height: 45px; }
+  .sig-label { font-weight: bold; color: #1B4F72; }
+
+  /* Info grid */
+  .info-grid { display: table; width: 100%; border-collapse: collapse; }
+  .info-cell { display: table-cell; padding: 4px 8px; border: 1px solid #D5D8DC; font-size: 8.5pt; }
+  .info-label { font-weight: bold; color: #1B4F72; font-size: 8pt; }
+
+  .text-center { text-align: center; }
+  .text-bold   { font-weight: bold; }
+  .text-blue   { color: #1B4F72; }
+  .mand-star   { color: #C0392B; }
+  .note-box    { background: #FEF9E7; border: 1px solid #F0B429; padding: 6px 10px; font-size: 8pt;
+                 margin-top: 6px; color: #7D6608; }
+  .env-table { width: 100%; border-collapse: collapse; }
+  .env-table td { padding: 4px 10px; border: 1px solid #D5D8DC; font-size: 8.5pt; width: 25%; }
+  .env-table td.label { background: #EAF2F8; font-weight: bold; color: #1B4F72; }
+</style>
+
+<!-- ════════════════════════════════════════════════════
+     DOCUMENT HEADER (identical structure to SOP template)
+════════════════════════════════════════════════════ -->
+<div class="doc-header">
+  <div class="dh-logo-cell">
+    <div class="company-name"><t t-esc="doc.company_id.name or 'MICRON HVAC SYSTEMS'"/></div>
+    <div class="company-sub">HVAC Testing, Commissioning &amp; Balancing</div>
+    <div class="company-sub" style="margin-top:4px;font-size:7.5pt;color:#888;">
+      <t t-esc="doc.company_id.street or ''"/>
+      <t t-if="doc.company_id.city"> | <t t-esc="doc.company_id.city"/></t>
+    </div>
+  </div>
+  <div class="dh-title-cell">
+    <div class="doc-type-label">Test &amp; Commissioning Certificate</div>
+    <div class="doc-main-title">
+      <t t-esc="doc.sop_revision_id.sop_name if doc.sop_revision_id else 'HVAC Performance Test'"/>
+    </div>
+    <div style="margin-top:4px;font-size:8pt;">
+      AHU Tag: <strong><t t-esc="doc.ahu_tag or '—'"/></strong>
+    </div>
+  </div>
+  <div class="dh-meta-cell">
+    <table class="meta-table">
+      <tr><td>Certificate No.</td><td><strong><t t-esc="doc.name"/></strong></td></tr>
+      <tr><td>Job Order</td><td><t t-esc="doc.job_id.name if doc.job_id else '—'"/></td></tr>
+      <tr><td>Test Date</td><td><strong><t t-esc="doc.test_date or '—'"/></strong></td></tr>
+      <tr><td>SOP Reference</td><td>
+        <t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else '—'"/>
+        <t t-if="doc.sop_revision_id"> <strong><t t-esc="doc.sop_revision_id.version_label"/></strong></t>
+      </td></tr>
+      <tr><td>Overall Result</td><td>
+        <t t-if="doc.overall_result == 'pass'"><strong style="color:#1e8449;">✔ PASS</strong></t>
+        <t t-elif="doc.overall_result == 'fail'"><strong style="color:#C0392B;">✘ FAIL</strong></t>
+        <t t-elif="doc.overall_result == 'conditional'"><strong style="color:#E67E22;">~ CONDITIONAL</strong></t>
+        <t t-else=""><span style="color:#888;">Pending</span></t>
+      </td></tr>
+      <tr><td>Status</td><td><strong><t t-esc="doc.state.upper()"/></strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     1. CLIENT &amp; SITE INFORMATION
+════════════════════════════════════════════════════ -->
+<div class="section-header">1. Client &amp; Site Information</div>
+<div class="section-body" style="padding:0;">
+  <table style="width:100%;border-collapse:collapse;">
+    <tr>
+      <td style="padding:5px 10px;width:15%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;font-size:8pt;">Client</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><strong><t t-esc="doc.partner_id.name if doc.partner_id else '—'"/></strong></td>
+      <td style="padding:5px 10px;width:15%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;border-left:1px solid #D5D8DC;font-size:8pt;">Contact Person</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.client_rep or doc.job_id.contact_person or '—'"/></td>
+    </tr>
+    <tr>
+      <td style="padding:5px 10px;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;font-size:8pt;">Project Name</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.job_id.project_name if doc.job_id else '—'"/></td>
+      <td style="padding:5px 10px;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;border-left:1px solid #D5D8DC;font-size:8pt;">Site Address</td>
+      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.job_id.site_address if doc.job_id else '—'"/></td>
+    </tr>
+    <tr>
+      <td style="padding:5px 10px;background:#EAF2F8;font-weight:bold;color:#1B4F72;font-size:8pt;">Equipment Tag</td>
+      <td colspan="3" style="padding:5px 10px;font-size:8.5pt;"><t t-esc="doc.ahu_tag or '—'"/></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     2. EQUIPMENT DESIGN DATA
+════════════════════════════════════════════════════ -->
+<div class="section-header">2. Test Details &amp; Design Data</div>
+<div class="section-body" style="padding:0;">
+  <table style="width:100%;border-collapse:collapse;">
+    <tr>
+      <td style="padding:4px 10px;width:16%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-right:1px solid #D5D8DC;font-size:8pt;">Design CFM</td>
+      <td style="padding:4px 10px;border-right:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="'%.0f CFM' % doc.design_cfm if doc.design_cfm else '—'"/></td>
+      <td style="padding:4px 10px;width:16%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-right:1px solid #D5D8DC;font-size:8pt;">Lead Technician</td>
+      <td style="padding:4px 10px;border-right:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.lead_tech_id.name if doc.lead_tech_id else '—'"/></td>
+      <td style="padding:4px 10px;width:16%;background:#EAF2F8;font-weight:bold;color:#1B4F72;font-size:8pt;">Witnessed By</td>
+      <td style="padding:4px 10px;font-size:8.5pt;"><t t-esc="doc.witnessed_by or '—'"/></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     3. ENVIRONMENTAL CONDITIONS AT TIME OF TEST
+════════════════════════════════════════════════════ -->
+<div class="section-header">3. Environmental Conditions at Time of Test</div>
+<div class="section-body" style="padding:0;">
+  <table class="env-table">
+    <tr>
+      <td class="label">Ambient Dry Bulb Temp</td>
+      <td><t t-esc="'%.1f °C' % doc.ambient_temp if doc.ambient_temp else '—'"/></td>
+      <td class="label">Ambient Relative Humidity</td>
+      <td><t t-esc="('%.1f' % doc.ambient_rh) + ' %%' if doc.ambient_rh else '—'"/></td>
+    </tr>
+    <tr>
+      <td class="label">Test Time (Start – End)</td>
+      <td colspan="3">
+        <t t-esc="'%.2f' % doc.test_start_time if doc.test_start_time else '—'"/>
+        –
+        <t t-esc="'%.2f' % doc.test_end_time if doc.test_end_time else '—'"/> hrs
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     4. INSTRUMENTS USED — with calibration cert details
+════════════════════════════════════════════════════ -->
+<t t-if="doc.instrument_used_ids">
+<div class="section-header">4. Instruments Used During Test</div>
+<div class="section-body" style="padding:0;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th class="col-seq">#</th>
+        <th>Asset Code</th>
+        <th>Instrument Name</th>
+        <th>Make / Model</th>
+        <th>Serial No.</th>
+        <th>Calibration Cert No.</th>
+        <th>Cal. Date</th>
+        <th>Valid Until</th>
+        <th>Cal. Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <t t-foreach="doc.instrument_used_ids" t-as="ins">
+        <tr>
+          <td class="col-seq text-center"><t t-esc="ins_index + 1"/></td>
+          <td><t t-esc="ins.asset_code"/></td>
+          <td class="text-bold"><t t-esc="ins.name"/></td>
+          <td style="font-size:7.5pt;"><t t-esc="(ins.make or '') + ' ' + (ins.model_no or '')"/></td>
+          <td style="font-size:7.5pt;"><t t-esc="ins.serial_no"/></td>
+          <td style="font-weight:bold;"><t t-esc="ins.latest_cert_no or '—'"/></td>
+          <td><t t-esc="ins.last_calibration_date or '—'"/></td>
+          <td><t t-esc="ins.next_calibration_date or '—'"/></td>
+          <td class="text-center">
+            <t t-if="ins.calibration_status == 'valid'">
+              <span style="color:#1e8449;font-weight:bold;">✔ Valid</span>
+            </t>
+            <t t-elif="ins.calibration_status == 'due_soon'">
+              <span style="color:#E67E22;font-weight:bold;">⚠ Due Soon</span>
+            </t>
+            <t t-else="">
+              <span style="color:#C0392B;font-weight:bold;">✘ Overdue</span>
+            </t>
+          </td>
+        </tr>
+      </t>
+    </tbody>
+  </table>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     5. TEST RESULTS — ★ MIRROR OF SOP PARAMETER TABLE ★
+         Columns: Code | Parameter | Unit | Nominal | Min | Max
+                | Actual (Avg) | Deviation | Result | Remarks
+════════════════════════════════════════════════════ -->
+<div class="section-header">5. Test Results Summary</div>
+<div class="section-body">
+  <table style="width:100%;border-collapse:collapse;font-size:9pt;">
+    <tr>
+      <td style="padding:6px 10px;width:30%;font-weight:bold;color:#1B4F72;">Test Type (SOP)</td>
+      <td style="padding:6px 10px;"><t t-esc="doc.sop_test_code or '—'"/> — <t t-esc="doc.sop_revision_id.sop_name if doc.sop_revision_id else ''"/></td>
+    </tr>
+    <t t-if="doc.sop_test_code == 'VL-001'">
+    <tr>
+      <td style="padding:6px 10px;font-weight:bold;color:#1B4F72;">Velocity/ACPH Result</td>
+      <td style="padding:6px 10px;">
+        <t t-if="doc.velocity_result == 'pass'"><span class="status-pass">PASS</span></t>
+        <t t-elif="doc.velocity_result == 'fail'"><span class="status-fail">FAIL</span></t>
+        <t t-else=""><span class="status-na">N/A</span></t>
+      </td>
+    </tr>
+    </t>
+    <t t-if="doc.sop_test_code == 'VL-002'">
+    <tr>
+      <td style="padding:6px 10px;font-weight:bold;color:#1B4F72;">PAO Overall Result</td>
+      <td style="padding:6px 10px;">
+        <t t-if="doc.pao_result == 'pass'"><span class="status-pass">PASS</span></t>
+        <t t-elif="doc.pao_result == 'fail'"><span class="status-fail">FAIL</span></t>
+        <t t-else=""><span class="status-na">N/A</span></t>
+      </td>
+    </tr>
+    </t>
+    <t t-if="doc.sop_test_code == 'VL-003'">
+    <tr>
+      <td style="padding:6px 10px;font-weight:bold;color:#1B4F72;">Particle Count Result</td>
+      <td style="padding:6px 10px;">
+        <t t-if="doc.particle_result == 'pass'"><span class="status-pass">PASS</span></t>
+        <t t-elif="doc.particle_result == 'fail'"><span class="status-fail">FAIL</span></t>
+        <t t-else=""><span class="status-na">N/A</span></t>
+      </td>
+    </tr>
+    </t>
+    <t t-if="doc.sop_test_code == 'VL-004'">
+    <tr>
+      <td style="padding:6px 10px;font-weight:bold;color:#1B4F72;">Recovery Result</td>
+      <td style="padding:6px 10px;">
+        <t t-if="doc.recovery_result == 'pass'"><span class="status-pass">PASS</span></t>
+        <t t-elif="doc.recovery_result == 'fail'"><span class="status-fail">FAIL</span></t>
+        <t t-else=""><span class="status-na">N/A</span></t>
+      </td>
+    </tr>
+    </t>
+    <t t-if="doc.sop_test_code == 'VL-005'">
+    <tr>
+      <td style="padding:6px 10px;font-weight:bold;color:#1B4F72;">Temp &amp; RH Result</td>
+      <td style="padding:6px 10px;">
+        <t t-if="doc.th_result == 'pass'"><span class="status-pass">PASS</span></t>
+        <t t-elif="doc.th_result == 'fail'"><span class="status-fail">FAIL</span></t>
+        <t t-else=""><span class="status-na">N/A</span></t>
+      </td>
+    </tr>
+    </t>
+  </table>
+  <!-- Detailed readings tables inside Section 5 -->
+  <t t-if="doc.sop_test_code == 'VL-001' and doc.vl001_line_ids">
+    <div style="margin-top: 10px; font-weight: bold; color: #1B4F72; font-size: 8.5pt;">Detailed Readings (Air Velocity &amp; CFM):</div>
+    <table class="data-table" style="margin-top:5px; width:100%;">
+      <thead>
+        <tr>
+          <th>Room Name &amp; No.</th>
+          <th>Filter ID</th>
+          <th>V1</th>
+          <th>V2</th>
+          <th>V3</th>
+          <th>V4</th>
+          <th>V5</th>
+          <th>Avg (FPM/ms)</th>
+          <th>CFM</th>
+          <th>ACPH</th>
+          <th>Result</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr t-foreach="doc.vl001_line_ids" t-as="line">
+          <td><t t-esc="line.room_name or ''"/></td>
+          <td class="text-center"><t t-esc="line.filter_id or ''"/></td>
+          <td class="text-center"><t t-esc="'%.2f' % line.vel_1 if line.vel_1 else ''"/></td>
+          <td class="text-center"><t t-esc="'%.2f' % line.vel_2 if line.vel_2 else ''"/></td>
+          <td class="text-center"><t t-esc="'%.2f' % line.vel_3 if line.vel_3 else ''"/></td>
+          <td class="text-center"><t t-esc="'%.2f' % line.vel_4 if line.vel_4 else ''"/></td>
+          <td class="text-center"><t t-esc="'%.2f' % line.vel_5 if line.vel_5 else ''"/></td>
+          <td class="text-center">
+            <t t-esc="'%.2f' % line.avg_fpm if line.avg_fpm else '0.00'"/> / 
+            <t t-esc="'%.3f' % line.avg_ms if line.avg_ms else '0.000'"/>
+          </td>
+          <td class="text-center"><t t-esc="'%.0f' % line.cfm if line.cfm else ''"/></td>
+          <td class="text-center"><t t-esc="'%.1f' % line.acph if line.acph else ''"/></td>
+          <td class="text-center">
+            <t t-if="line.vel_result == 'pass'"><span class="status-pass">PASS</span></t>
+            <t t-elif="line.vel_result == 'fail'"><span class="status-fail">FAIL</span></t>
+            <t t-else=""><span class="status-na">N/A</span></t>
+          </td>
+          <td><t t-esc="line.remark or ''"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </t>
+
+  <t t-if="doc.sop_test_code == 'VL-002' and doc.vl002_line_ids">
+    <div style="margin-top: 10px; font-weight: bold; color: #1B4F72; font-size: 8.5pt;">Detailed Readings (HEPA Filter Integrity):</div>
+    <table class="data-table" style="margin-top:5px; width:100%;">
+      <thead>
+        <tr>
+          <th>Room Name &amp; No.</th>
+          <th>Filter Tag No.</th>
+          <th>Filter Location</th>
+          <th>Upstream Before (µg/L)</th>
+          <th>Downstream Leakage (%)</th>
+          <th>Upstream After (µg/L)</th>
+          <th>Recovery (%)</th>
+          <th>Result</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr t-foreach="doc.vl002_line_ids" t-as="line">
+          <td><t t-esc="line.room_name or ''"/></td>
+          <td class="text-center"><t t-esc="line.filter_id or ''"/></td>
+          <td><t t-esc="line.filter_location or ''"/></td>
+          <td class="text-center"><t t-esc="'%.3f' % line.upstream_before if line.upstream_before else ''"/></td>
+          <td class="text-center"><t t-esc="'%.4f' % line.downstream_pct if line.downstream_pct else '0.0000'"/></td>
+          <td class="text-center"><t t-esc="'%.3f' % line.upstream_after if line.upstream_after else ''"/></td>
+          <td class="text-center"><t t-esc="'%.1f' % line.upstream_recovery_pct if line.upstream_recovery_pct else '0.0'"/></td>
+          <td class="text-center">
+            <t t-if="line.pao_result == 'pass'"><span class="status-pass">PASS</span></t>
+            <t t-elif="line.pao_result == 'fail'"><span class="status-fail">FAIL</span></t>
+            <t t-else=""><span class="status-na">N/A</span></t>
+          </td>
+          <td><t t-esc="line.remark or ''"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </t>
+
+  <t t-if="doc.sop_test_code == 'VL-003' and doc.vl003_line_ids">
+    <div style="margin-top: 10px; font-weight: bold; color: #1B4F72; font-size: 8.5pt;">Detailed Readings (Non-Viable Particle Count):</div>
+    <table class="data-table" style="margin-top:5px; width:100%;">
+      <thead>
+        <tr>
+          <th>Room Name &amp; No.</th>
+          <th>Location</th>
+          <th>Condition</th>
+          <th>ISO Class</th>
+          <th>Limit 0.5µm</th>
+          <th>Count 0.5µm</th>
+          <th>Limit 5.0µm</th>
+          <th>Count 5.0µm</th>
+          <th>Result (0.5/5.0)</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr t-foreach="doc.vl003_line_ids" t-as="line">
+          <td><t t-esc="line.room_name or ''"/></td>
+          <td class="text-center"><t t-esc="line.location_id or ''"/></td>
+          <td class="text-center"><t t-esc="line.test_condition == 'at_rest' and 'At Rest' or 'In Operation'"/></td>
+          <td class="text-center"><t t-esc="line.iso_class and line.iso_class.upper() or ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.limit_05um if line.limit_05um else ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.count_05um if line.count_05um else ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.limit_50um if line.limit_50um else ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.count_50um if line.count_50um else ''"/></td>
+          <td class="text-center">
+            <span t-attf-class="status-#{line.result_05 or 'na'}"><t t-esc="line.result_05 and line.result_05.upper() or ''"/></span> / 
+            <span t-attf-class="status-#{line.result_50 or 'na'}"><t t-esc="line.result_50 and line.result_50.upper() or ''"/></span>
+          </td>
+          <td><t t-esc="line.remark or ''"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </t>
+
+  <t t-if="doc.sop_test_code == 'VL-004' and doc.vl004_line_ids">
+    <div style="margin-top: 10px; font-weight: bold; color: #1B4F72; font-size: 8.5pt;">Detailed Readings (Recovery Study):</div>
+    <table class="data-table" style="margin-top:5px; width:100%;">
+      <thead>
+        <tr>
+          <th>Room Name &amp; No.</th>
+          <th>AHU Condition</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>0.5 µm Count</th>
+          <th>5.0 µm Count</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr t-foreach="doc.vl004_line_ids" t-as="line">
+          <td><t t-esc="line.room_name or ''"/></td>
+          <td class="text-center">
+            <t t-if="line.ahu_condition == 'initial'">Initial (Baseline)</t>
+            <t t-elif="line.ahu_condition == 'generation'">Generation (Challenge)</t>
+            <t t-else="">Recovery</t>
+          </td>
+          <td class="text-center"><t t-esc="line.time_start or ''"/></td>
+          <td class="text-center"><t t-esc="line.time_end or ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.count_05um if line.count_05um else ''"/></td>
+          <td class="text-center"><t t-esc="'%.0f' % line.count_50um if line.count_50um else ''"/></td>
+          <td><t t-esc="line.remark or ''"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </t>
+
+  <t t-if="doc.sop_test_code == 'VL-005' and doc.vl005_line_ids">
+    <div style="margin-top: 10px; font-weight: bold; color: #1B4F72; font-size: 8.5pt;">Detailed Readings (Temp &amp; RH Study):</div>
+    <table class="data-table" style="margin-top:5px; width:100%;">
+      <thead>
+        <tr>
+          <th>Room Name &amp; No.</th>
+          <th>Logger ID</th>
+          <th>Position Description</th>
+          <th>Mean Temp (°C)</th>
+          <th>Temp Range (°C)</th>
+          <th>Mean RH (%)</th>
+          <th>RH Range (%)</th>
+          <th>Result (T / RH / Stab)</th>
+          <th>Remark</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr t-foreach="doc.vl005_line_ids" t-as="line">
+          <td><t t-esc="line.room_name or ''"/></td>
+          <td class="text-center"><t t-esc="line.logger_id or ''"/></td>
+          <td><t t-esc="line.position or ''"/></td>
+          <td class="text-center">
+            <t t-esc="'%.2f' % line.temp_mean if line.temp_mean else ''"/> 
+            (<t t-esc="'%.1f' % line.temp_min"/> - <t t-esc="'%.1f' % line.temp_max"/>)
+          </td>
+          <td class="text-center"><t t-esc="'%.2f' % line.temp_range if line.temp_range else ''"/></td>
+          <td class="text-center">
+            <t t-esc="'%.2f' % line.rh_mean if line.rh_mean else ''"/> 
+            (<t t-esc="'%.1f' % line.rh_min"/> - <t t-esc="'%.1f' % line.rh_max"/>)
+          </td>
+          <td class="text-center"><t t-esc="'%.2f' % line.rh_range if line.rh_range else ''"/></td>
+          <td class="text-center">
+            <span t-attf-class="status-#{line.temp_result or 'na'}"><t t-esc="line.temp_result and line.temp_result.upper() or ''"/></span> / 
+            <span t-attf-class="status-#{line.rh_result or 'na'}"><t t-esc="line.rh_result and line.rh_result.upper() or ''"/></span> /
+            <span t-attf-class="status-#{line.stability_result or 'na'}"><t t-esc="line.stability_result and line.stability_result.upper() or ''"/></span>
+          </td>
+          <td><t t-esc="line.remark or ''"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </t>
+
+  <div class="note-box">
+    All acceptance criteria taken from the referenced SOP revision:
+    <strong><t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else ''"/>
+    <t t-esc="doc.sop_revision_id.version_label if doc.sop_revision_id else ''"/></strong>.
+    Detailed readings are printed above and are also available in the specialised test annexures.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     OVERALL RESULT BANNER
+════════════════════════════════════════════════════ -->
+<t t-if="doc.overall_result == 'pass'">
+  <div class="result-banner-pass">✔  OVERALL TEST RESULT: PASS</div>
+</t>
+<t t-elif="doc.overall_result == 'fail'">
+  <div class="result-banner-fail">✘  OVERALL TEST RESULT: FAIL — NCR REQUIRED</div>
+</t>
+<t t-elif="doc.overall_result == 'conditional'">
+  <div class="result-banner-conditional">~  OVERALL RESULT: CONDITIONAL PASS — SEE REMARKS</div>
+</t>
+<t t-else="">
+  <div class="result-banner-none">TEST IN PROGRESS — RESULT PENDING</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     6. GENERAL REMARKS
+════════════════════════════════════════════════════ -->
+<t t-if="doc.remarks">
+<div class="section-header">6. General Remarks &amp; Observations</div>
+<div class="section-body" style="font-size:8.5pt;line-height:1.6;white-space:pre-line;">
+  <t t-esc="doc.remarks"/>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     SIGNATURE BLOCK (mirrors SOP approval block)
+════════════════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:10px;">Certification &amp; Signatures</div>
+<div class="section-body" style="padding:0;">
+  <table class="sig-table">
+    <thead>
+      <tr>
+        <th style="width:33%;">Lead Technician</th>
+        <th style="width:33%;">Micron HVAC Authorised Signatory</th>
+        <th style="width:33%;">Client Representative</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="sig-label">Name:</div>
+          <div><t t-esc="doc.lead_tech_id.name if doc.lead_tech_id else '—'"/></div>
+        </td>
+        <td>
+          <div class="sig-label">Name:</div>
+          <div><t t-esc="doc.witnessed_by or '—'"/></div>
+        </td>
+        <td>
+          <div class="sig-label">Name:</div>
+          <div><t t-esc="doc.client_rep or '—'"/></div>
+        </td>
+      </tr>
+      <tr>
+        <td><div class="sig-label">Designation:</div><div>HVAC Commissioning Technician</div></td>
+        <td><div class="sig-label">Designation:</div><div>QA Engineer</div></td>
+        <td>
+          <div class="sig-label">Designation:</div>
+          <div><t t-esc="doc.client_rep_designation or '—'"/></div>
+        </td>
+      </tr>
+      <tr class="sign-row">
+        <td>
+          <div class="sig-label">Signature:</div>
+          <t t-if="doc.tech_signature">
+            <img t-att-src="'data:image/png;base64,' + doc.tech_signature.decode()"
+                 style="max-height:40px;max-width:150px;margin-top:4px;"/>
+          </t>
+        </td>
+        <td><div class="sig-label">Signature:</div></td>
+        <td>
+          <div class="sig-label">Signature:</div>
+          <t t-if="doc.client_signature">
+            <img t-att-src="'data:image/png;base64,' + doc.client_signature.decode()"
+                 style="max-height:40px;max-width:150px;margin-top:4px;"/>
+          </t>
+        </td>
+      </tr>
+      <tr>
+        <td><div class="sig-label">Date:</div> <div><t t-esc="doc.test_date or '—'"/></div></td>
+        <td><div class="sig-label">Date:</div></td>
+        <td><div class="sig-label">Date:</div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     DECLARATION FOOTER
+════════════════════════════════════════════════════ -->
+<div style="margin-top:8px;background:#EAF2F8;border:1px solid #1B4F72;padding:6px 10px;font-size:7.5pt;line-height:1.5;">
+  <strong style="color:#1B4F72;">Declaration:</strong>
+  The tests described in this certificate were carried out in accordance with the procedures specified in
+  <strong><t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else 'the referenced SOP'"/>
+  <t t-esc="doc.sop_revision_id.version_label if doc.sop_revision_id else ''"/></strong>
+  using calibrated instruments traceable to national standards (NABL / NPL India).
+  Results apply only to the specific equipment and conditions described herein.
+  This certificate shall not be reproduced except in full without prior written approval of
+  <t t-esc="doc.company_id.name or 'Micron HVAC Systems'"/>.
+</div>
+
+<div style="margin-top:6px;font-size:7.5pt;color:#888;text-align:center;border-top:1px solid #D5D8DC;padding-top:4px;">
+  Certificate No.: <t t-esc="doc.name"/> |
+  Issued By: <t t-esc="doc.company_id.name or 'Micron HVAC Systems'"/> |
+  Test Date: <t t-esc="doc.test_date or '—'"/> |
+  SOP Ref: <t t-esc="doc.sop_revision_id.display_name if doc.sop_revision_id else '—'"/>
+</div>
+
+</div><!-- .page -->
+</t><!-- web.external_layout -->
+</t><!-- t-foreach docs -->
+</t><!-- web.html_container -->
+</template>
+
+</data>
+</odoo>

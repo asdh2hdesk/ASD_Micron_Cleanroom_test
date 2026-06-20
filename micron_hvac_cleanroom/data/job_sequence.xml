@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_micron_job_order" model="ir.sequence">
+        <field name="name">Micron Job Order</field>
+        <field name="code">micron.job.order</field>
+        <field name="prefix">JOB/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

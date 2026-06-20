@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="paperformat_micron_test_certificate" model="report.paperformat">
+            <field name="name">Micron Test Certificate</field>
+            <field name="format">A4</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">10</field>
+            <field name="margin_bottom">10</field>
+            <field name="margin_left">10</field>
+            <field name="margin_right">10</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field>
+            <field name="dpi">96</field>
+        </record>
+
+        <record id="action_report_micron_test_certificate" model="ir.actions.report">
+            <field name="name">Test Certificate (All Tests)</field>
+            <field name="model">micron.job.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">micron_hvac_cleanroom.report_micron_test_certificate_document</field>
+            <field name="report_file">micron_hvac_cleanroom.report_micron_test_certificate_document</field>
+            <field name="print_report_name">'Test Certificate - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="model_micron_job_order"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_micron_test_certificate"/>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SHARED STYLES
+        ═══════════════════════════════════════════════════════════ -->
+        <template id="report_micron_cert_styles">
+            <style type="text/css">
+                .micron-cert { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #000; position: relative; }
+                .micron-cert h1 { text-align: center; font-size: 16px; margin: 0 0 8px 0; text-decoration: underline; font-weight: bold; }
+                .micron-cert h2 { font-size: 12px; font-weight: bold; margin: 10px 0 4px 0; text-decoration: underline; }
+                .micron-cert .red { color: #c00000; }
+                .micron-cert .green { color: #006400; }
+                .micron-cert table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+                .micron-cert th, .micron-cert td { border: 1px solid #000; padding: 3px 5px; vertical-align: middle; }
+                .micron-cert .hdr { background-color: #d9d9d9; font-weight: bold; text-align: center; }
+                .micron-cert .label { font-weight: bold; width: 22%; white-space: nowrap; }
+                .micron-cert .summary-row { background-color: #d9d9d9; font-weight: bold; }
+                .micron-cert .sig-box { height: 60px; }
+                .micron-cert .small { font-size: 8px; }
+                .micron-cert .logo-header { text-align: left; margin-bottom: 4px; }
+                .micron-cert .logo-header img { max-height: 44px; max-width: 160px; }
+                .micron-cert .watermark {
+                    position: absolute; top: 26%; left: 15%;
+                    width: 70%; text-align: center; opacity: 0.07; z-index: 0;
+                }
+                .micron-cert .watermark img { width: 100%; max-height: 380px; object-fit: contain; }
+                .micron-cert .content { position: relative; z-index: 1; }
+                .micron-cert .pass-badge { color: #006400; font-weight: bold; }
+                .micron-cert .fail-badge { color: #c00000; font-weight: bold; }
+                .micron-cert .section-break { border-top: 2px solid #000; margin: 10px 0 6px 0; }
+                .micron-cert .test-section { page-break-inside: avoid; }
+            </style>
+        </template>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             MAIN DOCUMENT
+        ═══════════════════════════════════════════════════════════ -->
+        <template id="report_micron_test_certificate_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="company" t-value="doc.env.company"/>
+
+                    <div class="page micron-cert">
+                        <t t-call="micron_hvac_cleanroom.report_micron_cert_styles"/>
+
+                        <!-- Watermark -->
+                        <t t-if="company and company.logo">
+                            <div class="watermark">
+                                <img t-att-src="'/web/image/res.company/%s/logo' % company.id" alt="Watermark"/>
+                            </div>
+                        </t>
+
+                        <div class="content">
+
+                            <!-- ── Header: Logo + Title ── -->
+                            <t t-if="company and company.logo">
+                                <div class="logo-header">
+                                    <img t-att-src="'/web/image/res.company/%s/logo' % company.id" alt="Logo"/>
+                                </div>
+                            </t>
+                            <h1>TEST CERTIFICATE</h1>
+
+                            <!-- ── Job Info Table ── -->
+                            <table>
+                                <tr>
+                                    <td class="label">CLIENT :</td>
+                                    <td colspan="3">
+                                        <strong><t t-out="doc.certificate_client_name or doc.client_id.name or ''"/></strong>
+                                        <t t-if="doc.certificate_client_address">
+                                            <br/><span t-out="doc.certificate_client_address"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label">AHU NO. :</td>
+                                    <td><t t-out="doc.ahu_no or ''"/></td>
+                                    <td class="label">ROOM NAME &amp; NO. :</td>
+                                    <td><t t-out="doc.room_no or ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="label">TEST CARRIED OUT BY :</td>
+                                    <td class="red" colspan="3"><t t-out="doc.test_carried_out_by.name if doc.test_carried_out_by else ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="label">TEST WITNESSED BY :</td>
+                                    <td class="red" colspan="3"><t t-out="doc.test_witnessed_by.name if doc.test_witnessed_by else ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="label">TEST CARRIED OUT :</td>
+                                    <td colspan="3"><t t-out="doc.test_type or ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="label">VALIDATION DATE :</td>
+                                    <td class="red" colspan="3">
+                                        <t t-if="doc.validation_date" t-out="doc.validation_date.strftime('%d/%m/%Y')"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label">AREA NAME :</td>
+                                    <td class="red" colspan="3"><t t-out="doc.area_name_text or doc.area_id.name or ''"/></td>
+                                </tr>
+                            </table>
+
+                            <!-- ── Test Summary ── -->
+                            <h2>SUMMARY OF TEST RESULTS</h2>
+                            <table>
+                                <tr class="hdr">
+                                    <th>Test</th>
+                                    <th>Performed</th>
+                                    <th>Result</th>
+                                </tr>
+                                <tr>
+                                    <td>Air Velocity Measurement</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_air_velocity else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_air_velocity">
+                                            <span t-att-class="'pass-badge' if doc.air_velocity_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['air_velocity_result'].selection).get(doc.air_velocity_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CFM / Air Change Rate (ACPH)</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_ach else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_ach">
+                                            <span t-att-class="'pass-badge' if doc.cfm_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['cfm_result'].selection).get(doc.cfm_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>HEPA Filter Integrity (PAO)</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_filter_integrity else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_filter_integrity">
+                                            <span t-att-class="'pass-badge' if doc.pao_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['pao_result'].selection).get(doc.pao_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Particle Count (NVPC)</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_particle_count else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_particle_count">
+                                            <span t-att-class="'pass-badge' if doc.particle_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['particle_result'].selection).get(doc.particle_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Recovery Test</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_recovery else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_recovery">
+                                            <span t-att-class="'pass-badge' if doc.recovery_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['recovery_result'].selection).get(doc.recovery_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Temperature &amp; Humidity</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_temp_humidity else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_temp_humidity">
+                                            <span t-att-class="'pass-badge' if doc.temp_humidity_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['temp_humidity_result'].selection).get(doc.temp_humidity_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Differential Pressure</td>
+                                    <td style="text-align:center;"><t t-out="'Yes' if doc.run_diff_pressure else 'No'"/></td>
+                                    <td style="text-align:center;">
+                                        <t t-if="doc.run_diff_pressure">
+                                            <span t-att-class="'pass-badge' if doc.diff_pressure_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['diff_pressure_result'].selection).get(doc.diff_pressure_result, '')"/>
+                                            </span>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 1: AIR VELOCITY
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_air_velocity">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>1. AIR VELOCITY MEASUREMENT</h2>
+
+                                    <!-- Equipment -->
+                                    <table>
+                                        <tr class="hdr">
+                                            <th style="width:50%">EQUIPMENT USED</th>
+                                            <th style="width:25%">CALIBRATION DATE</th>
+                                            <th style="width:25%">CALIBRATION DUE DATE</th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <t t-out="doc.equipment_used_name.name if doc.equipment_used_name else ''"/>
+                                                <t t-if="doc.equipment_model_no or doc.equipment_serial_no">
+                                                    <br/>
+                                                    <span t-if="doc.equipment_model_no">Model No. : <t t-out="doc.equipment_model_no"/></span>
+                                                    <t t-if="doc.equipment_serial_no">  Sr.No. : <t t-out="doc.equipment_serial_no"/></t>
+                                                </t>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-if="doc.calibration_date" t-out="doc.calibration_date.strftime('%d/%m/%Y')"/>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-if="doc.calibration_due_date" t-out="doc.calibration_due_date.strftime('%d/%m/%Y')"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Readings -->
+                                    <t t-set="vel_lines" t-value="doc.air_velocity_line_ids.sorted(lambda l: (l.sr_no, l.id))"/>
+                                    <t t-set="vel_count" t-value="len(vel_lines)"/>
+                                    <t t-set="vel_equip" t-value="(vel_lines[0].equipment_name_id.display_name if vel_lines and vel_lines[0].equipment_name_id else (doc.equipment_used_name.display_name if doc.equipment_used_name else ''))"/>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th style="width:5%">Sr.</th>
+                                            <th style="width:22%" class="red">Equipment Name &amp; ID</th>
+                                            <th style="width:18%">Filter No.</th>
+                                            <th colspan="5" style="width:30%">Air Velocity Reading m/s</th>
+                                            <th style="width:12%">Avg (m/s)</th>
+                                        </tr>
+                                        <tr class="hdr">
+                                            <th/><th/><th/>
+                                            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                                            <th/>
+                                        </tr>
+                                        <t t-if="not vel_count">
+                                            <tr>
+                                                <td>1</td>
+                                                <td class="red"><t t-out="vel_equip"/></td>
+                                                <td/><td/><td/><td/><td/><td/><td/>
+                                            </tr>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-foreach="vel_lines" t-as="line">
+                                                <tr>
+                                                    <t t-if="line_index == 0">
+                                                        <td t-att-rowspan="vel_count"><t t-out="line.sr_no"/></td>
+                                                        <td class="red" t-att-rowspan="vel_count"><t t-out="vel_equip"/></td>
+                                                    </t>
+                                                    <td><t t-out="line.filter_no or ''"/></td>
+                                                    <td style="text-align:center;"><t t-out="line.reading_1" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                    <td style="text-align:center;"><t t-out="line.reading_2" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                    <td style="text-align:center;"><t t-out="line.reading_3" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                    <td style="text-align:center;"><t t-out="line.reading_4" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                    <td style="text-align:center;"><t t-out="line.reading_5" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                    <td style="text-align:center;"><t t-out="line.row_avg" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                    <table>
+                                        <tr class="summary-row"><td>ACCEPTANCE CRITERIA : <t t-out="doc.acceptance_criteria_text or ''"/></td></tr>
+                                        <tr class="summary-row"><td>RESULT : <t t-out="doc.result_statement or ''"/></td></tr>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 2: CFM / ACPH
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_ach">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>2. CFM MEASUREMENT &amp; AIR CHANGE RATE (ACPH)</h2>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th style="width:50%">INSTRUMENT USED</th>
+                                            <th style="width:25%">CALIBRATION DATE</th>
+                                            <th style="width:25%">CALIBRATION DUE DATE</th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <t t-out="doc.cfm_equipment_id.name if doc.cfm_equipment_id else ''"/>
+                                                <t t-if="doc.cfm_equipment_id">
+                                                    <br/>Model No.: <t t-out="doc.cfm_equipment_id.model_no or ''"/>
+                                                    &amp;nbsp;&amp;nbsp;Sr.No.: <t t-out="doc.cfm_equipment_id.serial_number or ''"/>
+                                                </t>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-if="doc.cfm_equipment_id and doc.cfm_equipment_id.calibration_date" t-out="doc.cfm_equipment_id.calibration_date.strftime('%d/%m/%Y')"/>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <t t-if="doc.cfm_equipment_id" t-out="doc.cfm_equipment_id.calibration_due_date.strftime('%d/%m/%Y') if doc.cfm_equipment_id.calibration_due_date else ''"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr. No.</th>
+                                            <th>Room Name &amp; No.</th>
+                                            <th>Filter Code</th>
+                                            <th>Actual CFM</th>
+                                            <th>Total CFM</th>
+                                            <th>Room Vol. (Ft³)</th>
+                                            <th>ACPH</th>
+                                            <th>Result</th>
+                                        </tr>
+                                        <t t-foreach="doc.cfm_line_ids.sorted(lambda l: l.sr_no)" t-as="line">
+                                            <tr t-att-class="'pass-badge' if line.acph_result == 'pass' else ('fail-badge' if line.acph_result == 'fail' else '')">
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="line.room_name or ''"/></td>
+                                                <td><t t-out="line.filter_code or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="line.actual_cfm" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;"><t t-out="line.total_cfm" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;"><t t-out="line.room_vol_ft3" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;"><t t-out="line.acph" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;"><t t-out="'PASS' if line.acph_result == 'pass' else ('FAIL' if line.acph_result == 'fail' else 'N/A')"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <table>
+                                        <tr class="summary-row"><td>ACCEPTANCE CRITERIA : AS PER ISO 14644-3:2019 (E) AIR CHANGES SHOULD NOT BE LESS THAN 20 ACPH</td></tr>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 3: HEPA FILTER INTEGRITY (PAO)
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_filter_integrity">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>3. HEPA FILTER INTEGRITY TEST (PAO)</h2>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th colspan="2">INSTRUMENTS USED</th>
+                                            <th>CALIBRATION DATE</th>
+                                            <th>CALIBRATION DUE DATE</th>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Aerosol Photometer</td>
+                                            <td>
+                                                <t t-out="doc.pao_photometer_id.name if doc.pao_photometer_id else ''"/>
+                                                <t t-if="doc.pao_photometer_id">
+                                                    — Model: <t t-out="doc.pao_photometer_id.model_no or ''"/>
+                                                    Sr.No.: <t t-out="doc.pao_photometer_id.serial_number or ''"/>
+                                                </t>
+                                            </td>
+                                            <td style="text-align:center;"><t t-if="doc.pao_photometer_id and doc.pao_photometer_id.calibration_date" t-out="doc.pao_photometer_id.calibration_date.strftime('%d/%m/%Y')"/></td>
+                                            <td style="text-align:center;"><t t-if="doc.pao_photometer_id" t-out="doc.pao_photometer_id.calibration_due_date.strftime('%d/%m/%Y') if doc.pao_photometer_id.calibration_due_date else ''"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Pressure Gauge</td>
+                                            <td>
+                                                <t t-out="doc.pao_pressure_gauge_id.name if doc.pao_pressure_gauge_id else ''"/>
+                                                <t t-if="doc.pao_pressure_gauge_id">
+                                                    — Sr.No.: <t t-out="doc.pao_pressure_gauge_id.serial_number or ''"/>
+                                                </t>
+                                            </td>
+                                            <td style="text-align:center;"><t t-if="doc.pao_pressure_gauge_id and doc.pao_pressure_gauge_id.calibration_date" t-out="doc.pao_pressure_gauge_id.calibration_date.strftime('%d/%m/%Y')"/></td>
+                                            <td style="text-align:center;"><t t-if="doc.pao_pressure_gauge_id" t-out="doc.pao_pressure_gauge_id.calibration_due_date.strftime('%d/%m/%Y') if doc.pao_pressure_gauge_id.calibration_due_date else ''"/></td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr.</th>
+                                            <th>Filter No.</th>
+                                            <th>Upstream Conc. Before (µg/L)<br/>(20–80 range)</th>
+                                            <th>Downstream Conc. After</th>
+                                            <th>Leakage (%)</th>
+                                            <th>PAO Result</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                        <t t-foreach="doc.pao_line_ids.sorted(lambda l: l.sr_no)" t-as="line">
+                                            <tr>
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="line.filter_no or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="line.upstream_conc_before" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;"><t t-out="line.downstream_conc_after" t-options='{"widget": "float", "precision": 4}'/></td>
+                                                <td style="text-align:center;"><t t-out="line.leakage_pct" t-options='{"widget": "float", "precision": 4}'/></td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.pao_result == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.pao_result == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td><t t-out="line.remarks or ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <table>
+                                        <tr class="summary-row"><td>ACCEPTANCE CRITERIA : AS PER ISO 14644-3:2019 (E) — LEAKAGE NMT 0.01%</td></tr>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 4: PARTICLE COUNT (NVPC)
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_particle_count">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>4. NON-VIABLE PARTICLE COUNT TEST (NVPC)</h2>
+                                    <table>
+                                        <tr>
+                                            <td class="label">Instrument Used</td>
+                                            <td><t t-out="doc.particle_equipment_id.name if doc.particle_equipment_id else 'Lasair_III Particle Counter'"/></td>
+                                            <td class="label">Make</td>
+                                            <td><t t-out="doc.particle_equipment_id.name if doc.particle_equipment_id else 'PMS'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Sr. No.</td>
+                                            <td><t t-out="doc.particle_equipment_id.serial_number if doc.particle_equipment_id else ''"/></td>
+                                            <td class="label">Model No.</td>
+                                            <td><t t-out="doc.particle_equipment_id.model_no if doc.particle_equipment_id else ''"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Flow Rate</td>
+                                            <td><t t-out="doc.particle_flow_rate or '28.3 LPM'"/></td>
+                                            <td class="label">Sampling Time</td>
+                                            <td><t t-out="doc.particle_sampling_time or '1 Min'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Sampling Volume</td>
+                                            <td><t t-out="doc.particle_sampling_volume or ''"/></td>
+                                            <td class="label">ISO Class</td>
+                                            <td><t t-out="dict(doc._fields['iso_class'].selection).get(doc.iso_class, '')"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Calibration Date</td>
+                                            <td><t t-if="doc.particle_equipment_id and doc.particle_equipment_id.calibration_date" t-out="doc.particle_equipment_id.calibration_date.strftime('%d/%m/%Y')"/></td>
+                                            <td class="label">Calibration Due</td>
+                                            <td><t t-if="doc.particle_equipment_id" t-out="doc.particle_equipment_id.calibration_due_date.strftime('%d/%m/%Y') if doc.particle_equipment_id.calibration_due_date else ''"/></td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr.</th>
+                                            <th>Room Name &amp; No.</th>
+                                            <th>Location</th>
+                                            <th>Condition</th>
+                                            <th>0.5µm (per m³)</th>
+                                            <th>5.0µm (per m³)</th>
+                                            <th>0.5µm Result</th>
+                                            <th>5.0µm Result</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                        <t t-foreach="doc.particle_line_ids.sorted(lambda l: (l.sr_no, l.condition, l.id))" t-as="line">
+                                            <tr>
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="line.room_name or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="line.location or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="dict(line._fields['condition'].selection).get(line.condition, '')"/></td>
+                                                <td style="text-align:right;"><t t-out="int(line.particles_05um)"/></td>
+                                                <td style="text-align:right;"><t t-out="int(line.particles_50um)"/></td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.result_05 == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.result_05 == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.result_50 == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.result_50 == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td><t t-out="line.remarks or ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>No.</th><th>Class</th><th>0.5µm limit/m³</th><th>5.0µm limit/m³</th>
+                                        </tr>
+                                        <tr><td style="text-align:center;">1</td><td>ISO 5</td><td style="text-align:right;">3,520</td><td style="text-align:right;">29</td></tr>
+                                        <tr><td style="text-align:center;">2</td><td>ISO 6</td><td style="text-align:right;">35,200</td><td style="text-align:right;">293</td></tr>
+                                        <tr><td style="text-align:center;">3</td><td>ISO 7</td><td style="text-align:right;">352,000</td><td style="text-align:right;">2,930</td></tr>
+                                        <tr><td style="text-align:center;">4</td><td>ISO 8</td><td style="text-align:right;">3,520,000</td><td style="text-align:right;">29,300</td></tr>
+                                        <tr><td style="text-align:center;">5</td><td>ISO 9</td><td style="text-align:right;">35,200,000</td><td style="text-align:right;">293,000</td></tr>
+                                    </table>
+                                    <table>
+                                        <tr class="summary-row"><td>ACCEPTANCE CRITERIA AS PER ISO-14644-2:2015 (E) or EU GMP — Maximum Permitted number of particles/m³ equal to or less than the above limits</td></tr>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 5: RECOVERY TEST
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_recovery">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>5. RECOVERY TEST</h2>
+                                    <table>
+                                        <tr>
+                                            <td class="label">Instrument Used</td>
+                                            <td><t t-out="doc.recovery_equipment_id.name if doc.recovery_equipment_id else 'Lasair_III Particle Counter'"/></td>
+                                            <td class="label">Flow Rate</td>
+                                            <td><t t-out="doc.recovery_flow_rate or '28.3 LPM'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Sampling Volume</td>
+                                            <td><t t-out="doc.recovery_sampling_volume or ''"/></td>
+                                            <td class="label">Sampling Time</td>
+                                            <td><t t-out="doc.recovery_sampling_time or '1 Min'"/></td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr.</th>
+                                            <th>AHU Condition</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>0.5µm (per m³)</th>
+                                            <th>5.0µm (per m³)</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                        <t t-foreach="doc.recovery_line_ids.sorted(lambda l: l.sr_no)" t-as="line">
+                                            <tr>
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="dict(line._fields['ahu_condition'].selection).get(line.ahu_condition, '')"/></td>
+                                                <td style="text-align:center;"><t t-out="'%02d:%02d' % (int(line.time_start), int((line.time_start % 1) * 60))"/></td>
+                                                <td style="text-align:center;"><t t-out="'%02d:%02d' % (int(line.time_end), int((line.time_end % 1) * 60))"/></td>
+                                                <td style="text-align:right;"><t t-out="int(line.particles_05um)"/></td>
+                                                <td style="text-align:right;"><t t-out="int(line.particles_50um)"/></td>
+                                                <td><t t-out="line.remarks or ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                    <table>
+                                        <tr class="summary-row">
+                                            <td>RECOVERY PERIOD : <strong><t t-out="doc.recovery_period or ''"/></strong></td>
+                                            <td>RESULT : <span t-att-class="'pass-badge' if doc.recovery_result == 'pass' else 'fail-badge'">
+                                                <t t-out="dict(doc._fields['recovery_result'].selection).get(doc.recovery_result, '')"/>
+                                            </span></td>
+                                        </tr>
+                                        <tr class="summary-row"><td colspan="2">ACCEPTANCE CRITERIA: NMT 15 Min AS PER ISO-14644-3:2019 (E)</td></tr>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 6: TEMPERATURE & HUMIDITY
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_temp_humidity">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>6. TEMPERATURE &amp; HUMIDITY (RH) STUDY</h2>
+                                    <table>
+                                        <tr>
+                                            <td class="label">Instrument Used</td>
+                                            <td><t t-out="doc.temp_humidity_equipment_id.name if doc.temp_humidity_equipment_id else 'Thermo-Hygrometer'"/></td>
+                                            <td class="label">Sr. No.</td>
+                                            <td><t t-out="doc.temp_humidity_equipment_id.serial_number if doc.temp_humidity_equipment_id else ''"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Calibration Date</td>
+                                            <td><t t-if="doc.temp_humidity_equipment_id and doc.temp_humidity_equipment_id.calibration_date" t-out="doc.temp_humidity_equipment_id.calibration_date.strftime('%d/%m/%Y')"/></td>
+                                            <td class="label">Calibration Due</td>
+                                            <td><t t-if="doc.temp_humidity_equipment_id" t-out="doc.temp_humidity_equipment_id.calibration_due_date.strftime('%d/%m/%Y') if doc.temp_humidity_equipment_id.calibration_due_date else ''"/></td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr.</th>
+                                            <th>Location</th>
+                                            <th>Temperature (°C)</th>
+                                            <th>Temp Result</th>
+                                            <th>Humidity (%RH)</th>
+                                            <th>Humidity Result</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                        <t t-foreach="doc.temp_humidity_line_ids.sorted(lambda l: l.sr_no)" t-as="line">
+                                            <tr>
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="line.location or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="line.temperature" t-options='{"widget": "float", "precision": 1}'/></td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.temp_result == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.temp_result == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td style="text-align:center;"><t t-out="line.humidity" t-options='{"widget": "float", "precision": 1}'/></td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.humidity_result == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.humidity_result == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td><t t-out="line.remarks or ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SECTION 7: DIFFERENTIAL PRESSURE
+                            ══════════════════════════════════════════════ -->
+                            <t t-if="doc.run_diff_pressure">
+                                <div class="section-break"/>
+                                <div class="test-section">
+                                    <h2>7. DIFFERENTIAL PRESSURE</h2>
+                                    <table>
+                                        <tr>
+                                            <td class="label">Instrument Used</td>
+                                            <td><t t-out="doc.diff_pressure_equipment_id.name if doc.diff_pressure_equipment_id else ''"/></td>
+                                            <td class="label">Sr. No.</td>
+                                            <td><t t-out="doc.diff_pressure_equipment_id.serial_number if doc.diff_pressure_equipment_id else ''"/></td>
+                                        </tr>
+                                    </table>
+                                    <table>
+                                        <tr class="hdr">
+                                            <th>Sr.</th>
+                                            <th>From Room (Higher Pressure)</th>
+                                            <th>To Room (Adjacent)</th>
+                                            <th>Pressure (Pa)</th>
+                                            <th>Result</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                        <t t-foreach="doc.diff_pressure_line_ids.sorted(lambda l: l.sr_no)" t-as="line">
+                                            <tr>
+                                                <td style="text-align:center;"><t t-out="line.sr_no"/></td>
+                                                <td><t t-out="line.room_from or ''"/></td>
+                                                <td><t t-out="line.room_to or ''"/></td>
+                                                <td style="text-align:center;"><t t-out="line.pressure_pa" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td style="text-align:center;" t-att-class="'pass-badge' if line.result == 'pass' else 'fail-badge'">
+                                                    <t t-out="'PASS' if line.result == 'pass' else 'FAIL'"/>
+                                                </td>
+                                                <td><t t-out="line.remarks or ''"/></td>
+                                            </tr>
+                                        </t>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- ══════════════════════════════════════════════
+                                 SIGNATURES
+                            ══════════════════════════════════════════════ -->
+                            <div class="section-break"/>
+                            <table>
+                                <tr class="hdr">
+                                    <th style="width:33%">TEST CARRIED OUT BY</th>
+                                    <th style="width:33%">TEST WITNESSED BY</th>
+                                    <th style="width:34%">TEST REVIEWED BY</th>
+                                </tr>
+                                <tr>
+                                    <td class="sig-box"/>
+                                    <td class="sig-box"/>
+                                    <td class="sig-box"/>
+                                </tr>
+                                <tr>
+                                    <td class="small" style="text-align:center;">Engg</td>
+                                    <td class="small" style="text-align:center;">&#160;</td>
+                                    <td class="small" style="text-align:center;">QA</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:center;">Sign &amp; Date<br/>For, Micron HVAC Pvt.Ltd.</td>
+                                    <td style="text-align:center;">Sign &amp; Date<br/>For, <t t-out="doc.certificate_client_name or doc.client_id.name or ''"/></td>
+                                    <td style="text-align:center;">Sign &amp; Date</td>
+                                </tr>
+                            </table>
+
+                        </div><!-- /content -->
+                    </div><!-- /page -->
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

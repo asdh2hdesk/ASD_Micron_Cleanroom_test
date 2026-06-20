@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="view_hvac_job_list" model="ir.ui.view">
+        <field name="name">hvac.job.list</field>
+        <field name="model">hvac.job</field>
+        <field name="arch" type="xml">
+            <list string="Job Orders"
+                  decoration-success="state == 'done'"
+                  decoration-warning="state == 'in_progress'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name" string="Job No."/>
+                <field name="project_name"/>
+                <field name="partner_id" string="Client"/>
+                <field name="job_type"/>
+                <field name="scheduled_date"/>
+                <field name="lead_technician_id" string="Lead Tech."/>
+                <field name="calibration_valid" string="Cal. OK" widget="boolean"/>
+                <field name="test_sheet_count" string="# Sheets"/>
+                <field name="ncr_count" string="# NCRs"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-primary="state == 'in_progress'"
+                       decoration-warning="state == 'scheduled'"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="priority" widget="priority"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hvac_job_kanban" model="ir.ui.view">
+        <field name="name">hvac.job.kanban</field>
+        <field name="model">hvac.job</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="project_name"/>
+                <field name="job_type"/>
+                <field name="scheduled_date"/>
+                <field name="lead_technician_id"/>
+                <field name="calibration_valid"/>
+                <field name="state"/>
+                <field name="priority"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><i class="fa fa-building-o"/> <field name="partner_id"/></div>
+                                    <div><i class="fa fa-map-marker"/> <field name="project_name"/></div>
+                                    <div invisible="not scheduled_date">
+                                        <i class="fa fa-calendar"/> <field name="scheduled_date" widget="date"/>
+                                    </div>
+                                    <div invisible="not lead_technician_id">
+                                        <i class="fa fa-user"/> <field name="lead_technician_id"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span t-if="!record.calibration_valid.raw_value"
+                                              class="badge bg-danger">Cal. Overdue</span>
+                                        <span t-if="record.calibration_valid.raw_value"
+                                              class="badge bg-success">Cal. OK</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_hvac_job_form" model="ir.ui.view">
+        <field name="name">hvac.job.form</field>
+        <field name="model">hvac.job</field>
+        <field name="arch" type="xml">
+            <form string="Job Order">
+                <header>
+                    <button name="action_schedule" type="object" string="Schedule Job"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_start" type="object" string="Start Job"
+                            invisible="state != 'scheduled'" class="btn-success"/>
+                    <button name="action_complete" type="object" string="Mark Complete"
+                            invisible="state != 'in_progress'" class="btn-success"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state not in ('draft','scheduled')"
+                            confirm="Are you sure you want to cancel this job?"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('cancelled',)"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,scheduled,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_test_sheets" type="object"
+                                class="oe_stat_button" icon="fa-clipboard">
+                            <field name="test_sheet_count" widget="statinfo" string="Test Sheets"/>
+                        </button>
+                        <button name="action_open_ncrs" type="object"
+                                class="oe_stat_button" icon="fa-exclamation-triangle"
+                                invisible="ncr_count == 0">
+                            <field name="ncr_count" widget="statinfo" string="NCRs"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Calibration Alert" bg_color="bg-danger"
+                            invisible="calibration_valid"/>
+                    <div class="oe_title">
+                        <label class="o_form_label" for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <field name="priority" widget="priority"/>
+                    </div>
+                    <group>
+                        <group string="Client &amp; Site">
+                            <field name="partner_id"/>
+                            <field name="contact_person"/>
+                            <field name="contact_phone"/>
+                            <field name="project_name"/>
+                            <field name="site_address"/>
+                        </group>
+                        <group string="Job Details">
+                            <field name="job_type"/>
+                            <field name="scheduled_date"/>
+                            <field name="estimated_duration"/>
+                            <field name="lead_technician_id"/>
+                            <field name="technician_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="calibration_valid">
+                        <strong>Calibration Alert:</strong> <field name="calibration_warning" readonly="1"/>
+                        — Resolve before starting the job.
+                    </div>
+                    <notebook>
+                        <page string="Instruments on Job" name="instruments">
+                            <field name="instrument_line_ids">
+                                <list editable="bottom">
+                                    <field name="instrument_id"/>
+                                    <field name="instrument_type" readonly="1"/>
+                                    <field name="calibration_status" readonly="1" widget="badge"
+                                           decoration-success="calibration_status == 'valid'"
+                                           decoration-warning="calibration_status == 'due_soon'"
+                                           decoration-danger="calibration_status in ('overdue','not_calibrated')"/>
+                                    <field name="latest_cert_no" readonly="1" string="Cert No."/>
+                                    <field name="next_calibration_date" readonly="1" string="Cal. Due"/>
+                                    <field name="purpose"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Test Worksheets" name="sheets">
+                            <field name="test_sheet_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="sop_test_code" string="Test Type"/>
+                                    <field name="ahu_tag" string="AHU Tag"/>
+                                    <field name="test_date"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'verified'"
+                                           decoration-primary="state == 'done'"/>
+                                    <field name="overall_result" widget="badge"
+                                           decoration-success="overall_result == 'pass'"
+                                           decoration-danger="overall_result == 'fail'"/>
+                                    <button name="action_print_certificate" type="object"
+                                            string="Certificate" icon="fa-certificate"
+                                            invisible="state not in ('done','verified')"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Internal notes, site observations, client requirements..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hvac_job_search" model="ir.ui.view">
+        <field name="name">hvac.job.search</field>
+        <field name="model">hvac.job</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_name"/>
+                <field name="partner_id"/>
+                <filter name="my_jobs" string="My Jobs"
+                        domain="[('technician_ids.user_id','=',uid)]"/>
+                <filter name="scheduled" string="Scheduled" domain="[('state','=','scheduled')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
+                <filter name="cal_alert" string="Calibration Alert"
+                        domain="[('calibration_valid','=',False)]"/>
+                <separator/>
+                <filter name="today" string="Today"
+                        domain="[('scheduled_date','&gt;=', datetime.datetime.now().strftime('%%Y-%%m-%%d 00:00:00')),
+                                 ('scheduled_date','&lt;=', datetime.datetime.now().strftime('%%Y-%%m-%%d 23:59:59'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="by_client" string="Client" context="{'group_by':'partner_id'}"/>
+                    <filter name="by_type" string="Job Type" context="{'group_by':'job_type'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hvac_job" model="ir.actions.act_window">
+        <field name="name">Job Orders</field>
+        <field name="res_model">hvac.job</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first job order</p>
+            <p>Schedule HVAC testing and commissioning jobs, assign technicians, and track from dispatch to invoice.</p>
+        </field>
+    </record>
+
+</data>
+</odoo>

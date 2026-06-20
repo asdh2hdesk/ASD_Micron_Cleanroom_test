@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_micron_root" name="Micron Cleanroom" sequence="10" groups="micron_hvac_cleanroom.group_micron_hvac_user"/>
+
+    <menuitem id="menu_micron_jobs" name="Job Management" parent="menu_micron_root" sequence="10"/>
+    <menuitem id="menu_micron_master_data" name="Master Data" parent="menu_micron_root" sequence="20" groups="micron_hvac_cleanroom.group_micron_hvac_manager"/>
+</odoo>

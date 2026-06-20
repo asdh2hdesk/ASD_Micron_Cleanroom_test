@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_vl004_annexures_document">
+<t t-call="web.html_container">
+<t t-foreach="docs" t-as="o">
+
+<style>
+  @page { size: A4 portrait; margin: 8mm 10mm 6mm 10mm; }
+  body { font-family: Arial, sans-serif; font-size: 8.5pt; color: #000; }
+  .pg { width: 100%; box-sizing: border-box; }
+  .pgbrk { page-break-after: always; }
+
+  /* ── Page header ── */
+  .hdr { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+  .hdr td { padding: 0 2px; vertical-align: middle; }
+  .mbox { display: inline-block; border: 2px solid #000; padding: 2px 10px; font-weight: bold; font-size: 9pt; }
+  .mcell { text-align: right; line-height: 1.45; font-size: 8pt; }
+  .mu { font-size: 20pt; font-weight: bold; font-style: italic; font-family: 'Times New Roman', serif; vertical-align: middle; }
+  .subtitle { text-align: center; font-weight: bold; font-size: 8.5pt; }
+  .atitle { text-align: center; font-weight: bold; font-size: 9.5pt; margin: 1px 0 3px 0; }
+
+  /* ── Form table ── */
+  .ft { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  .ft th, .ft td { border: 1px solid #000; padding: 2px 3px; font-size: 7.8pt; vertical-align: middle; }
+  .ft th { font-weight: bold; text-align: center; }
+  .ft td.L { text-align: left; }
+  .ft td.C { text-align: center; }
+  .sec-hdr { font-size: 9pt; font-weight: bold; text-align: center; padding: 3px 4px; }
+  .inst-td { text-align: left; line-height: 1.75; vertical-align: top; }
+  .dr td { height: 22px; }   /* data row */
+  .sr td { height: 55px; }   /* sign row */
+  .ref { text-align: right; font-size: 7pt; border: none !important; }
+
+  .pass { color: #1a7e3f; font-weight: bold; }
+  .fail { color: #c0392b; font-weight: bold; }
+</style>
+
+<!-- Retrieve Particle Counter instrument -->
+<t t-set="ipc" t-value="o.instrument_used_ids.filtered(lambda i: i.instrument_type == 'particle_counter')"/>
+<t t-set="ipc1" t-value="ipc[0] if ipc else o.env['hvac.instrument']"/>
+
+<t t-set="MIN_ROWS" t-value="12"/>
+<t t-set="n_lines" t-value="len(o.vl004_line_ids)"/>
+
+<div class="pg">
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">Recovery Test Raw Data &amp; Report</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Rep. SOP No. MHPL/VL/004<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure I</div>
+
+  <table class="ft">
+    <tr><td colspan="8" class="sec-hdr">RECOVERY STUDY (CLEANROOM RECOVERY TEST)</td></tr>
+
+    <!-- Client / Date / AHU -->
+    <tr>
+      <td colspan="4" class="L">Client Name: -&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="4" class="L">Date: -&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" class="L">AHU No.: -&#160;&#160;<t t-esc="o.ahu_tag or ''"/></td>
+      <td colspan="4" class="L">Room Name &amp; No.: -&#160;&#160;<t t-esc="o.vl004_line_ids[0].room_name if o.vl004_line_ids else ''"/></td>
+    </tr>
+
+    <!-- Instrument details -->
+    <tr>
+      <th colspan="8">INSTRUMENT DETAILS</th>
+    </tr>
+    <tr style="height:55px;">
+      <td colspan="4" class="inst-td" style="font-size:7.5pt;">
+        Instrument Used: <t t-esc="ipc1.name or 'Lasair_III Particle Counter'"/><br/>
+        Make: <t t-esc="ipc1.make or 'PMS'"/><br/>
+        Sr. No.: <t t-esc="ipc1.serial_no or ''"/>&#160;|&#160;Model No.: <t t-esc="ipc1.model_no or ''"/>
+      </td>
+      <td colspan="4" class="inst-td" style="font-size:7.5pt;">
+        Flow Rate: <t t-esc="o.vl004_line_ids[0].flow_rate if o.vl004_line_ids else '28.3 LPM'"/><br/>
+        Sampling Volume: <t t-esc="o.vl004_line_ids[0].sample_volume if o.vl004_line_ids else '0.0283 m³/min'"/><br/>
+        Calibration Date: <t t-if="ipc1.last_calibration_date"><t t-esc="ipc1.last_calibration_date.strftime('%d/%m/%Y')"/></t>&#160;|&#160;
+        Due on: <t t-if="ipc1.next_calibration_date"><t t-esc="ipc1.next_calibration_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+
+    <!-- Column Headers -->
+    <tr>
+      <th rowspan="2" style="width:6%">Sr. No.</th>
+      <th rowspan="2" style="width:16%">Room Name &amp; No.</th>
+      <th rowspan="2" style="width:16%">AHU Condition</th>
+      <th colspan="2" style="width:20%">Time of Reading</th>
+      <th colspan="2" style="width:24%">No of Particles in m³</th>
+      <th rowspan="2" style="width:18%">Remarks / Observations</th>
+    </tr>
+    <tr>
+      <th>START</th>
+      <th>END</th>
+      <th>0.5 µm</th>
+      <th>5.0 µm</th>
+    </tr>
+
+    <!-- Data Rows -->
+    <t t-foreach="o.vl004_line_ids" t-as="line">
+      <tr class="dr">
+        <td class="C"><t t-esc="line_index + 1"/></td>
+        <td class="L"><t t-esc="line.room_name or ''"/></td>
+        <td class="C"><t t-esc="dict(line._fields['ahu_condition'].selection).get(line.ahu_condition, '')"/></td>
+        <td class="C"><t t-esc="line.time_start or ''"/></td>
+        <td class="C"><t t-esc="line.time_end or ''"/></td>
+        <td class="C"><t t-esc="('{:,.0f}'.format(line.count_05um)) if line.count_05um else '0'"/></td>
+        <td class="C"><t t-esc="('{:,.0f}'.format(line.count_50um)) if line.count_50um else '0'"/></td>
+        <td class="L"><t t-esc="line.remark or ''"/></td>
+      </tr>
+    </t>
+
+    <!-- Pad Empty Rows -->
+    <t t-if="n_lines &lt; MIN_ROWS">
+      <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
+        <tr class="dr">
+          <td class="C"><t t-esc="n_lines + r + 1"/></td>
+          <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+        </tr>
+      </t>
+    </t>
+
+    <!-- Recovery Study Summary Math -->
+    <tr>
+      <th colspan="8" style="text-align:left;">RECOVERY CALCULATIONS &amp; ANALYSIS</th>
+    </tr>
+    <tr>
+      <td colspan="4" class="L"><strong>A] Time at which aerosol injection stopped / challenge stopped :</strong></td>
+      <td colspan="4" class="C"><strong><t t-esc="o.recovery_time_a or '—'"/></strong></td>
+    </tr>
+    <tr>
+      <td colspan="4" class="L"><strong>B] Time at which design ISO cleanliness class was regained :</strong></td>
+      <td colspan="4" class="C"><strong><t t-esc="o.recovery_time_b or '—'"/></strong></td>
+    </tr>
+    <tr>
+      <td colspan="4" class="L"><strong>RECOVERY PERIOD = [ B − A ] :</strong></td>
+      <td colspan="4" class="C" style="font-size:10pt;">
+        <strong>
+          <t t-if="o.recovery_period_min">
+            <t t-esc="'%.1f minutes' % o.recovery_period_min"/>
+          </t>
+          <t t-else="">—</t>
+        </strong>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" class="L"><strong>RECOVERY TEST RESULT :</strong></td>
+      <td colspan="4" class="C" style="font-size:10pt;">
+        <span t-att-class="o.recovery_result">
+          <strong><t t-esc="o.recovery_result.upper() if o.recovery_result else 'PENDING'"/></strong>
+        </span>
+      </td>
+    </tr>
+
+    <!-- Reference & Acceptance -->
+    <tr>
+      <td colspan="8" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong> NMT 15 MINUTES AS PER ISO 14644-3:2019 ( E ) ANNEX B12.
+      </td>
+    </tr>
+    <tr>
+      <td colspan="8" class="L" style="font-size:7.5pt;">
+        <strong>REFERENCE :</strong> AS PER PROTOCOL No. PSV/PRO/001 / ISO 14644-3:2019
+      </td>
+    </tr>
+
+    <!-- Signatures -->
+    <tr>
+      <th colspan="3" style="text-align:center">Performed By</th>
+      <th colspan="3" style="text-align:center">Witnessed By</th>
+      <th colspan="2" style="text-align:center">Reviewed By</th>
+    </tr>
+    <tr class="sr">
+      <td colspan="3" class="C" style="vertical-align:bottom; padding-bottom:5px;">
+        <t t-if="o.tech_signature">
+          <img t-att-src="'data:image/png;base64,' + o.tech_signature.decode()" style="max-height:35px; max-width:140px;"/>
+        </t>
+      </td>
+      <td colspan="3" class="C" style="vertical-align:bottom; padding-bottom:5px;">
+        <t t-if="o.client_signature">
+          <img t-att-src="'data:image/png;base64,' + o.client_signature.decode()" style="max-height:35px; max-width:140px;"/>
+        </t>
+      </td>
+      <td colspan="2"></td>
+    </tr>
+    <tr>
+      <td colspan="3" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="3" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="2" style="text-align:center">Sign &amp; Date</td>
+    </tr>
+    <tr><td colspan="8" class="ref">F/VL/004/01-02</td></tr>
+  </table>
+</div>
+
+</t>
+</t>
+</template>
+
+</data>
+</odoo>

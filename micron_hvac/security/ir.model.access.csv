@@ -1,0 +1,34 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hvac_sop_user,hvac.sop user,model_hvac_sop,,1,0,0,0
+access_hvac_sop_manager,hvac.sop manager,model_hvac_sop,base.group_system,1,1,1,1
+access_hvac_sop_revision_user,hvac.sop.revision user,model_hvac_sop_revision,,1,0,0,0
+access_hvac_sop_revision_manager,hvac.sop.revision manager,model_hvac_sop_revision,base.group_system,1,1,1,1
+access_hvac_sop_step_user,hvac.sop.step user,model_hvac_sop_step,,1,0,0,0
+access_hvac_sop_step_manager,hvac.sop.step manager,model_hvac_sop_step,base.group_system,1,1,1,1
+access_hvac_sop_parameter_user,hvac.sop.parameter user,model_hvac_sop_parameter,,1,0,0,0
+access_hvac_sop_parameter_manager,hvac.sop.parameter manager,model_hvac_sop_parameter,base.group_system,1,1,1,1
+access_hvac_instrument_user,hvac.instrument user,model_hvac_instrument,,1,1,1,0
+access_hvac_instrument_manager,hvac.instrument manager,model_hvac_instrument,base.group_system,1,1,1,1
+access_hvac_calibration_user,hvac.calibration user,model_hvac_calibration,,1,1,1,0
+access_hvac_calibration_manager,hvac.calibration manager,model_hvac_calibration,base.group_system,1,1,1,1
+access_hvac_test_sheet_user,hvac.test.sheet user,model_hvac_test_sheet,,1,1,1,0
+access_hvac_test_sheet_manager,hvac.test.sheet manager,model_hvac_test_sheet,base.group_system,1,1,1,1
+access_hvac_job_user,hvac.job user,model_hvac_job,,1,1,1,0
+access_hvac_job_manager,hvac.job manager,model_hvac_job,base.group_system,1,1,1,1
+access_hvac_job_instrument_line_user,hvac.job.instrument.line user,model_hvac_job_instrument_line,,1,1,1,0
+access_hvac_job_instrument_line_manager,hvac.job.instrument.line manager,model_hvac_job_instrument_line,base.group_system,1,1,1,1
+access_hvac_ncr_user,hvac.ncr user,model_hvac_ncr,,1,1,1,0
+access_hvac_ncr_manager,hvac.ncr manager,model_hvac_ncr,base.group_system,1,1,1,1
+access_hvac_capa_user,hvac.capa user,model_hvac_capa,,1,1,1,0
+access_hvac_capa_manager,hvac.capa manager,model_hvac_capa,base.group_system,1,1,1,1
+access_hvac_vl001_line_user,hvac.vl001.line user,model_hvac_vl001_line,,1,1,1,0
+access_hvac_vl001_line_manager,hvac.vl001.line manager,model_hvac_vl001_line,base.group_system,1,1,1,1
+access_hvac_vl002_line_user,hvac.vl002.line user,model_hvac_vl002_line,,1,1,1,0
+access_hvac_vl002_line_manager,hvac.vl002.line manager,model_hvac_vl002_line,base.group_system,1,1,1,1
+access_hvac_vl003_line_user,hvac.vl003.line user,model_hvac_vl003_line,,1,1,1,0
+access_hvac_vl003_line_manager,hvac.vl003.line manager,model_hvac_vl003_line,base.group_system,1,1,1,1
+access_hvac_vl004_line_user,hvac.vl004.line user,model_hvac_vl004_line,,1,1,1,0
+access_hvac_vl004_line_manager,hvac.vl004.line manager,model_hvac_vl004_line,base.group_system,1,1,1,1
+access_hvac_vl005_line_user,hvac.vl005.line user,model_hvac_vl005_line,,1,1,1,0
+access_hvac_vl005_line_manager,hvac.vl005.line manager,model_hvac_vl005_line,base.group_system,1,1,1,1
+

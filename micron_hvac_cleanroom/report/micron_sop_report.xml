@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ── Paper Format ── -->
+        <record id="paperformat_micron_sop" model="report.paperformat">
+            <field name="name">Micron SOP Document</field>
+            <field name="format">A4</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">12</field>
+            <field name="margin_bottom">18</field>
+            <field name="margin_left">18</field>
+            <field name="margin_right">18</field>
+            <field name="header_line" eval="False"/>
+            <field name="dpi">96</field>
+        </record>
+
+        <!-- ── Report Action ── -->
+        <record id="action_report_micron_sop_document" model="ir.actions.report">
+            <field name="name">SOP Document</field>
+            <field name="model">micron.sop.template</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">micron_hvac_cleanroom.report_micron_sop_document_template</field>
+            <field name="report_file">micron_hvac_cleanroom.report_micron_sop_document_template</field>
+            <field name="print_report_name">'SOP - %s - Rev %s' % (object.sop_no, object.revision)</field>
+            <field name="binding_model_id" ref="model_micron_sop_template"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_micron_sop"/>
+        </record>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             SOP DOCUMENT TEMPLATE — mirrors physical SOP exactly
+        ══════════════════════════════════════════════════════════════════ -->
+        <template id="report_micron_sop_document_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="company" t-value="doc.env.company"/>
+
+                    <!-- ── CSS ── -->
+                    <style type="text/css">
+                        body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #000; }
+                        .sop-page { padding: 0; }
+
+                        /* ── Header Table ── */
+                        .sop-header-table { width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 14px; }
+                        .sop-header-table td, .sop-header-table th { border: 1px solid #000; padding: 5px 8px; vertical-align: middle; }
+                        .sop-brand-row td { background: #fff; border-bottom: 1px solid #000; }
+                        .sop-title-row td { background: #e8e8e8; font-weight: bold; font-size: 13px; text-align: center; border-bottom: 1px solid #000; }
+                        .sop-meta-left { width: 28%; }
+                        .sop-meta-center { width: 36%; text-align: center; font-weight: bold; font-size: 12px; }
+                        .sop-meta-right { width: 36%; font-size: 10px; }
+                        .sop-meta-right table { width: 100%; border-collapse: collapse; }
+                        .sop-meta-right td { border: none; padding: 2px 0; }
+
+                        /* ── Running header on each page ── */
+                        .sop-running-header { width: 100%; border-collapse: collapse; border: 1px solid #000;
+                                              margin-bottom: 10px; font-size: 10px; }
+                        .sop-running-header td { border: 1px solid #000; padding: 3px 6px; vertical-align: middle; }
+
+                        /* ── Sections ── */
+                        .sop-section-number { font-weight: bold; font-size: 12px; margin: 12px 0 4px 0; }
+                        .sop-section-content { margin-left: 16px; margin-bottom: 8px; line-height: 1.5; }
+                        .sop-section-content p { margin: 4px 0; }
+                        .sop-section-content ol, .sop-section-content ul { padding-left: 18px; }
+                        .sop-section-content li { margin-bottom: 4px; }
+                        .sop-section-content table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+                        .sop-section-content table td, .sop-section-content table th {
+                            border: 1px solid #000; padding: 4px 6px; }
+                        .sop-section-content table th { background: #e8e8e8; font-weight: bold; }
+
+                        /* ── Signature block ── */
+                        .sop-sig-table { width: 100%; border-collapse: collapse; border: 1px solid #000;
+                                         margin-top: 14px; page-break-inside: avoid; }
+                        .sop-sig-table td, .sop-sig-table th { border: 1px solid #000; padding: 6px; vertical-align: top; text-align: center; }
+                        .sop-sig-table th { background: #e8e8e8; font-weight: bold; width: 33%; }
+                        .sop-sig-cell { height: 60px; }
+
+                        /* ── Revision History Table ── */
+                        .sop-rev-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+                        .sop-rev-table td, .sop-rev-table th { border: 1px solid #000; padding: 4px 6px; font-size: 10px; }
+                        .sop-rev-table th { background: #e8e8e8; font-weight: bold; text-align: center; }
+
+                        /* ── Watermark ── */
+                        .sop-uncontrolled {
+                            border: 2px solid #c00; color: #c00; font-weight: bold;
+                            font-size: 13px; text-align: center; padding: 3px 12px;
+                            display: inline-block; margin-top: 8px;
+                        }
+                        .sop-uncontrolled-wrap { text-align: center; margin-top: 10px; }
+
+                        /* ── Brand ── -->
+                        .sop-micron-brand { font-size: 24px; font-weight: bold; font-family: 'Times New Roman', serif; }
+
+                        @page { margin: 12mm 18mm 18mm 18mm; }
+                        .page-break { page-break-after: always; }
+                    </style>
+
+                    <div class="page sop-page">
+
+                        <!-- ══════════════════════════════════════════════
+                             PAGE 1 — COVER / TITLE
+                        ══════════════════════════════════════════════ -->
+                        <table class="sop-header-table">
+                            <!-- Brand Row -->
+                            <tr class="sop-brand-row">
+                                <td style="width:35%;">
+                                    <div style="border: 1px solid #555; display: inline-block;
+                                                padding: 2px 8px; font-weight: bold; font-size: 10px;">
+                                        MASTER COPY
+                                    </div>
+                                </td>
+                                <td style="width: 65%; text-align: right; border: none;">
+                                    <span class="sop-micron-brand">&#956; MICRON</span>
+                                </td>
+                            </tr>
+                            <!-- SOP Title Band -->
+                            <tr class="sop-title-row">
+                                <td colspan="2">STANDARD OPERATING PROCEDURE</td>
+                            </tr>
+                            <!-- Metadata Row -->
+                            <tr>
+                                <td class="sop-meta-left">
+                                    <div><b>SOP NO.: <t t-out="doc.sop_no or ''"/></b></div>
+                                    <div style="margin-top: 10px; font-size: 10px; color: #555;">
+                                        Supersedes.:<br/>
+                                        <t t-out="doc.supersedes or ''"/>
+                                    </div>
+                                </td>
+                                <td class="sop-meta-center">
+                                    <t t-out="doc.name or ''"/>
+                                </td>
+                                <td class="sop-meta-right">
+                                    <table>
+                                        <tr>
+                                            <td><b>Date Prepared.:-</b></td>
+                                            <td>
+                                                <t t-if="doc.date_prepared" t-out="doc.date_prepared.strftime('%d | %m | %Y')"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Effective Date.:-</b></td>
+                                            <td>
+                                                <t t-if="doc.effective_date" t-out="doc.effective_date.strftime('%d | %m | %Y')"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Next review Date.:-</b></td>
+                                            <td>
+                                                <t t-if="doc.next_review_date" t-out="doc.next_review_date.strftime('%d | %m | %Y')"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Page.:</b></td>
+                                            <td>1 of <t t-out="doc.total_pages"/></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ══ Section 1.0 — Purpose ══ -->
+                        <t t-if="doc.purpose">
+                            <div class="sop-section-number">1.0&#160;&#160;PURPOSE</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.purpose"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 2.0 — Scope ══ -->
+                        <t t-if="doc.scope">
+                            <div class="sop-section-number">2.0&#160;&#160;SCOPE</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.scope"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 3.0 — Responsibilities ══ -->
+                        <t t-if="doc.responsibilities">
+                            <div class="sop-section-number">3.0&#160;&#160;RESPONSIBILITIES</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.responsibilities"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 4.0 — Definitions ══ -->
+                        <t t-if="doc.definitions">
+                            <div class="sop-section-number">4.0&#160;&#160;DEFINITIONS</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.definitions"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 5.0 — Procedure ══ -->
+                        <t t-if="doc.procedure">
+                            <div class="sop-section-number">5.0&#160;&#160;PROCEDURE</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.procedure"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 6.0 — Acceptance Criteria ══ -->
+                        <t t-if="doc.acceptance_criteria_html">
+                            <div class="sop-section-number">6.0&#160;&#160;ACCEPTANCE CRITERIA</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.acceptance_criteria_html"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 7.0 — Frequency ══ -->
+                        <t t-if="doc.frequency">
+                            <div class="sop-section-number">7.0&#160;&#160;FREQUENCY</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.frequency"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 8.0 — References ══ -->
+                        <t t-if="doc.references">
+                            <div class="sop-section-number">8.0&#160;&#160;REFERENCES</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.references"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Section 9.0 — Abbreviations ══ -->
+                        <t t-if="doc.abbreviations">
+                            <div class="sop-section-number">9.0&#160;&#160;ABBREVIATIONS</div>
+                            <div class="sop-section-content">
+                                <t t-out="doc.abbreviations"/>
+                            </div>
+                        </t>
+
+                        <!-- ══ Revision History ══ -->
+                        <t t-if="doc.revision_history_ids">
+                            <div class="sop-section-number" style="margin-top: 16px;">REVISION HISTORY</div>
+                            <table class="sop-rev-table">
+                                <tr>
+                                    <th style="width: 12%;">Rev. No.</th>
+                                    <th style="width: 15%;">Date</th>
+                                    <th style="width: 58%;">Changes / Reason for Revision</th>
+                                    <th style="width: 15%;">Changed By</th>
+                                </tr>
+                                <t t-foreach="doc.revision_history_ids.sorted(lambda r: r.revision)" t-as="rev">
+                                    <tr>
+                                        <td style="text-align:center;"><t t-out="rev.revision"/></td>
+                                        <td style="text-align:center;">
+                                            <t t-if="rev.date" t-out="rev.date.strftime('%d/%m/%Y')"/>
+                                        </td>
+                                        <td><t t-out="rev.description or ''"/></td>
+                                        <td><t t-out="rev.changed_by or ''"/></td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+                        <!-- ══ Signature Block ══ -->
+                        <table class="sop-sig-table">
+                            <tr>
+                                <th>Prepared By</th>
+                                <th>Checked By</th>
+                                <th>Approved By</th>
+                            </tr>
+                            <tr>
+                                <td class="sop-sig-cell">
+                                    <t t-out="doc.prepared_by or ''"/>
+                                </td>
+                                <td class="sop-sig-cell">
+                                    <t t-out="doc.checked_by or ''"/>
+                                </td>
+                                <td class="sop-sig-cell">
+                                    <t t-out="doc.approved_by or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sign &amp; Date<br/>
+                                    <t t-if="doc.prepared_by_date" t-out="doc.prepared_by_date.strftime('%d/%m/%Y')"/>
+                                </td>
+                                <td>Sign &amp; Date<br/>
+                                    <t t-if="doc.checked_by_date" t-out="doc.checked_by_date.strftime('%d/%m/%Y')"/>
+                                </td>
+                                <td>Sign &amp; Date<br/>
+                                    <t t-if="doc.approved_by_date" t-out="doc.approved_by_date.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ══ UNCONTROLLED COPY stamp ══ -->
+                        <div class="sop-uncontrolled-wrap">
+                            <span class="sop-uncontrolled">UNCONTROLLED COPY</span>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="view_hvac_ncr_list" model="ir.ui.view">
+        <field name="name">hvac.ncr.list</field>
+        <field name="model">hvac.ncr</field>
+        <field name="arch" type="xml">
+            <list string="Non-Conformance Reports"
+                  decoration-danger="severity == 'critical'"
+                  decoration-warning="severity == 'major'">
+                <field name="name" string="NCR No."/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="test_sheet_id"/>
+                <field name="severity" widget="badge"
+                       decoration-danger="severity == 'critical'"
+                       decoration-warning="severity == 'major'"
+                       decoration-info="severity == 'minor'"/>
+                <field name="raised_by"/>
+                <field name="raised_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'closed'"
+                       decoration-warning="state == 'under_review'"
+                       decoration-danger="state == 'open'"/>
+                <field name="description"/>
+                <button name="action_create_capa" type="object" string="Create CAPA"
+                        invisible="state != 'open'" class="btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hvac_ncr_form" model="ir.ui.view">
+        <field name="name">hvac.ncr.form</field>
+        <field name="model">hvac.ncr</field>
+        <field name="arch" type="xml">
+            <form string="Non-Conformance Report">
+                <header>
+                    <button name="action_create_capa" type="object" string="Create CAPA"
+                            invisible="state != 'open'" class="btn-primary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,under_review,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="job_id"/>
+                            <field name="test_sheet_id"/>
+                            <field name="severity"/>
+                            <field name="raised_by" readonly="1"/>
+                            <field name="raised_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="capa_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Describe the non-conformance in detail..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hvac_ncr" model="ir.actions.act_window">
+        <field name="name">Non-Conformance Reports</field>
+        <field name="res_model">hvac.ncr</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- CAPA -->
+    <record id="view_hvac_capa_form" model="ir.ui.view">
+        <field name="name">hvac.capa.form</field>
+        <field name="model">hvac.capa</field>
+        <field name="arch" type="xml">
+            <form string="CAPA">
+                <header>
+                    <button name="action_close" type="object" string="Close CAPA"
+                            invisible="state == 'verified'" class="btn-success"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,in_progress,verified"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ncr_id" readonly="1"/>
+                            <field name="job_id"/>
+                            <field name="responsible_id"/>
+                            <field name="target_date"/>
+                            <field name="actual_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Root Cause Analysis">
+                            <field name="root_cause" placeholder="5-Why or Fishbone analysis..."/>
+                        </page>
+                        <page string="Corrective Action">
+                            <field name="corrective_action" placeholder="Immediate corrective actions taken..."/>
+                        </page>
+                        <page string="Preventive Action">
+                            <field name="preventive_action" placeholder="Long-term preventive actions to avoid recurrence..."/>
+                        </page>
+                        <page string="Effectiveness Review">
+                            <field name="effectiveness_review" placeholder="Did the action work? Evidence of effectiveness..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hvac_capa" model="ir.actions.act_window">
+        <field name="name">CAPA</field>
+        <field name="res_model">hvac.capa</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</data>
+</odoo>

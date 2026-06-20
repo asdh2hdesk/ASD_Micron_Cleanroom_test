@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_micron_clean_room_area_tree" model="ir.ui.view">
+        <field name="name">micron.clean.room.area.list</field>
+        <field name="model">micron.clean.room.area</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="site_reference"/>
+                <field name="area_grade"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_micron_clean_room_area_form" model="ir.ui.view">
+        <field name="name">micron.clean.room.area.form</field>
+        <field name="model">micron.clean.room.area</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="client_id"/>
+                        <field name="site_reference"/>
+                        <field name="area_grade"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_micron_clean_room_area" model="ir.actions.act_window">
+        <field name="name">Clean Room Areas</field>
+        <field name="res_model">micron.clean.room.area</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_micron_clean_room_area" name="Clean Room Areas" parent="menu_micron_master_data" action="action_micron_clean_room_area" sequence="20"/>
+</odoo>

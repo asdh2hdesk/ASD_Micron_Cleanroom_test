@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<!-- ═══════════════════════════════════════════════════════════
+     VL-001 ANNEXURES — Air Velocity and CFM Measurement
+     Report model: hvac.test.sheet
+     Data source: o.vl001_line_ids (hvac.vl001.line records)
+     All 5 annexures match Micron HVAC scanned form layouts exactly.
+═══════════════════════════════════════════════════════════ -->
+
+<template id="report_vl001_annexures_document">
+<t t-call="web.html_container">
+<t t-foreach="docs" t-as="o">
+
+<style>
+  @page { size: A4 portrait; margin: 8mm 10mm 6mm 10mm; }
+  body { font-family: Arial, sans-serif; font-size: 8.5pt; color: #000; }
+  .pg { width: 100%; box-sizing: border-box; }
+  .pgbrk { page-break-after: always; }
+
+  /* ── Page header ── */
+  .hdr { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+  .hdr td { padding: 0 2px; vertical-align: middle; }
+  .mbox { display: inline-block; border: 2px solid #000; padding: 2px 10px; font-weight: bold; font-size: 9pt; }
+  .mcell { text-align: right; line-height: 1.45; font-size: 8pt; }
+  .mu { font-size: 20pt; font-weight: bold; font-style: italic; font-family: 'Times New Roman', serif; vertical-align: middle; }
+  .subtitle { text-align: center; font-weight: bold; font-size: 8.5pt; }
+  .atitle { text-align: center; font-weight: bold; font-size: 9.5pt; margin: 1px 0 3px 0; }
+
+  /* ── Form table ── */
+  .ft { width: 100%; border-collapse: collapse; }
+  .ft th, .ft td { border: 1px solid #000; padding: 2px 3px; font-size: 7.8pt; vertical-align: middle; }
+  .ft th { font-weight: bold; text-align: center; }
+  .ft td.L { text-align: left; }
+  .ft td.C { text-align: center; }
+  .sec-hdr { font-size: 9pt; font-weight: bold; text-align: center; padding: 3px 4px; }
+  .inst-td { text-align: left; line-height: 1.75; vertical-align: top; }
+  .dr td { height: 17px; }   /* data row */
+  .sr td { height: 55px; }   /* sign row */
+  .ref { text-align: right; font-size: 7pt; border: none !important; }
+
+  /* Result badges inline */
+  .pass { color: #1a7e3f; font-weight: bold; }
+  .fail { color: #c0392b; font-weight: bold; }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Helper: pick flow-hood instrument from test sheet
+     (used for Annexure I, III, IV — velocity+CFM instrument)
+═══════════════════════════════════════════════════════════ -->
+<t t-set="ifh"
+   t-value="o.instrument_used_ids.filtered(lambda i: i.instrument_type == 'flow_hood')"/>
+<t t-set="ifh1" t-value="ifh[0] if ifh else o.env['hvac.instrument']"/>
+
+<t t-set="ian"
+   t-value="o.instrument_used_ids.filtered(lambda i: i.instrument_type == 'anemometer')"/>
+<t t-set="ian1" t-value="ian[0] if ian else o.env['hvac.instrument']"/>
+
+<!-- Grand total CFM across all lines (for Total CFM row) -->
+<t t-set="grand_cfm" t-value="sum(o.vl001_line_ids.mapped('cfm'))"/>
+<t t-set="grand_cmh" t-value="sum(o.vl001_line_ids.mapped('cmh'))"/>
+
+<!-- Minimum displayed rows per annexure -->
+<t t-set="MIN_ROWS" t-value="13"/>
+<t t-set="n_lines" t-value="len(o.vl001_line_ids)"/>
+
+
+<!-- ╔═══════════════════════════════════════════════════════╗ -->
+<!-- ║  ANNEXURE I — Air Velocity and ACPH Raw Data         ║ -->
+<!--   Columns: Room | Filter | V1-V5 | Avg FPM | Size(Ft²) | CFM | Vol(Ft³) | ACPH -->
+<!-- ╚═══════════════════════════════════════════════════════╝ -->
+<div class="pg pgbrk" t-if="o.vl001_subtype == 'both'">
+
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">Air Velocity and ACPH Raw Data</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Rep. SOP No. MHPL/VL/001<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure I</div>
+
+  <table class="ft">
+    <!-- ── Form title ── -->
+    <tr><td colspan="12" class="sec-hdr">Air Velocity &amp; ACPH</td></tr>
+
+    <!-- ── Client / Date ── -->
+    <tr>
+      <td colspan="7" class="L">Client Name: -&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="5" class="L">Date: -&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="12" class="L" style="height:26px">
+        AHU No&#160;&#160;:-&#160;&#160;<t t-esc="o.ahu_tag or ''"/>
+        <br/>&#160;
+      </td>
+    </tr>
+
+    <!-- ── Instrument header ── -->
+    <tr>
+      <th colspan="3">INSTRUMENT USED</th>
+      <th colspan="5">CALIBRATION DATE</th>
+      <th colspan="4">CALIBRATION DUE DATE</th>
+    </tr>
+    <tr style="height:44px">
+      <td colspan="3" class="inst-td">
+        Instrument.&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.name"/></t><br/>
+        Model No.&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.model_no or ''"/></t><br/>
+        Sr. No.&#160;&#160;&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.serial_no or ''"/></t>
+      </td>
+      <td colspan="5" class="C">
+        <t t-if="ifh and ifh1.last_calibration_date">
+          <t t-esc="ifh1.last_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+      <td colspan="4" class="C">
+        <t t-if="ifh and ifh1.next_calibration_date">
+          <t t-esc="ifh1.next_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+    </tr>
+
+    <!-- ── Column headers (rowspan for multi-row header) ── -->
+    <tr>
+      <th rowspan="2" style="width:14%">Room Name<br/>&amp; No.</th>
+      <th rowspan="2" style="width:8%">Filter ID</th>
+      <th colspan="5" style="width:30%">Air Velocity (FPM)</th>
+      <th rowspan="2" style="width:8%">AVG.<br/>Velocity</th>
+      <th rowspan="2" style="width:8%">Filter<br/>Size<br/>(Ft&#178;)</th>
+      <th rowspan="2" style="width:8%">CFM</th>
+      <th rowspan="2" style="width:8%">Room<br/>Vol (Ft&#179;)</th>
+      <th rowspan="2" style="width:8%">ACPH</th>
+    </tr>
+    <tr>
+      <th style="width:6%">1</th><th style="width:6%">2</th>
+      <th style="width:6%">3</th><th style="width:6%">4</th><th style="width:6%">5</th>
+    </tr>
+
+    <!-- ── Data rows from vl001_line_ids ── -->
+    <t t-foreach="o.vl001_line_ids" t-as="line">
+    <tr class="dr">
+      <td class="L"><t t-esc="line.room_name or ''"/></td>
+      <td class="C"><t t-esc="line.filter_id or ''"/></td>
+      <td class="C"><t t-if="line.vel_1"><t t-esc="'%.2f' % line.vel_1"/></t></td>
+      <td class="C"><t t-if="line.vel_2"><t t-esc="'%.2f' % line.vel_2"/></t></td>
+      <td class="C"><t t-if="line.vel_3"><t t-esc="'%.2f' % line.vel_3"/></t></td>
+      <td class="C"><t t-if="line.vel_4"><t t-esc="'%.2f' % line.vel_4"/></t></td>
+      <td class="C"><t t-if="line.vel_5"><t t-esc="'%.2f' % line.vel_5"/></t></td>
+      <td class="C"><t t-if="line.avg_fpm"><t t-esc="'%.2f' % line.avg_fpm"/></t></td>
+      <td class="C"><t t-if="line.filter_size_ft2"><t t-esc="'%.2f' % line.filter_size_ft2"/></t></td>
+      <td class="C"><t t-if="line.cfm"><t t-esc="'%.0f' % line.cfm"/></t></td>
+      <td class="C"><t t-if="line.room_vol_ft3"><t t-esc="'%.0f' % line.room_vol_ft3"/></t></td>
+      <td class="C">
+        <t t-if="line.acph">
+          <t t-esc="'%.1f' % line.acph"/>
+          &#160;<span t-attf-class="#{line.acph_result}">
+            <t t-if="line.acph_result != 'na'">(<t t-esc="line.acph_result.upper()"/>)</t></span>
+        </t>
+      </td>
+    </tr>
+    </t>
+
+    <!-- ── Pad empty rows to minimum height ── -->
+    <t t-if="n_lines &lt; MIN_ROWS">
+      <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
+      <tr class="dr"><td></td><td></td><td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </t>
+    </t>
+
+    <!-- ── Total CFM row ── -->
+    <tr>
+      <td colspan="9" class="C" style="font-weight:bold">Total CFM</td>
+      <td class="C" style="font-weight:bold">
+        <t t-if="grand_cfm"><t t-esc="'%.0f' % grand_cfm"/></t>
+      </td>
+      <td></td><td></td>
+    </tr>
+
+    <!-- ── Result ── -->
+    <tr>
+      <td colspan="12" class="L">
+        Result: - Meets / Does Not meet validation Acceptance Criteria As per Client Requirement.
+      </td>
+    </tr>
+
+    <!-- ── Sign ── -->
+    <tr>
+      <th colspan="6" style="text-align:center">Performed By</th>
+      <th colspan="6" style="text-align:center">Checked By</th>
+    </tr>
+    <tr class="sr"><td colspan="6"></td><td colspan="6"></td></tr>
+    <tr>
+      <td colspan="6" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="6" style="text-align:center">Sign &amp; Date</td>
+    </tr>
+  </table>
+
+</div><!-- end Annexure I -->
+
+
+<!-- ╔═══════════════════════════════════════════════════════╗ -->
+<!-- ║  ANNEXURE II — Air Velocity (5-point per filter)    ║ -->
+<!--   Columns: Equipment | Filter | V1-V5 | Avg FPM/ms | Remark -->
+<!-- ╚═══════════════════════════════════════════════════════╝ -->
+<div class="pg pgbrk" t-if="o.vl001_subtype in ('both', 'velocity')">
+
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">Air Velocity</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Rep. SOP No. MHPL/VL/001<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure II</div>
+
+  <table class="ft">
+    <tr><td colspan="9" class="sec-hdr">Air Velocity</td></tr>
+
+    <tr>
+      <td colspan="5" class="L">Client Name&#160;:-&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="4" class="L">Date:-&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="9" class="L" style="height:26px">
+        Room Name &amp; No.&#160;:-&#160;<t t-esc="o.vl001_line_ids[0].room_name if o.vl001_line_ids else ''"/>
+        <br/>&#160;
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">INSTRUMENT USED</th>
+      <th colspan="4">CALIBRATION DATE</th>
+      <th colspan="3">CALIBRATION DUE DATE</th>
+    </tr>
+    <tr style="height:44px">
+      <td colspan="2" class="inst-td">
+        Instrument.&#160;:-&#160;<t t-if="ian"><t t-esc="ian1.name"/></t><br/>
+        Model No.&#160;&#160;:-&#160;<t t-if="ian"><t t-esc="ian1.model_no or ''"/></t><br/>
+        Sr. No.&#160;&#160;&#160;&#160;:-&#160;<t t-if="ian"><t t-esc="ian1.serial_no or ''"/></t>
+      </td>
+      <td colspan="4" class="C">
+        <t t-if="ian and ian1.last_calibration_date">
+          <t t-esc="ian1.last_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+      <td colspan="3" class="C">
+        <t t-if="ian and ian1.next_calibration_date">
+          <t t-esc="ian1.next_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+    </tr>
+
+    <!-- Column headers -->
+    <tr>
+      <th rowspan="2" style="width:20%">Equipment Name &amp; No.</th>
+      <th rowspan="2" style="width:10%">Filter ID</th>
+      <th colspan="5">Air Velocity (FPM / m/s)</th>
+      <th rowspan="2" style="width:12%">AVG.<br/>Velocity<br/>(FPM / m/s)</th>
+      <th rowspan="2" style="width:12%">Remark</th>
+    </tr>
+    <tr>
+      <th style="width:7%">1</th><th style="width:7%">2</th>
+      <th style="width:7%">3</th><th style="width:7%">4</th><th style="width:7%">5</th>
+    </tr>
+
+    <!-- Data rows -->
+    <t t-foreach="o.vl001_line_ids" t-as="line">
+    <tr class="dr">
+      <td class="L"><t t-esc="(line.equipment_name or line.room_name) or ''"/></td>
+      <td class="C"><t t-esc="line.filter_id or ''"/></td>
+      <td class="C"><t t-if="line.vel_1"><t t-esc="'%.2f' % line.vel_1"/></t></td>
+      <td class="C"><t t-if="line.vel_2"><t t-esc="'%.2f' % line.vel_2"/></t></td>
+      <td class="C"><t t-if="line.vel_3"><t t-esc="'%.2f' % line.vel_3"/></t></td>
+      <td class="C"><t t-if="line.vel_4"><t t-esc="'%.2f' % line.vel_4"/></t></td>
+      <td class="C"><t t-if="line.vel_5"><t t-esc="'%.2f' % line.vel_5"/></t></td>
+      <td class="C">
+        <t t-if="line.avg_fpm">
+          <t t-esc="'%.2f' % line.avg_fpm"/> /
+          <t t-esc="'%.3f' % line.avg_ms"/>
+          &#160;<span t-attf-class="#{line.vel_result}">
+            <t t-if="line.vel_result != 'na'">(<t t-esc="line.vel_result.upper()"/>)</t></span>
+        </t>
+      </td>
+      <td class="L"><t t-esc="line.remark or ''"/></td>
+    </tr>
+    </t>
+
+    <!-- Pad -->
+    <t t-if="n_lines &lt; MIN_ROWS">
+      <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
+      <tr class="dr">
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      </t>
+    </t>
+
+    <tr>
+      <td colspan="9" class="L">
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per Client Requirement.
+      </td>
+    </tr>
+    <tr>
+      <th colspan="4" style="text-align:center">Performed By</th>
+      <th colspan="5" style="text-align:center">Checked by</th>
+    </tr>
+    <tr class="sr"><td colspan="4"></td><td colspan="5"></td></tr>
+    <tr>
+      <td colspan="4" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="5" style="text-align:center">Sign &amp; Date</td>
+    </tr>
+    <tr><td colspan="9" class="ref">F/VL/001/02-02</td></tr>
+  </table>
+
+</div><!-- end Annexure II -->
+
+
+<!-- ╔═══════════════════════════════════════════════════════╗ -->
+<!-- ║  ANNEXURE III — CFM Measurement and ACPH            ║ -->
+<!--   Columns: Room | Filter | CFM | Total CFM | Room Vol (Ft³) | ACPH -->
+<!-- ╚═══════════════════════════════════════════════════════╝ -->
+<div class="pg pgbrk" t-if="o.vl001_subtype in ('both', 'cfm')">
+
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">CFM Measurement &amp; ACPH</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Rep. SOP No. MHPL/VL/001<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure III</div>
+
+  <table class="ft">
+    <tr><td colspan="6" class="sec-hdr">CFM MEASUREMENT &amp; ACPH</td></tr>
+
+    <tr>
+      <td colspan="3" class="L">Client Name&#160;&#160;:-&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="3" class="L">Date:&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6" class="L" style="height:26px">
+        AHU &amp; No.&#160;&#160;:-&#160;<t t-esc="o.ahu_tag or ''"/>
+        <br/>&#160;
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">INSTRUMENT USED</th>
+      <th colspan="2">CALIBRATION DATE</th>
+      <th colspan="2">CALIBRATION DUE DATE</th>
+    </tr>
+    <tr style="height:44px">
+      <td colspan="2" class="inst-td">
+        Instrument.&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.name"/></t><br/>
+        Model No.&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.model_no or ''"/></t><br/>
+        Sr. No.&#160;&#160;&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.serial_no or ''"/></t>
+      </td>
+      <td colspan="2" class="C">
+        <t t-if="ifh and ifh1.last_calibration_date">
+          <t t-esc="ifh1.last_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+      <td colspan="2" class="C">
+        <t t-if="ifh and ifh1.next_calibration_date">
+          <t t-esc="ifh1.next_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+    </tr>
+
+    <tr>
+      <th style="width:28%">Room Name &amp; No.</th>
+      <th style="width:16%">Filter ID</th>
+      <th style="width:14%">CFM</th>
+      <th style="width:14%">Total CFM<br/>(Room)</th>
+      <th style="width:14%">Room Vol.<br/>(Ft&#179;)</th>
+      <th style="width:14%">ACPH</th>
+    </tr>
+
+    <!-- Data rows — CFM-focused view -->
+    <t t-foreach="o.vl001_line_ids" t-as="line">
+    <tr class="dr">
+      <td class="L"><t t-esc="line.room_name or ''"/></td>
+      <td class="C"><t t-esc="line.filter_id or ''"/></td>
+      <td class="C"><t t-if="line.cfm"><t t-esc="'%.0f' % line.cfm"/></t></td>
+      <td class="C">
+        <t t-if="line.total_room_cfm"><t t-esc="'%.0f' % line.total_room_cfm"/></t>
+      </td>
+      <td class="C"><t t-if="line.room_vol_ft3"><t t-esc="'%.0f' % line.room_vol_ft3"/></t></td>
+      <td class="C">
+        <t t-if="line.acph">
+          <t t-esc="'%.1f' % line.acph"/>&#160;
+          <span t-attf-class="#{line.acph_result}">
+            <t t-if="line.acph_result != 'na'">(<t t-esc="line.acph_result.upper()"/>)</t></span>
+        </t>
+      </td>
+    </tr>
+    </t>
+
+    <!-- Pad -->
+    <t t-if="n_lines &lt; MIN_ROWS">
+      <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
+      <tr class="dr"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </t>
+    </t>
+
+    <tr>
+      <td colspan="6" class="L">
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per Client Requirement.
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3" style="text-align:center">Performed By</th>
+      <th colspan="3" style="text-align:center">Checked By</th>
+    </tr>
+    <tr class="sr"><td colspan="3"></td><td colspan="3"></td></tr>
+    <tr>
+      <td colspan="3" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="3" style="text-align:center">Sign &amp; Date</td>
+    </tr>
+    <tr><td colspan="6" class="ref">F/VL/001/03-02</td></tr>
+  </table>
+
+</div><!-- end Annexure III -->
+
+
+<!-- ╔═══════════════════════════════════════════════════════╗ -->
+<!-- ║  ANNEXURE IV — CFM/CMH Measurement and ACPH (SI)    ║ -->
+<!--   Columns: Room | Filter | CFM | CMH(×1.7) | Total CMH | Room Vol (m³) | ACPH -->
+<!-- ╚═══════════════════════════════════════════════════════╝ -->
+<div class="pg pgbrk" t-if="o.vl001_subtype in ('both', 'cfm')">
+
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">CFM/ CMH Measurement &amp; ACPH</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Rep. SOP No. MHPL/VL/001<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure IV</div>
+
+  <table class="ft">
+    <tr><td colspan="7" class="sec-hdr">CFM/ CMH MEASUREMENT &amp; ACPH</td></tr>
+
+    <tr>
+      <td colspan="4" class="L">Client Name&#160;&#160;:-&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="3" class="L">Date: -&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="7" class="L" style="height:26px">
+        AHU &amp; No.&#160;&#160;:-&#160;<t t-esc="o.ahu_tag or ''"/>
+        <br/>&#160;
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">INSTRUMENT USED</th>
+      <th colspan="3">CALIBRATION DATE</th>
+      <th colspan="2">CALIBRATION DUE DATE</th>
+    </tr>
+    <tr style="height:44px">
+      <td colspan="2" class="inst-td">
+        Instrument.&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.name"/></t><br/>
+        Model No.&#160;&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.model_no or ''"/></t><br/>
+        Sr.No.&#160;&#160;&#160;&#160;&#160;&#160;:-&#160;<t t-if="ifh"><t t-esc="ifh1.serial_no or ''"/></t>
+      </td>
+      <td colspan="3" class="C">
+        <t t-if="ifh and ifh1.last_calibration_date">
+          <t t-esc="ifh1.last_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+      <td colspan="2" class="C">
+        <t t-if="ifh and ifh1.next_calibration_date">
+          <t t-esc="ifh1.next_calibration_date.strftime('%d/%m/%Y')"/>
+        </t>
+      </td>
+    </tr>
+
+    <tr>
+      <th style="width:20%">Room Name &amp; No.</th>
+      <th style="width:13%">Filter ID</th>
+      <th style="width:12%">CFM</th>
+      <th style="width:15%">CMH<br/>(CFM&#215;1.7)</th>
+      <th style="width:13%">Total CMH<br/>(Room)</th>
+      <th style="width:14%">Room Vol.<br/>(m&#179;)</th>
+      <th style="width:13%">ACPH</th>
+    </tr>
+
+    <!-- Data rows — SI units view -->
+    <t t-foreach="o.vl001_line_ids" t-as="line">
+    <t t-set="total_room_cmh"
+       t-value="sum(o.vl001_line_ids.filtered(lambda l: l.room_name == line.room_name).mapped('cmh'))"/>
+    <t t-set="room_acph_m3"
+       t-value="round(total_room_cmh / line.room_vol_m3, 1) if line.room_vol_m3 else 0"/>
+    <tr class="dr">
+      <td class="L"><t t-esc="line.room_name or ''"/></td>
+      <td class="C"><t t-esc="line.filter_id or ''"/></td>
+      <td class="C"><t t-if="line.cfm"><t t-esc="'%.0f' % line.cfm"/></t></td>
+      <td class="C"><t t-if="line.cmh"><t t-esc="'%.0f' % line.cmh"/></t></td>
+      <td class="C"><t t-if="total_room_cmh"><t t-esc="'%.0f' % total_room_cmh"/></t></td>
+      <td class="C"><t t-if="line.room_vol_m3"><t t-esc="'%.2f' % line.room_vol_m3"/></t></td>
+      <td class="C">
+        <t t-if="room_acph_m3"><t t-esc="'%.1f' % room_acph_m3"/></t>
+      </td>
+    </tr>
+    </t>
+
+    <!-- Pad -->
+    <t t-if="n_lines &lt; MIN_ROWS">
+      <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
+      <tr class="dr"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </t>
+    </t>
+
+    <tr>
+      <td colspan="7" class="L">
+        Result: - Meets / Does Not meet validation Acceptance Criteria As per Client Requirement.
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3" style="text-align:center">Performed By</th>
+      <th colspan="4" style="text-align:center">Checked By</th>
+    </tr>
+    <tr class="sr"><td colspan="3"></td><td colspan="4"></td></tr>
+    <tr>
+      <td colspan="3" style="text-align:center">Sign &amp; Date</td>
+      <td colspan="4" style="text-align:center">Sign &amp; Date</td>
+    </tr>
+    <tr><td colspan="7" class="ref">F/VL/001/04-02</td></tr>
+  </table>
+
+</div><!-- end Annexure IV -->
+
+
+<!-- ╔═══════════════════════════════════════════════════════╗ -->
+<!-- ║  ANNEXURE V — Room Layout Sketch / Summary Sheet    ║ -->
+<!--   AHU info + large blank area for room sketch / notes  -->
+<!-- ╚═══════════════════════════════════════════════════════╝ -->
+<div class="pg">
+
+  <table class="hdr">
+    <tr>
+      <td width="27%"><span class="mbox">MASTER COPY</span></td>
+      <td width="46%" class="subtitle">Air Velocity and CFM Measurement</td>
+      <td width="27%" class="mcell">
+        <span class="mu">&#956;</span> <strong>MICRON</strong><br/>
+        Ref. SOP. No. MHPL/VL/001<br/>
+        Page 1 of 1
+      </td>
+    </tr>
+  </table>
+  <div class="atitle">Annexure V</div>
+
+  <table class="ft">
+    <tr><td colspan="2" class="sec-hdr">Air Velocity and CFM Measurement</td></tr>
+    <tr>
+      <td class="L" style="width:50%">AHU NO.:&#160;&#160;<t t-esc="o.ahu_tag or ''"/></td>
+      <td class="L" style="width:50%">Date:&#160;&#160;
+        <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
+      </td>
+    </tr>
+    <tr>
+      <td class="L">Room/Equipment Name:&#160;&#160;
+        <t t-esc="o.vl001_line_ids[0].room_name if o.vl001_line_ids else ''"/>
+      </td>
+      <td class="L">Room/Equipment No:&#160;&#160;<t t-esc="o.ahu_tag or ''"/></td>
+    </tr>
+    <!-- Large blank area — remarks / room sketch / test point map -->
+    <tr>
+      <td colspan="2" style="height:185mm; vertical-align:top; padding:8px;">
+        <t t-if="o.remarks">
+          <strong>Observations / Notes:</strong><br/>
+          <t t-esc="o.remarks"/>
+        </t>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align:center">Performed by</th>
+      <th style="text-align:center">Checked by</th>
+    </tr>
+    <tr class="sr"><td></td><td></td></tr>
+    <tr>
+      <td style="text-align:center">Sign &amp; Date</td>
+      <td style="text-align:center">Sign &amp; Date</td>
+    </tr>
+    <tr><td colspan="2" class="ref">F/VL/001/05-01</td></tr>
+  </table>
+
+</div><!-- end Annexure V -->
+
+</t><!-- end t-foreach docs -->
+</t><!-- end html_container -->
+</template>
+
+</data>
+</odoo>

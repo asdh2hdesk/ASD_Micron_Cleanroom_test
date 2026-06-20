@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ═══ SOP Master ═══ -->
+    <record id="view_hvac_sop_list" model="ir.ui.view">
+        <field name="name">hvac.sop.list</field>
+        <field name="model">hvac.sop</field>
+        <field name="arch" type="xml">
+            <list string="SOP Library" decoration-muted="active_revision_id == False">
+                <field name="code" string="SOP Code"/>
+                <field name="name" string="Title"/>
+                <field name="category"/>
+                <field name="active_revision_id" string="Active Rev."/>
+                <field name="revision_count" string="# Revisions"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hvac_sop_form" model="ir.ui.view">
+        <field name="name">hvac.sop.form</field>
+        <field name="model">hvac.sop</field>
+        <field name="arch" type="xml">
+            <form string="Standard Operating Procedure">
+                <header>
+                    <button name="action_new_revision" type="object" string="New Revision"
+                            class="btn-primary" icon="fa-plus"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_revisions" type="object" class="oe_stat_button" icon="fa-history">
+                            <field name="revision_count" widget="statinfo" string="Revisions"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" string="SOP Code"/>
+                            <field name="name" string="Title"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active_revision_id" string="Current Active Revision" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Scope &amp; Purpose">
+                            <group>
+                                <field name="scope" nolabel="1" placeholder="Define the scope and applicability of this SOP..."/>
+                            </group>
+                            <separator string="Purpose"/>
+                            <group>
+                                <field name="purpose" nolabel="1" placeholder="State the objective of this procedure..."/>
+                            </group>
+                        </page>
+                        <page string="Revisions">
+                            <field name="revision_ids" readonly="1">
+                                <list string="Revisions">
+                                    <field name="version_label"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'approved'"
+                                           decoration-warning="state == 'review'"
+                                           decoration-muted="state == 'obsolete'"/>
+                                    <field name="effective_date"/>
+                                    <field name="approved_by"/>
+                                    <field name="change_summary"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hvac_sop_search" model="ir.ui.view">
+        <field name="name">hvac.sop.search</field>
+        <field name="model">hvac.sop</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <group expand="0" string="Group By">
+                    <filter name="by_category" string="Category" context="{'group_by':'category'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hvac_sop" model="ir.actions.act_window">
+        <field name="name">SOP Library</field>
+        <field name="res_model">hvac.sop</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first SOP</p>
+            <p>Define Standard Operating Procedures with version control and approval workflow.</p>
+        </field>
+    </record>
+
+    <!-- ═══ SOP Revision ═══ -->
+    <record id="view_hvac_sop_revision_form" model="ir.ui.view">
+        <field name="name">hvac.sop.revision.form</field>
+        <field name="model">hvac.sop.revision</field>
+        <field name="arch" type="xml">
+            <form string="SOP Revision">
+                <header>
+                    <button name="action_submit_review" type="object" string="Submit for Review"
+                            invisible="state not in ('draft',)" class="btn-primary"/>
+                    <button name="action_approve" type="object" string="Approve"
+                            invisible="state != 'review'" class="btn-success"
+                            groups="base.group_system"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('review',)"/>
+                    <button name="action_obsolete" type="object" string="Mark Obsolete"
+                            invisible="state not in ('approved',)" confirm="Mark this revision as obsolete?"/>
+                    <button name="action_print_sop" type="object" string="Print SOP Template"
+                            invisible="state != 'approved'" class="btn-secondary" icon="fa-print"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,review,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="sop_code" readonly="1" class="text-muted" style="font-size:14px"/>
+                            — <field name="version_label" placeholder="Rev 1.0"/>
+                        </h1>
+                        <h2><field name="sop_name" readonly="1"/></h2>
+                    </div>
+                    <group>
+                        <group string="Revision Info">
+                            <field name="sop_id" readonly="1"/>
+                            <field name="revision_no"/>
+                            <field name="effective_date"/>
+                            <field name="next_review_date"/>
+                        </group>
+                        <group string="Approval">
+                            <field name="reviewed_by"/>
+                            <field name="reviewed_date"/>
+                            <field name="approved_by" readonly="1"/>
+                            <field name="approved_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="change_summary" placeholder="Describe changes from previous revision..."/>
+                    </group>
+                    <notebook>
+                        <page string="Test Parameters" name="parameters">
+                            <div class="alert alert-info" role="alert" invisible="state == 'approved'">
+                                <strong>Define acceptance criteria below.</strong>
+                                These parameters will be copied to every test certificate generated using this SOP revision.
+                            </div>
+                            <field name="parameter_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="parameter_code" string="Code"/>
+                                    <field name="name" string="Parameter"/>
+                                    <field name="unit"/>
+                                    <field name="nominal_value" string="Nominal"/>
+                                    <field name="min_value" string="Min"/>
+                                    <field name="max_value" string="Max"/>
+                                    <field name="tolerance"/>
+                                    <field name="test_method" string="Method / Standard"/>
+                                    <field name="instrument_type" string="Instrument"/>
+                                    <field name="is_mandatory" string="Mandatory"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Procedure Steps" name="steps">
+                            <field name="step_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" string="Step Title"/>
+                                    <field name="responsible"/>
+                                    <field name="estimated_time" string="Est. (min)"/>
+                                    <field name="description" string="Instructions" optional="show"/>
+                                    <field name="warning" string="Warning" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Required Instruments" name="instruments">
+                            <field name="required_instrument_ids">
+                                <list>
+                                    <field name="asset_code"/>
+                                    <field name="name"/>
+                                    <field name="instrument_type"/>
+                                    <field name="make"/>
+                                    <field name="model_no"/>
+                                    <field name="range_description" string="Range"/>
+                                    <field name="accuracy_class" string="Accuracy"/>
+                                    <field name="calibration_status" widget="badge"
+                                           decoration-success="calibration_status == 'valid'"
+                                           decoration-warning="calibration_status == 'due_soon'"
+                                           decoration-danger="calibration_status in ('overdue','not_calibrated')"/>
+                                    <field name="next_calibration_date" string="Cal. Due"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Safety &amp; References" name="safety">
+                            <group>
+                                <group string="PPE Requirements">
+                                    <field name="ppe_requirements" nolabel="1"/>
+                                </group>
+                                <group string="Safety Precautions">
+                                    <field name="safety_precautions" nolabel="1"/>
+                                </group>
+                            </group>
+                            <separator string="References / Standards"/>
+                            <field name="references" nolabel="1"/>
+                        </page>
+                        <page string="Document" name="document">
+                            <group>
+                                <field name="document" filename="document_name" widget="binary"/>
+                                <field name="document_name" invisible="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hvac_sop_revision_list" model="ir.ui.view">
+        <field name="name">hvac.sop.revision.list</field>
+        <field name="model">hvac.sop.revision</field>
+        <field name="arch" type="xml">
+            <list string="SOP Revisions"
+                  decoration-success="state == 'approved'"
+                  decoration-warning="state == 'review'"
+                  decoration-muted="state == 'obsolete'">
+                <field name="sop_code" string="SOP Code"/>
+                <field name="sop_name" string="SOP Title"/>
+                <field name="version_label" string="Version"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'review'"
+                       decoration-muted="state == 'obsolete'"/>
+                <field name="effective_date"/>
+                <field name="approved_by"/>
+                <field name="next_review_date"/>
+                <button name="action_print_sop" type="object" string="Print SOP" icon="fa-print"
+                        invisible="state != 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hvac_sop_revision" model="ir.actions.act_window">
+        <field name="name">SOP Revisions</field>
+        <field name="res_model">hvac.sop.revision</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state','!=','obsolete')]</field>
+    </record>
+
+</data>
+</odoo>

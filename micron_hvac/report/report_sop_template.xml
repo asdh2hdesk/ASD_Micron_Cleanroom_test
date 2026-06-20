@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<template id="report_sop_template_document">
+<t t-call="web.html_container">
+<t t-foreach="docs" t-as="doc">
+<t t-call="web.external_layout">
+
+<div class="page">
+<style>
+  /* ─── Micron HVAC SOP Template — Common Styles ─── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+  /* Document header */
+  .doc-header { display: table; width: 100%; border: 2px solid #1B4F72; margin-bottom: 0; }
+  .dh-logo-cell { display: table-cell; width: 22%; padding: 8px 12px; border-right: 2px solid #1B4F72; vertical-align: middle; }
+  .dh-title-cell { display: table-cell; vertical-align: middle; padding: 6px 12px; }
+  .dh-meta-cell { display: table-cell; width: 30%; border-left: 2px solid #1B4F72; vertical-align: top; }
+  .company-name { font-size: 13pt; font-weight: bold; color: #1B4F72; line-height: 1.2; }
+  .company-sub { font-size: 8pt; color: #555; }
+  .doc-type-label { font-size: 8pt; color: #1B4F72; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .doc-main-title { font-size: 12pt; font-weight: bold; color: #1a1a1a; line-height: 1.3; }
+
+  /* Meta table inside header */
+  .meta-table { width: 100%; border-collapse: collapse; height: 100%; }
+  .meta-table td { border-bottom: 1px solid #1B4F72; padding: 4px 8px; font-size: 8pt; }
+  .meta-table td:first-child { background: #EAF2F8; font-weight: bold; color: #1B4F72; white-space: nowrap; }
+  .meta-table tr:last-child td { border-bottom: none; }
+
+  /* Section headers */
+  .section-header { background: #1B4F72; color: #fff; font-weight: bold; font-size: 9pt;
+                    padding: 5px 10px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-body { border: 1px solid #BDC3C7; border-top: none; padding: 8px 10px; margin-bottom: 0; }
+
+  /* Standard tables */
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  table.data-table th { background: #2E86C1; color: #fff; padding: 5px 7px; text-align: center;
+                        border: 1px solid #1B4F72; font-weight: bold; }
+  table.data-table td { padding: 4px 7px; border: 1px solid #BDC3C7; vertical-align: top; }
+  table.data-table tr:nth-child(even) td { background: #F2F9FF; }
+  .col-seq   { width: 4%; text-align: center; }
+  .col-code  { width: 7%; text-align: center; }
+  .col-param { width: 22%; }
+  .col-unit  { width: 8%; text-align: center; }
+  .col-val   { width: 9%; text-align: center; }
+  .col-tol   { width: 12%; text-align: center; }
+  .col-method { width: 18%; }
+  .col-inst  { width: 12%; }
+
+  /* Procedure steps */
+  .step-block { margin-bottom: 6px; border: 1px solid #D5D8DC; }
+  .step-header { background: #EAF2F8; padding: 5px 10px; display: table; width: 100%; }
+  .step-no { display: table-cell; width: 60px; font-weight: bold; color: #1B4F72; font-size: 9pt; }
+  .step-title { display: table-cell; font-weight: bold; font-size: 9pt; color: #1a1a1a; }
+  .step-meta { display: table-cell; text-align: right; font-size: 8pt; color: #666; width: 120px; }
+  .step-body { padding: 6px 10px; font-size: 8.5pt; line-height: 1.6; white-space: pre-line; }
+  .step-warning { background: #FEF9E7; border-top: 1px solid #F0B429; padding: 4px 10px;
+                  font-size: 8pt; color: #7D6608; font-style: italic; }
+
+  /* Approval block */
+  .approval-table { width: 100%; border-collapse: collapse; margin-top: 2px; }
+  .approval-table th { background: #1B4F72; color: #fff; padding: 5px 8px; font-size: 8.5pt; border: 1px solid #1B4F72; }
+  .approval-table td { border: 1px solid #BDC3C7; padding: 8px; font-size: 8pt; vertical-align: top; }
+  .approval-table .sign-row td { height: 40px; }
+  .approval-label { font-weight: bold; color: #1B4F72; font-size: 8pt; }
+
+  /* Misc */
+  .text-center { text-align: center; }
+  .text-bold { font-weight: bold; }
+  .text-blue { color: #1B4F72; }
+  .mand-star { color: #C0392B; font-weight: bold; }
+  .note-box { background: #FEF9E7; border: 1px solid #F0B429; padding: 6px 10px; font-size: 8pt;
+              margin-top: 6px; color: #7D6608; }
+</style>
+
+<!-- ════════════════════════════════════════════════════
+     DOCUMENT HEADER
+════════════════════════════════════════════════════ -->
+<div class="doc-header">
+  <div class="dh-logo-cell">
+    <div class="company-name">
+      <t t-esc="doc.company_id.name or 'MICRON HVAC SYSTEMS'"/>
+    </div>
+    <div class="company-sub">HVAC Testing, Commissioning &amp; Balancing</div>
+    <div class="company-sub" style="margin-top:4px; font-size:7.5pt; color:#888;">
+      <t t-esc="doc.company_id.street or ''"/>
+      <t t-if="doc.company_id.city"> | <t t-esc="doc.company_id.city"/></t>
+    </div>
+  </div>
+  <div class="dh-title-cell">
+    <div class="doc-type-label">Standard Operating Procedure (SOP)</div>
+    <div class="doc-main-title"><t t-esc="doc.sop_id.name"/></div>
+  </div>
+  <div class="dh-meta-cell">
+    <table class="meta-table">
+      <tr><td>SOP Code</td><td><strong><t t-esc="doc.sop_code"/></strong></td></tr>
+      <tr><td>Revision</td><td><strong><t t-esc="doc.version_label"/></strong></td></tr>
+      <tr><td>Effective Date</td><td><t t-esc="doc.effective_date or '—'"/></td></tr>
+      <tr><td>Next Review</td><td><t t-esc="doc.next_review_date or '—'"/></td></tr>
+      <tr><td>Category</td><td><t t-esc="dict(doc._fields['sop_category']._description_selection(doc.env)).get(doc.sop_category,'')"/></td></tr>
+      <tr><td>Status</td><td><strong style="color:#1e8449;"><t t-esc="doc.state.upper()"/></strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     1. SCOPE &amp; PURPOSE
+════════════════════════════════════════════════════ -->
+<div class="section-header">1. Scope &amp; Purpose</div>
+<div class="section-body">
+  <table style="width:100%;border-collapse:collapse;">
+    <tr>
+      <td style="width:50%;padding:0 6px 0 0;vertical-align:top;">
+        <div class="text-bold" style="color:#1B4F72;margin-bottom:3px;">SCOPE</div>
+        <div style="font-size:8.5pt;line-height:1.5;"><t t-esc="doc.sop_id.scope or '—'"/></div>
+      </td>
+      <td style="width:50%;padding:0 0 0 6px;border-left:1px solid #D5D8DC;padding-left:10px;vertical-align:top;">
+        <div class="text-bold" style="color:#1B4F72;margin-bottom:3px;">PURPOSE</div>
+        <div style="font-size:8.5pt;line-height:1.5;"><t t-esc="doc.sop_id.purpose or '—'"/></div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     2. REFERENCES / STANDARDS
+════════════════════════════════════════════════════ -->
+<t t-if="doc.references">
+<div class="section-header">2. References &amp; Standards</div>
+<div class="section-body" style="white-space:pre-line;font-size:8.5pt;line-height:1.6;">
+  <t t-esc="doc.references"/>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     3. PPE &amp; SAFETY
+════════════════════════════════════════════════════ -->
+<div class="section-header">3. PPE Requirements &amp; Safety Precautions</div>
+<div class="section-body">
+  <table style="width:100%;border-collapse:collapse;">
+    <tr>
+      <td style="width:40%;vertical-align:top;padding-right:8px;">
+        <div class="text-bold" style="color:#C0392B;margin-bottom:3px;">▲ Personal Protective Equipment</div>
+        <div style="font-size:8.5pt;line-height:1.6;white-space:pre-line;"><t t-esc="doc.ppe_requirements or '—'"/></div>
+      </td>
+      <td style="width:60%;vertical-align:top;border-left:1px solid #D5D8DC;padding-left:10px;">
+        <div class="text-bold" style="color:#C0392B;margin-bottom:3px;">⚠ Safety Precautions (Must Read Before Work)</div>
+        <div style="font-size:8.5pt;line-height:1.6;white-space:pre-line;"><t t-esc="doc.safety_precautions or '—'"/></div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     4. REQUIRED INSTRUMENTS
+════════════════════════════════════════════════════ -->
+<t t-if="doc.required_instrument_ids">
+<div class="section-header">4. Required Instruments &amp; Calibration Requirements</div>
+<div class="section-body" style="padding:0;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th class="col-seq">#</th>
+        <th>Asset Code</th>
+        <th>Instrument Name</th>
+        <th>Make / Model</th>
+        <th>Measurement Range</th>
+        <th>Accuracy Class</th>
+        <th>Cal. Interval</th>
+        <th>Cal. Requirement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <t t-foreach="doc.required_instrument_ids" t-as="ins">
+        <tr>
+          <td class="col-seq text-center"><t t-esc="ins_index + 1"/></td>
+          <td><t t-esc="ins.asset_code"/></td>
+          <td class="text-bold"><t t-esc="ins.name"/></td>
+          <td><t t-esc="(ins.make or '') + ' ' + (ins.model_no or '')"/></td>
+          <td><t t-esc="ins.range_description or '—'"/></td>
+          <td><t t-esc="ins.accuracy_class or '—'"/></td>
+          <td class="text-center"><t t-esc="str(ins.calibration_interval) + ' days'"/></td>
+          <td>NABL Accredited Lab<br/>Certificate with traceability</td>
+        </tr>
+      </t>
+    </tbody>
+  </table>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     5. ACCEPTANCE CRITERIA / TEST PARAMETERS
+         *** THIS TABLE IS THE MIRROR OF THE TEST CERTIFICATE ***
+════════════════════════════════════════════════════ -->
+<t t-if="doc.parameter_ids">
+<div class="section-header">5. Acceptance Criteria — Test Parameters</div>
+<div class="section-body" style="padding:0;">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th class="col-seq">#</th>
+        <th class="col-code">Code</th>
+        <th class="col-param" style="text-align:left;">Parameter Name</th>
+        <th class="col-unit">Unit</th>
+        <th class="col-val">Nominal / Design</th>
+        <th class="col-val">Min. Acceptable</th>
+        <th class="col-val">Max. Acceptable</th>
+        <th class="col-tol">Tolerance</th>
+        <th class="col-method" style="text-align:left;">Test Method / Standard</th>
+        <th class="col-inst" style="text-align:left;">Instrument Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <t t-foreach="doc.parameter_ids.sorted('sequence')" t-as="param">
+        <tr>
+          <td class="col-seq text-center"><t t-esc="param_index + 1"/></td>
+          <td class="col-code text-center text-bold"><t t-esc="param.parameter_code or '—'"/></td>
+          <td class="col-param">
+            <t t-esc="param.name"/>
+            <t t-if="param.is_mandatory"> <span class="mand-star">*</span></t>
+          </td>
+          <td class="col-unit text-center"><t t-esc="param.unit"/></td>
+          <td class="col-val text-center">
+            <t t-if="param.nominal_value"><t t-esc="'%.2f' % param.nominal_value"/></t>
+            <t t-else="">—</t>
+          </td>
+          <td class="col-val text-center" style="color:#1e8449;font-weight:bold;">
+            <t t-if="param.min_value"><t t-esc="'%.2f' % param.min_value"/></t>
+            <t t-else="">—</t>
+          </td>
+          <td class="col-val text-center" style="color:#c0392b;font-weight:bold;">
+            <t t-if="param.max_value"><t t-esc="'%.2f' % param.max_value"/></t>
+            <t t-else="">—</t>
+          </td>
+          <td class="col-tol text-center" style="font-size:7.5pt;">
+            <t t-esc="param.tolerance or '—'"/>
+          </td>
+          <td class="col-method" style="font-size:8pt;">
+            <t t-esc="param.test_method or '—'"/>
+          </td>
+          <td class="col-inst" style="font-size:8pt;">
+            <t t-esc="dict(param._fields['instrument_type']._description_selection(param.env)).get(param.instrument_type,'') or '—'"/>
+          </td>
+        </tr>
+      </t>
+    </tbody>
+  </table>
+  <div class="note-box">
+    <strong>* Mandatory Parameter</strong> — All mandatory parameters must achieve PASS for overall job result to be PASS.
+    Measurements performed per the referenced standard. Instruments must be within valid calibration period at time of test.
+  </div>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     6. TEST PROCEDURE — STEP BY STEP
+════════════════════════════════════════════════════ -->
+<t t-if="doc.step_ids">
+<div class="section-header">6. Test Procedure — Step-by-Step Instructions</div>
+<div class="section-body" style="padding:6px 8px;">
+  <t t-foreach="doc.step_ids.sorted('sequence')" t-as="step">
+    <div class="step-block">
+      <div class="step-header">
+        <div class="step-no">Step <t t-esc="step_index + 1"/></div>
+        <div class="step-title"><t t-esc="step.name"/></div>
+        <div class="step-meta">
+          <t t-esc="dict(step._fields['responsible']._description_selection(step.env)).get(step.responsible,'') or step.responsible"/>
+          <t t-if="step.estimated_time"> | <t t-esc="str(int(step.estimated_time))"/> min</t>
+        </div>
+      </div>
+      <div class="step-body"><t t-esc="step.description"/></div>
+      <t t-if="step.warning">
+        <div class="step-warning">⚠ <t t-esc="step.warning"/></div>
+      </t>
+    </div>
+  </t>
+</div>
+</t>
+
+<!-- Summary of change -->
+<t t-if="doc.change_summary">
+<div class="section-header">7. Summary of Changes (This Revision)</div>
+<div class="section-body" style="font-size:8.5pt;line-height:1.5;">
+  <t t-esc="doc.change_summary"/>
+</div>
+</t>
+
+<!-- ════════════════════════════════════════════════════
+     APPROVAL BLOCK
+════════════════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:12px;">Document Approval</div>
+<div class="section-body" style="padding:0;">
+  <table class="approval-table">
+    <thead>
+      <tr>
+        <th style="width:33%;">Prepared By</th>
+        <th style="width:33%;">Reviewed By</th>
+        <th style="width:33%;">Approved By</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="approval-label">Name:</div>
+          <div style="margin-top:2px;">Micron HVAC — Quality Team</div>
+        </td>
+        <td>
+          <div class="approval-label">Name:</div>
+          <div style="margin-top:2px;"><t t-esc="doc.reviewed_by.name if doc.reviewed_by else '—'"/></div>
+        </td>
+        <td>
+          <div class="approval-label">Name:</div>
+          <div style="margin-top:2px;"><t t-esc="doc.approved_by.name if doc.approved_by else '—'"/></div>
+        </td>
+      </tr>
+      <tr>
+        <td><div class="approval-label">Designation:</div><div>Quality Officer</div></td>
+        <td><div class="approval-label">Designation:</div><div>Sr. HVAC Engineer</div></td>
+        <td><div class="approval-label">Designation:</div><div>Head of Operations</div></td>
+      </tr>
+      <tr class="sign-row">
+        <td><div class="approval-label">Signature:</div></td>
+        <td><div class="approval-label">Signature:</div></td>
+        <td><div class="approval-label">Signature:</div></td>
+      </tr>
+      <tr>
+        <td><div class="approval-label">Date:</div></td>
+        <td>
+          <div class="approval-label">Date:</div>
+          <div><t t-esc="doc.reviewed_date or '—'"/></div>
+        </td>
+        <td>
+          <div class="approval-label">Date:</div>
+          <div><t t-esc="doc.approved_date or '—'"/></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Footer note -->
+<div style="margin-top:8px;font-size:7.5pt;color:#888;text-align:center;border-top:1px solid #D5D8DC;padding-top:4px;">
+  <t t-esc="doc.sop_code"/> — <t t-esc="doc.version_label"/> |
+  Effective: <t t-esc="doc.effective_date or '—'"/> |
+  Next Review: <t t-esc="doc.next_review_date or '—'"/> |
+  This document is controlled. Printed copies are uncontrolled. Verify revision status before use.
+</div>
+
+</div><!-- .page -->
+</t><!-- t-call web.external_layout -->
+</t><!-- t-foreach docs -->
+</t><!-- t-call web.html_container -->
+</template>
+
+</data>
+</odoo>

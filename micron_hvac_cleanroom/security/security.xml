@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_micron_hvac_user" model="res.groups">
+        <field name="name">Micron HVAC User</field>
+        <field name="category_id" ref="base.module_category_services"/>
+    </record>
+
+    <record id="group_micron_hvac_manager" model="res.groups">
+        <field name="name">Micron HVAC Manager</field>
+        <field name="implied_ids" eval="[(4, ref('group_micron_hvac_user'))]"/>
+        <field name="category_id" ref="base.module_category_services"/>
+    </record>
+</odoo>

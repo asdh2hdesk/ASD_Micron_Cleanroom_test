@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════════════════════════════════
+         LIST VIEW
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_sop_template_list" model="ir.ui.view">
+        <field name="name">micron.sop.template.list</field>
+        <field name="model">micron.sop.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sop_no"/>
+                <field name="name"/>
+                <field name="revision"/>
+                <field name="test_type"/>
+                <field name="effective_date"/>
+                <field name="next_review_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'obsolete'"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SEARCH VIEW
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_sop_template_search" model="ir.ui.view">
+        <field name="name">micron.sop.template.search</field>
+        <field name="model">micron.sop.template</field>
+        <field name="arch" type="xml">
+            <search string="Search SOPs">
+                <field name="name"/>
+                <field name="sop_no"/>
+                <field name="code"/>
+                <separator/>
+                <filter name="filter_approved" string="Approved" domain="[('state','=','approved')]"/>
+                <filter name="filter_draft"    string="Draft"    domain="[('state','=','draft')]"/>
+                <filter name="filter_obsolete" string="Obsolete" domain="[('state','=','obsolete')]"/>
+                <separator/>
+                <filter name="filter_air_velocity"   string="Air Velocity"       domain="[('test_type','=','air_velocity')]"/>
+                <filter name="filter_ach"             string="CFM / ACPH"         domain="[('test_type','=','ach')]"/>
+                <filter name="filter_filter_integrity" string="Filter Integrity"  domain="[('test_type','=','filter_integrity')]"/>
+                <filter name="filter_particle_count"  string="Particle Count"     domain="[('test_type','=','particle_count')]"/>
+                <filter name="filter_recovery"        string="Recovery"           domain="[('test_type','=','recovery')]"/>
+                <filter name="filter_temp_humidity"   string="Temp &amp; Humidity" domain="[('test_type','=','temp_humidity')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_test_type" string="Test Type" context="{'group_by': 'test_type'}"/>
+                    <filter name="group_state"     string="Status"    context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         FORM VIEW — Full SOP Document style
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_sop_template_form" model="ir.ui.view">
+        <field name="name">micron.sop.template.form</field>
+        <field name="model">micron.sop.template</field>
+        <field name="arch" type="xml">
+            <form string="SOP Template">
+                <header>
+                    <button name="action_approve"       string="Approve"    type="object" class="oe_highlight" invisible="state == 'approved'"/>
+                    <button name="action_obsolete"      string="Obsolete"   type="object" invisible="state == 'obsolete'"/>
+                    <button name="action_reset_draft"   string="Reset Draft" type="object" invisible="state == 'draft'"/>
+                    <button name="action_print_sop"     string="Print SOP"  type="object" class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,obsolete"/>
+                </header>
+
+                <sheet>
+                    <!-- ── Document-style SOP Header ── -->
+                    <div class="o_field_html sop-document-header" style="
+                        border: 2px solid #000;
+                        margin-bottom: 16px;
+                        font-family: Arial, sans-serif;
+                        font-size: 13px;
+                    ">
+                        <!-- Top row: Company brand -->
+                        <div style="display: flex; justify-content: space-between; align-items: center;
+                                    border-bottom: 1px solid #000; padding: 6px 10px;">
+                            <div style="border: 1px solid #555; padding: 3px 8px; font-size: 11px; font-weight: bold;">
+                                MASTER COPY
+                            </div>
+                            <div style="font-size: 22px; font-weight: bold; font-family: 'Times New Roman', serif;">
+                                &#956; MICRON
+                            </div>
+                        </div>
+                        <!-- SOP Title band -->
+                        <div style="background: #f0f0f0; text-align: center; font-weight: bold;
+                                    font-size: 14px; padding: 6px; border-bottom: 1px solid #000;">
+                            STANDARD OPERATING PROCEDURE
+                        </div>
+                        <!-- SOP metadata grid -->
+                        <div style="display: flex;">
+                            <!-- Left column -->
+                            <div style="flex: 1; border-right: 1px solid #000; padding: 6px 10px;">
+                                <div><b>SOP NO.:</b>
+                                    <field name="sop_no" style="display:inline;" nolabel="1"/>
+                                </div>
+                                <div style="margin-top: 8px; color: #555; font-size: 11px;">
+                                    Supersedes: <field name="supersedes" style="display:inline;" nolabel="1"/>
+                                </div>
+                            </div>
+                            <!-- Center column: Title -->
+                            <div style="flex: 1.5; border-right: 1px solid #000; padding: 6px 10px;
+                                        text-align: center; font-weight: bold; display: flex;
+                                        align-items: center; justify-content: center;">
+                                <field name="name" nolabel="1" style="font-weight: bold; font-size: 14px;"/>
+                            </div>
+                            <!-- Right column: Dates -->
+                            <div style="flex: 1.2; padding: 6px 10px;">
+                                <table style="width: 100%; font-size: 11px;">
+                                    <tr>
+                                        <td style="white-space: nowrap;"><b>Date Prepared.:-</b></td>
+                                        <td><field name="date_prepared" nolabel="1" style="width: 100%;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="white-space: nowrap;"><b>Effective Date.:-</b></td>
+                                        <td><field name="effective_date" nolabel="1" style="width: 100%;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="white-space: nowrap;"><b>Next review Date.:-</b></td>
+                                        <td><field name="next_review_date" nolabel="1" style="width: 100%;"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Total Pages:</b></td>
+                                        <td><field name="total_pages" nolabel="1" style="width: 60px;"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Admin / Config fields (collapsible group) ── -->
+                    <group string="Classification &amp; Acceptance Values">
+                        <group>
+                            <field name="code"/>
+                            <field name="test_type"/>
+                            <field name="revision"/>
+                        </group>
+                        <group>
+                            <field name="min_value" string="Min. Value"/>
+                            <field name="max_value" string="Max. Value"/>
+                            <field name="unit"/>
+                        </group>
+                    </group>
+
+                    <!-- ── SOP Body Sections ── -->
+                    <notebook>
+
+                        <!-- Tab: Content -->
+                        <page string="SOP Content" name="content">
+                            <div class="sop-section">
+                                <label for="purpose" class="sop-section-label"/>
+                                <field name="purpose" class="sop-body-html" options="{'collaborative': true}"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="scope" class="sop-section-label"/>
+                                <field name="scope" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="responsibilities" class="sop-section-label"/>
+                                <field name="responsibilities" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="definitions" class="sop-section-label"/>
+                                <field name="definitions" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="procedure" class="sop-section-label"/>
+                                <field name="procedure" class="sop-body-html"/>
+                            </div>
+                        </page>
+
+                        <!-- Tab: Acceptance & Frequency -->
+                        <page string="Acceptance &amp; Frequency" name="acceptance">
+                            <div class="sop-section">
+                                <label for="acceptance_criteria_html" class="sop-section-label"/>
+                                <field name="acceptance_criteria_html" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="frequency" class="sop-section-label"/>
+                                <field name="frequency" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="references" class="sop-section-label"/>
+                                <field name="references" class="sop-body-html"/>
+                            </div>
+                            <hr/>
+                            <div class="sop-section">
+                                <label for="abbreviations" class="sop-section-label"/>
+                                <field name="abbreviations" class="sop-body-html"/>
+                            </div>
+                            <group string="Internal Notes">
+                                <field name="notes" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab: Revision History -->
+                        <page string="Revision History" name="revisions">
+                            <field name="revision_history_ids">
+                                <list editable="bottom">
+                                    <field name="revision" string="Rev. No."/>
+                                    <field name="date" string="Date"/>
+                                    <field name="description" string="Changes / Reason"/>
+                                    <field name="changed_by" string="Changed By"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- Tab: Signatures -->
+                        <page string="Signatures" name="signatures">
+                            <!-- Document-style signature block -->
+                            <div style="
+                                border: 1px solid #000;
+                                font-family: Arial, sans-serif;
+                                margin-top: 10px;
+                            ">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <th style="border: 1px solid #000; background: #d9d9d9;
+                                                   padding: 6px; text-align: center; width: 33%;">
+                                            Prepared By
+                                        </th>
+                                        <th style="border: 1px solid #000; background: #d9d9d9;
+                                                   padding: 6px; text-align: center; width: 33%;">
+                                            Checked By
+                                        </th>
+                                        <th style="border: 1px solid #000; background: #d9d9d9;
+                                                   padding: 6px; text-align: center; width: 34%;">
+                                            Approved By
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000; padding: 8px; height: 60px; vertical-align: top;">
+                                            <field name="prepared_by" nolabel="1" style="width: 100%;"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
+                                            <field name="checked_by" nolabel="1" style="width: 100%;"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 8px; vertical-align: top;">
+                                            <field name="approved_by" nolabel="1" style="width: 100%;"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000; padding: 4px 8px;">
+                                            <b>Sign &amp; Date:</b>
+                                            <field name="prepared_by_date" nolabel="1" style="width: 140px;"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 4px 8px;">
+                                            <b>Sign &amp; Date:</b>
+                                            <field name="checked_by_date" nolabel="1" style="width: 140px;"/>
+                                        </td>
+                                        <td style="border: 1px solid #000; padding: 4px 8px;">
+                                            <b>Sign &amp; Date:</b>
+                                            <field name="approved_by_date" nolabel="1" style="width: 140px;"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Uncontrolled copy watermark note -->
+                            <div style="
+                                text-align: center;
+                                border: 2px solid #c00;
+                                color: #c00;
+                                font-weight: bold;
+                                font-size: 14px;
+                                padding: 6px;
+                                margin-top: 16px;
+                                width: 200px;
+                                margin-left: auto;
+                                margin-right: auto;
+                            ">
+                                UNCONTROLLED COPY
+                            </div>
+                        </page>
+
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ACTION + MENUITEM
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_micron_sop_template" model="ir.actions.act_window">
+        <field name="name">SOP Templates</field>
+        <field name="res_model">micron.sop.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_micron_sop_template_search"/>
+        <field name="context">{"search_default_filter_approved": 1}</field>
+    </record>
+
+    <menuitem id="menu_micron_sop_template" name="SOP Templates"
+              parent="menu_micron_master_data"
+              action="action_micron_sop_template" sequence="30"/>
+</odoo>

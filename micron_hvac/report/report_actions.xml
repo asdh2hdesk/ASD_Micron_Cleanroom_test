@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <record id="action_report_sop_template" model="ir.actions.report">
+        <field name="name">SOP Template</field>
+        <field name="model">hvac.sop.revision</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_sop_template_document</field>
+        <field name="report_file">micron_hvac.report_sop_template_document</field>
+        <field name="print_report_name">'SOP-%s-%s' % (object.sop_code, object.version_label)</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_test_certificate" model="ir.actions.report">
+        <field name="name">Test &amp; Commissioning Certificate</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_test_certificate_document</field>
+        <field name="report_file">micron_hvac.report_test_certificate_document</field>
+        <field name="print_report_name">'TC-%s-%s' % (object.name, object.ahu_tag or 'HVAC')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+
+    <record id="action_report_vl001_annexures" model="ir.actions.report">
+        <field name="name">Air Velocity Annexures (VL-001)</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_vl001_annexures_document</field>
+        <field name="report_file">micron_hvac.report_vl001_annexures_document</field>
+        <field name="print_report_name">'AnnexVL001-%s-%s' % (object.name, object.ahu_tag or 'AHU')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_vl002_annexures" model="ir.actions.report">
+        <field name="name">HEPA Filter PAO Annexures (VL-002)</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_vl002_annexures_document</field>
+        <field name="report_file">micron_hvac.report_vl002_annexures_document</field>
+        <field name="print_report_name">'AnnexVL002-%s-%s' % (object.name, object.ahu_tag or 'AHU')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_vl003_annexures" model="ir.actions.report">
+        <field name="name">NVPC Annexures (VL-003)</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_vl003_annexures_document</field>
+        <field name="report_file">micron_hvac.report_vl003_annexures_document</field>
+        <field name="print_report_name">'AnnexVL003-%s-%s' % (object.name, object.ahu_tag or 'AHU')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_vl004_annexures" model="ir.actions.report">
+        <field name="name">Recovery Study Annexures (VL-004)</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_vl004_annexures_document</field>
+        <field name="report_file">micron_hvac.report_vl004_annexures_document</field>
+        <field name="print_report_name">'AnnexVL004-%s-%s' % (object.name, object.ahu_tag or 'AHU')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_vl005_annexures" model="ir.actions.report">
+        <field name="name">Temp &amp; RH Study Annexures (VL-005)</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">micron_hvac.report_vl005_annexures_document</field>
+        <field name="report_file">micron_hvac.report_vl005_annexures_document</field>
+        <field name="print_report_name">'AnnexVL005-%s-%s' % (object.name, object.ahu_tag or 'AHU')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+</data>
+</odoo>

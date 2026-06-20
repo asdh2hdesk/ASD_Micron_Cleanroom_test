@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ═══ Test Worksheet ═══ -->
+    <record id="view_hvac_test_sheet_list" model="ir.ui.view">
+        <field name="name">hvac.test.sheet.list</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="arch" type="xml">
+            <list string="Test Worksheets"
+                  decoration-success="overall_result == 'pass'"
+                  decoration-danger="overall_result == 'fail'"
+                  decoration-warning="overall_result == 'conditional'">
+                <field name="name" string="Sheet No."/>
+                <field name="job_id"/>
+                <field name="partner_id" string="Client"/>
+                <field name="sop_revision_id" string="SOP Rev."/>
+                <field name="sop_test_code" string="Test Type"/>
+                <field name="ahu_tag" string="AHU Tag"/>
+                <field name="test_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'verified'"
+                       decoration-primary="state == 'done'"
+                       decoration-warning="state == 'in_progress'"/>
+                <field name="overall_result" widget="badge"
+                       decoration-success="overall_result == 'pass'"
+                       decoration-danger="overall_result == 'fail'"
+                       decoration-warning="overall_result == 'conditional'"/>
+                <button name="action_print_certificate" type="object"
+                        string="Certificate" icon="fa-certificate"
+                        invisible="state not in ('done','verified')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hvac_test_sheet_form" model="ir.ui.view">
+        <field name="name">hvac.test.sheet.form</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Test Worksheet">
+                <header>
+                    <button name="action_start" type="object" string="Start Test"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_complete" type="object" string="Complete Test"
+                            invisible="state != 'in_progress'" class="btn-success"/>
+                    <button name="action_verify" type="object" string="Verify &amp; Issue"
+                            invisible="state != 'done'" class="btn-primary"
+                            groups="base.group_system"/>
+                    <button name="action_print_certificate" type="object"
+                            string="Print Test Certificate" icon="fa-certificate"
+                            invisible="state not in ('done','verified')" class="btn-secondary"/>
+                    <button name="action_print_vl001_annexures" type="object"
+                            string="Print Air Velocity Annexures" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="sop_test_code != 'VL-001'"/>
+                    <button name="action_print_vl002_annexures" type="object"
+                            string="Print PAO Annexures" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="sop_test_code != 'VL-002'"/>
+                    <button name="action_print_vl003_annexures" type="object"
+                            string="Print NVPC Annexures" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="sop_test_code != 'VL-003'"/>
+                    <button name="action_print_vl004_annexures" type="object"
+                            string="Print Recovery Annexures" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="sop_test_code != 'VL-004'"/>
+                    <button name="action_print_vl005_annexures" type="object"
+                            string="Print Temp &amp; RH Annexures" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="sop_test_code != 'VL-005'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done,verified"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_ncrs" type="object"
+                                class="oe_stat_button" icon="fa-exclamation-triangle"
+                                invisible="ncr_count == 0">
+                            <field name="ncr_count" widget="statinfo" string="NCRs"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="PASS" bg_color="bg-success"
+                            invisible="overall_result != 'pass'"/>
+                    <widget name="web_ribbon" title="FAIL" bg_color="bg-danger"
+                            invisible="overall_result != 'fail'"/>
+                    <widget name="web_ribbon" title="CONDITIONAL" bg_color="bg-warning"
+                            invisible="overall_result != 'conditional'"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <!-- Hidden field for invisible conditions -->
+                    <field name="sop_test_code" invisible="1"/>
+                    <group>
+                        <group string="Job &amp; SOP Info">
+                            <field name="job_id"/>
+                            <field name="sop_revision_id"
+                                   domain="[('state','=','approved')]"/>
+                            <field name="sop_test_code" readonly="1" string="Detected Test Type"/>
+                            <field name="vl001_subtype"
+                                   invisible="sop_test_code != 'VL-001'"
+                                   required="sop_test_code == 'VL-001'"/>
+                            <field name="test_date"/>
+                            <field name="partner_id" readonly="1" string="Client"/>
+                        </group>
+                        <group string="Equipment">
+                            <field name="ahu_tag" string="AHU / Equipment Tag"/>
+                            <field name="design_cfm" string="Design Air Flow (CFM)"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Test Conditions">
+                            <field name="ambient_temp"/>
+                            <field name="ambient_rh"/>
+                            <field name="test_start_time"/>
+                            <field name="test_end_time"/>
+                        </group>
+                        <group string="Personnel">
+                            <field name="lead_tech_id"/>
+                            <field name="technician_ids" widget="many2many_tags"/>
+                            <field name="witnessed_by"/>
+                            <field name="client_rep"/>
+                            <field name="client_rep_designation"/>
+                        </group>
+                    </group>
+                    <field name="acceptance_criteria_html" widget="html" readonly="1" nolabel="1"
+                           invisible="not sop_revision_id"/>
+                    <notebook>
+                        <!-- ── VL-001: Air Velocity & CFM Measurement tab ── -->
+                        <page string="Velocity Measurements (VL-001)" name="vl001_lines"
+                              invisible="sop_test_code != 'VL-001'">
+                            <group string="Import From Instrument" invisible="state not in ('in_progress', 'draft')">
+                                <group>
+                                    <field name="air_velocity_source_file"
+                                           filename="air_velocity_source_filename"/>
+                                    <field name="air_velocity_source_filename" invisible="1"/>
+                                </group>
+                                <group>
+                                    <field name="air_velocity_samples_text"
+                                           placeholder="Paste instrument text here (optional)"/>
+                                </group>
+                                <group>
+                                    <button name="action_import_air_velocity_from_file"
+                                            string="Import From PDF/Image" type="object" class="oe_highlight"/>
+                                    <button name="action_import_air_velocity_from_text"
+                                            string="Import From Text" type="object"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert"
+                                 invisible="vl001_line_ids">
+                                <strong>Add one row per HEPA filter / measurement point.</strong>
+                                Each row maps to one line in the Annexure tables. Enter Room Name, Filter ID, 5 velocity readings (FPM), Filter Size, and Room Volume — CFM, CMH, and ACPH are computed automatically.
+                            </div>
+                            <field name="vl001_line_ids" mode="list">
+                                <list editable="bottom" string="Air Velocity &amp; CFM Measurements"
+                                      decoration-success="vel_result == 'pass' and acph_result == 'pass'"
+                                      decoration-danger="vel_result == 'fail' or acph_result == 'fail'"
+                                      decoration-muted="vel_result == 'na'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="room_name" string="Room Name &amp; No."
+                                           placeholder="e.g. Production Room - R-14"/>
+                                    <field name="filter_id" string="Filter ID"
+                                           placeholder="e.g. F-01"/>
+                                    <field name="equipment_name" string="Equipment Name" optional="hide"
+                                           placeholder="e.g. AHU-B01 LAF Unit"/>
+                                    <!-- 5 velocity readings (FPM) -->
+                                    <field name="vel_1" string="V1 (FPM)" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="vel_2" string="V2 (FPM)" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="vel_3" string="V3 (FPM)" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="vel_4" string="V4 (FPM)" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="vel_5" string="V5 (FPM)" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <!-- Computed averages -->
+                                    <field name="avg_fpm" string="Avg (FPM)" readonly="1" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="avg_ms"  string="Avg (m/s)" readonly="1" optional="show" column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <!-- Filter size for CFM -->
+                                    <field name="filter_size_ft2" string="Filter Size (Ft²)" optional="show" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <!-- Computed airflows -->
+                                    <field name="cfm" string="CFM" readonly="1" optional="show" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <field name="cmh" string="CMH" readonly="1" optional="hide" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <!-- Room volume for ACPH -->
+                                    <field name="room_vol_ft3" string="Room Vol (Ft³)" optional="show" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <field name="room_vol_m3"  string="Room Vol (m³)"  readonly="1" optional="hide" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <!-- Computed ACPH -->
+                                    <field name="total_room_cfm" string="Room Total CFM" readonly="1" optional="hide" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <field name="acph" string="ACPH" readonly="1" optional="show" column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <!-- Acceptance limits -->
+                                    <field name="min_vel_ms" string="Min m/s" optional="hide"/>
+                                    <field name="max_vel_ms" string="Max m/s" optional="hide"/>
+                                    <field name="min_acph"   string="Min ACPH" optional="hide"/>
+                                    <!-- Results -->
+                                    <field name="vel_result" string="Velocity" readonly="1"
+                                           widget="badge"
+                                           decoration-success="vel_result == 'pass'"
+                                           decoration-danger="vel_result == 'fail'"
+                                           decoration-muted="vel_result == 'na'"
+                                           optional="show"
+                                           column_invisible="parent.vl001_subtype == 'cfm'"/>
+                                    <field name="acph_result" string="ACPH" readonly="1"
+                                           widget="badge"
+                                           decoration-success="acph_result == 'pass'"
+                                           decoration-danger="acph_result == 'fail'"
+                                           decoration-muted="acph_result == 'na'"
+                                           optional="show"
+                                           column_invisible="parent.vl001_subtype == 'velocity'"/>
+                                    <field name="remark" string="Remark" optional="show"/>
+                                </list>
+                            </field>
+                            <!-- Summary totals -->
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="design_cfm" string="Design Total CFM" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <!-- ══ VL-002: HEPA Filter PAO Test ══ -->
+                        <page string="PAO Test (VL-002)" name="vl002_lines"
+                              invisible="sop_test_code != 'VL-002'">
+                            <div class="alert alert-info" role="alert"
+                                 invisible="vl002_line_ids">
+                                <strong>Add one row per HEPA filter scanned.</strong>
+                                Enter Filter Tag, Upstream concentrations (µg/L), and Downstream Leakage %.
+                                Recovery % and Pass/Fail are computed automatically.
+                                Acceptance: Leakage NMT <strong>0.01%</strong> | Upstream Recovery 85–115%
+                                (ISO 14644-3:2019 Annex B6).
+                            </div>
+                            <field name="vl002_line_ids" mode="list">
+                                <list editable="bottom" string="HEPA Filter PAO Readings"
+                                      decoration-success="pao_result == 'pass'"
+                                      decoration-danger="pao_result == 'fail'"
+                                      decoration-muted="pao_result == 'na'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="room_name" string="Room Name &amp; No."
+                                           placeholder="e.g. Wash Room - 51"/>
+                                    <field name="filter_id" string="Filter Tag No."
+                                           placeholder="e.g. HEPA-B01-14"/>
+                                    <field name="filter_location" string="Location / Position"
+                                           placeholder="e.g. AHU-01 Supply Plenum"/>
+                                    <field name="upstream_before" string="Upstream Before (µg/L)"/>
+                                    <field name="downstream_pct" string="Downstream Leakage (%)"/>
+                                    <field name="upstream_after" string="Upstream After (µg/L)"
+                                           optional="show"/>
+                                    <field name="upstream_recovery_pct" string="Recovery (%)"
+                                           readonly="1" optional="show"/>
+                                    <field name="recovery_valid" string="Recovery Valid"
+                                           readonly="1" optional="show"/>
+                                    <field name="max_leakage_pct" string="Max Leakage (%)"
+                                           optional="hide"/>
+                                    <field name="pao_result" string="PAO Result" readonly="1"
+                                           widget="badge"
+                                           decoration-success="pao_result == 'pass'"
+                                           decoration-danger="pao_result == 'fail'"
+                                           decoration-muted="pao_result == 'na'"/>
+                                    <field name="remark" string="Remark" optional="show"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="pao_result" readonly="1" widget="badge"
+                                       decoration-success="pao_result == 'pass'"
+                                       decoration-danger="pao_result == 'fail'"
+                                       decoration-muted="pao_result == 'na'"
+                                       string="Overall PAO Result"/>
+                            </group>
+                        </page>
+
+                        <!-- ══ VL-003: Non-Viable Particle Count (NVPC) ══ -->
+                        <page string="Particle Count (VL-003)" name="vl003_lines"
+                              invisible="sop_test_code != 'VL-003'">
+                            <div class="alert alert-info" role="alert"
+                                 invisible="vl003_line_ids">
+                                <strong>Add one row per sampling location (L1, L2 … LN).</strong>
+                                Select ISO Class — limits at 0.5 µm and 5.0 µm are auto-populated.
+                                Min locations required: N = √(Room Area in m²).
+                                Standard: ISO 14644-1:2015 / ISO 14644-3:2019 Annex B3.
+                            </div>
+                            <field name="vl003_line_ids" mode="list">
+                                <list editable="bottom" string="Particle Count Locations"
+                                      decoration-success="result_05 == 'pass' and result_50 == 'pass'"
+                                      decoration-danger="result_05 == 'fail' or result_50 == 'fail'"
+                                      decoration-muted="result_05 == 'na'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="room_name" string="Room Name &amp; No."
+                                           placeholder="e.g. Wash Room - 51"/>
+                                    <field name="location_id" string="Location"
+                                           placeholder="L1"/>
+                                    <field name="location_desc" string="Description"
+                                           placeholder="e.g. Centre of room" optional="show"/>
+                                    <field name="test_condition" string="Condition"/>
+                                    <field name="iso_class" string="ISO Class"/>
+                                    <field name="limit_05um" string="Limit 0.5µm" readonly="1"
+                                           optional="show"/>
+                                    <field name="limit_50um" string="Limit 5.0µm" readonly="1"
+                                           optional="show"/>
+                                    <field name="count_05um" string="Count 0.5µm (p/m³)"/>
+                                    <field name="count_50um" string="Count 5.0µm (p/m³)"/>
+                                    <field name="result_05" string="0.5µm" readonly="1"
+                                           widget="badge"
+                                           decoration-success="result_05 == 'pass'"
+                                           decoration-danger="result_05 == 'fail'"
+                                           decoration-muted="result_05 == 'na'"/>
+                                    <field name="result_50" string="5.0µm" readonly="1"
+                                           widget="badge"
+                                           decoration-success="result_50 == 'pass'"
+                                           decoration-danger="result_50 == 'fail'"
+                                           decoration-muted="result_50 == 'na'"/>
+                                    <field name="flow_rate" string="Flow Rate" optional="hide"/>
+                                    <field name="sample_time_min" string="Sample Time (min)"
+                                           optional="hide"/>
+                                    <field name="remark" string="Remark" optional="show"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="particle_result" readonly="1" widget="badge"
+                                       decoration-success="particle_result == 'pass'"
+                                       decoration-danger="particle_result == 'fail'"
+                                       decoration-muted="particle_result == 'na'"
+                                       string="Overall Particle Count Result"/>
+                            </group>
+                        </page>
+
+                        <!-- ══ VL-004: Recovery Study ══ -->
+                        <page string="Recovery Study (VL-004)" name="vl004_lines"
+                              invisible="sop_test_code != 'VL-004'">
+                            <div class="alert alert-info" role="alert"
+                                 invisible="vl004_line_ids">
+                                <strong>Add one row per 1-minute monitoring interval.</strong>
+                                AHU Conditions: Initial (baseline) → Generation (challenge active) → Recovery.
+                                Enter Time A (challenge stopped) and Time B (ISO class regained) in the summary.
+                                Acceptance: Recovery Period (B − A) NMT <strong>15 minutes</strong>
+                                (ISO 14644-3:2019 Annex B12). Minimum 3 cycles required.
+                            </div>
+                            <!-- Recovery summary header -->
+                            <group string="Recovery Summary">
+                                <group>
+                                    <field name="recovery_iso_class" string="Room ISO Class"/>
+                                    <field name="recovery_time_a" string="Time A — Challenge Stopped"
+                                           placeholder="e.g. 10:35"/>
+                                    <field name="recovery_time_b" string="Time B — ISO Class Regained"
+                                           placeholder="e.g. 10:47"/>
+                                </group>
+                                <group>
+                                    <field name="recovery_period_min" string="Recovery Period (min)"
+                                           help="B − A in decimal minutes. NMT 15 min to PASS."/>
+                                    <field name="recovery_result" readonly="1" widget="badge"
+                                           decoration-success="recovery_result == 'pass'"
+                                           decoration-danger="recovery_result == 'fail'"
+                                           decoration-muted="recovery_result == 'na'"
+                                           string="Recovery Result"/>
+                                </group>
+                            </group>
+                            <!-- Per-interval data table -->
+                            <field name="vl004_line_ids" mode="list">
+                                <list editable="bottom" string="Recovery Monitoring Intervals">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="room_name" string="Room Name &amp; No."
+                                           placeholder="e.g. Wash Room - 51"/>
+                                    <field name="ahu_condition" string="AHU Condition"/>
+                                    <field name="time_start" string="Start Time"
+                                           placeholder="HH:MM"/>
+                                    <field name="time_end" string="End Time"
+                                           placeholder="HH:MM"/>
+                                    <field name="count_05um" string="0.5µm Count (p/m³)"/>
+                                    <field name="count_50um" string="5.0µm Count (p/m³)"
+                                           optional="show"/>
+                                    <field name="remark" string="Remark" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ══ VL-005: Temperature & RH Study ══ -->
+                        <page string="Temp &amp; RH Study (VL-005)" name="vl005_lines"
+                              invisible="sop_test_code != 'VL-005'">
+                            <div class="alert alert-info" role="alert"
+                                 invisible="vl005_line_ids">
+                                <strong>Add one row per data logger / measurement position.</strong>
+                                Min loggers: ≤10 m² → 2 | 10–25 m² → 3 | 25–50 m² → 5 | &gt;50 m² → 1 per 10 m².
+                                Enter Mean, Min, Max for Temperature and RH. Pass/Fail is auto-computed.
+                                Default limits: 18–27°C, 30–65% RH. Edit per-line as required by protocol.
+                                Standard: EU GMP Annex 1 / Schedule M (Revised) 2023.
+                            </div>
+                            <field name="vl005_line_ids" mode="list">
+                                <list editable="bottom" string="Temperature &amp; RH Logger Positions"
+                                      decoration-success="temp_result == 'pass' and rh_result == 'pass'"
+                                      decoration-danger="temp_result == 'fail' or rh_result == 'fail'"
+                                      decoration-muted="temp_result == 'na'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="room_name" string="Room Name &amp; No."
+                                           placeholder="e.g. Wash Room - 51"/>
+                                    <field name="logger_id" string="Logger ID"
+                                           placeholder="e.g. P1"/>
+                                    <field name="position" string="Position / Location"
+                                           placeholder="e.g. Near AHU return"/>
+                                    <field name="temp_mean" string="Mean Temp (°C)"/>
+                                    <field name="temp_min"  string="Min Temp (°C)" optional="show"/>
+                                    <field name="temp_max"  string="Max Temp (°C)" optional="show"/>
+                                    <field name="temp_range" string="Temp Range (°C)"
+                                           readonly="1" optional="show"/>
+                                    <field name="rh_mean" string="Mean RH (%)"/>
+                                    <field name="rh_min"  string="Min RH (%)" optional="show"/>
+                                    <field name="rh_max"  string="Max RH (%)" optional="show"/>
+                                    <field name="rh_range" string="RH Range (%)"
+                                           readonly="1" optional="show"/>
+                                    <field name="temp_min_limit" string="T Min" optional="hide"/>
+                                    <field name="temp_max_limit" string="T Max" optional="hide"/>
+                                    <field name="rh_min_limit" string="RH Min" optional="hide"/>
+                                    <field name="rh_max_limit" string="RH Max" optional="hide"/>
+                                    <field name="temp_result" string="Temp" readonly="1"
+                                           widget="badge"
+                                           decoration-success="temp_result == 'pass'"
+                                           decoration-danger="temp_result == 'fail'"
+                                           decoration-muted="temp_result == 'na'"/>
+                                    <field name="rh_result" string="RH" readonly="1"
+                                           widget="badge"
+                                           decoration-success="rh_result == 'pass'"
+                                           decoration-danger="rh_result == 'fail'"
+                                           decoration-muted="rh_result == 'na'"/>
+                                    <field name="stability_result" string="Stability" readonly="1"
+                                           widget="badge"
+                                           decoration-success="stability_result == 'pass'"
+                                           decoration-danger="stability_result == 'fail'"
+                                           decoration-muted="stability_result == 'na'"
+                                           optional="show"/>
+                                    <field name="remark" string="Remark" optional="show"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" colspan="2">
+                                <field name="th_result" readonly="1" widget="badge"
+                                       decoration-success="th_result == 'pass'"
+                                       decoration-danger="th_result == 'fail'"
+                                       decoration-muted="th_result == 'na'"
+                                       string="Overall Temp &amp; RH Result"/>
+                            </group>
+                        </page>
+
+                        <!-- ══ No specialised table — info for non-VL SOPs ══ -->
+                        <page string="Test Readings" name="generic_info"
+                              invisible="sop_test_code != ''">
+                            <div class="alert alert-warning" role="alert">
+                                <strong>This SOP type does not have a specialised reading table.</strong>
+                                Only cleanroom validation SOPs (VL-001 through VL-005) have dedicated measurement tabs.
+                            </div>
+                        </page>
+
+                        <page string="Instruments Used" name="instruments">
+                            <field name="instrument_used_ids">
+                                <list>
+                                    <field name="asset_code"/>
+                                    <field name="name"/>
+                                    <field name="instrument_type"/>
+                                    <field name="serial_no"/>
+                                    <field name="latest_cert_no" string="Cal. Cert No."/>
+                                    <field name="last_calibration_date" string="Cal. Date"/>
+                                    <field name="next_calibration_date" string="Valid Until"/>
+                                    <field name="calibration_status" widget="badge"
+                                           decoration-success="calibration_status == 'valid'"
+                                           decoration-warning="calibration_status == 'due_soon'"
+                                           decoration-danger="calibration_status in ('overdue','not_calibrated')"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Signatures &amp; Remarks">
+                            <group>
+                                <field name="remarks" placeholder="General observations, site conditions, deviations from standard procedure..."/>
+                            </group>
+                            <group>
+                                <group string="Lead Technician Signature">
+                                    <field name="tech_signature" widget="signature" nolabel="1"/>
+                                </group>
+                                <group string="Client Representative Signature">
+                                    <field name="client_signature" widget="signature" nolabel="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hvac_test_sheet_search" model="ir.ui.view">
+        <field name="name">hvac.test.sheet.search</field>
+        <field name="model">hvac.test.sheet</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="ahu_tag"/>
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <field name="sop_test_code"/>
+                <filter name="pass" string="Pass" domain="[('overall_result','=','pass')]"/>
+                <filter name="fail" string="Fail" domain="[('overall_result','=','fail')]"/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="done" string="Completed" domain="[('state','in',['done','verified'])]"/>
+                <group expand="0" string="Group By">
+                    <filter name="by_client" string="Client" context="{'group_by':'partner_id'}"/>
+                    <filter name="by_test" string="Test Type" context="{'group_by':'sop_test_code'}"/>
+                    <filter name="by_result" string="Result" context="{'group_by':'overall_result'}"/>
+                    <filter name="by_date" string="Test Date" context="{'group_by':'test_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hvac_test_sheet" model="ir.actions.act_window">
+        <field name="name">Test Worksheets</field>
+        <field name="res_model">hvac.test.sheet</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No test worksheets yet</p>
+            <p>Test worksheets are created from Job Orders or directly. Select an approved SOP revision and the matching reading table will appear automatically.</p>
+        </field>
+    </record>
+
+</data>
+</odoo>

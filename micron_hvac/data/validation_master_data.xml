@@ -1,0 +1,1255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION INSTRUMENTS
+     Real Micron HVAC instrument fleet (MHPL/ IDs from calibration register)
+     Source: ALL TEST+INSTRUMENT DETAILS.xlsx
+═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Air Capture Hood / Flow Hood — TSI AccuBalance 8380 -->
+    <record id="inst_ach_1062" model="hvac.instrument">
+        <field name="name">Air Capture Hood (TSI AccuBalance)</field>
+        <field name="asset_code">MHPL/ACH/1062</field>
+        <field name="instrument_type">flow_hood</field>
+        <field name="make">TSI Incorporated</field>
+        <field name="model_no">AccuBalance 8380</field>
+        <field name="serial_no">T83802146034</field>
+        <field name="range_description">42 – 4250 CFM (25 – 2500 LPS)</field>
+        <field name="resolution">1 CFM</field>
+        <field name="accuracy_class">+/-3% of reading or +/-1.5 CFM (NIST traceable)</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-01-22</field>
+        <field name="location">Equipment Store — Instrument Room</field>
+    </record>
+    <record id="cal_ach_1062" model="hvac.calibration">
+        <field name="name">MHPL/ACH/1062/CAL/2026</field>
+        <field name="instrument_id" ref="inst_ach_1062"/>
+        <field name="calibration_date">2026-01-22</field>
+        <field name="valid_until">2027-01-21</field>
+        <field name="calibrated_by">TSI Instruments India — NABL Accredited Lab</field>
+        <field name="lab_accreditation_no">NABL-CC-2755</field>
+        <field name="reference_standard">NIST-traceable Air Flow Standard Nozzle</field>
+        <field name="traceability">NABL / NIST USA</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Air Capture Hood #2 — TSI 8380 (for simultaneous multi-point measurement) -->
+    <record id="inst_ach_1116" model="hvac.instrument">
+        <field name="name">Air Capture Hood (TSI AccuBalance) #2</field>
+        <field name="asset_code">MHPL/ACH/1116</field>
+        <field name="instrument_type">flow_hood</field>
+        <field name="make">TSI Incorporated</field>
+        <field name="model_no">AccuBalance 8380</field>
+        <field name="serial_no">T83802207008</field>
+        <field name="range_description">42 – 4250 CFM (25 – 2500 LPS)</field>
+        <field name="resolution">1 CFM</field>
+        <field name="accuracy_class">+/-3% of reading or +/-1.5 CFM</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-03-07</field>
+        <field name="location">Equipment Store — Instrument Room</field>
+    </record>
+    <record id="cal_ach_1116" model="hvac.calibration">
+        <field name="name">MHPL/ACH/1116/CAL/2026</field>
+        <field name="instrument_id" ref="inst_ach_1116"/>
+        <field name="calibration_date">2026-03-07</field>
+        <field name="valid_until">2027-03-06</field>
+        <field name="calibrated_by">TSI Instruments India — NABL Accredited Lab</field>
+        <field name="lab_accreditation_no">NABL-CC-2755</field>
+        <field name="reference_standard">NIST-traceable Air Flow Standard Nozzle</field>
+        <field name="traceability">NABL / NIST USA</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Digital Vane Probe Anemometer — Metravi AVM-04 -->
+    <record id="inst_vta_1329" model="hvac.instrument">
+        <field name="name">Digital Vane Probe Anemometer (Metravi)</field>
+        <field name="asset_code">MHPL/VTA/1329</field>
+        <field name="instrument_type">anemometer</field>
+        <field name="make">Metravi Instruments</field>
+        <field name="model_no">AVM-04</field>
+        <field name="serial_no">230205234</field>
+        <field name="range_description">0.0 – 30.0 m/s | 0 – 5906 FPM</field>
+        <field name="resolution">0.01 m/s</field>
+        <field name="accuracy_class">+/-3% of reading +/- 1 digit</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2025-10-03</field>
+        <field name="location">Equipment Store — Instrument Room</field>
+    </record>
+    <record id="cal_vta_1329" model="hvac.calibration">
+        <field name="name">MHPL/VTA/1329/CAL/2025</field>
+        <field name="instrument_id" ref="inst_vta_1329"/>
+        <field name="calibration_date">2025-10-03</field>
+        <field name="valid_until">2026-10-02</field>
+        <field name="calibrated_by">Metravi Instruments — NABL Accredited Laboratory</field>
+        <field name="lab_accreditation_no">NABL-CC-1740</field>
+        <field name="reference_standard">NABL Calibrated Air Velocity Reference</field>
+        <field name="traceability">NABL / NPL India</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Hot Wire Anemometer — Testo 440 + Probe 004 -->
+    <record id="inst_hwa_0018" model="hvac.instrument">
+        <field name="name">Hot Wire Anemometer (Testo 440 + Probe)</field>
+        <field name="asset_code">MHPL/HWA/0018</field>
+        <field name="instrument_type">anemometer</field>
+        <field name="make">Testo SE and Co. KGaA</field>
+        <field name="model_no">Testo 440 + Thermal Velocity Probe 004</field>
+        <field name="serial_no">83217553+20812200</field>
+        <field name="range_description">Velocity: 0 – 20 m/s | Temp: -20 to +70 deg C | RH: 0-100%</field>
+        <field name="resolution">0.01 m/s velocity / 0.1 deg C</field>
+        <field name="accuracy_class">Velocity: +/-0.03 m/s +/-4% of rdg | Temp: +/-0.3 deg C</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-01-24</field>
+        <field name="location">Equipment Store — Instrument Room</field>
+    </record>
+    <record id="cal_hwa_0018" model="hvac.calibration">
+        <field name="name">MHPL/HWA/0018/CAL/2026</field>
+        <field name="instrument_id" ref="inst_hwa_0018"/>
+        <field name="calibration_date">2026-01-24</field>
+        <field name="valid_until">2027-01-23</field>
+        <field name="calibrated_by">Testo India Pvt. Ltd. — NABL Accredited Service Centre</field>
+        <field name="lab_accreditation_no">NABL-CC-2901</field>
+        <field name="reference_standard">NPL-traceable velocity reference standard</field>
+        <field name="traceability">NABL / NPL India</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Aerosol Photometer — ATI 2i (Airtech) -->
+    <record id="inst_apm_0030" model="hvac.instrument">
+        <field name="name">Aerosol Photometer (PAO / DOP)</field>
+        <field name="asset_code">MHPL/APM/0030</field>
+        <field name="instrument_type">aerosol_photometer</field>
+        <field name="make">Airtech / ATI (Air Techniques International)</field>
+        <field name="model_no">ATI 2i Photometer</field>
+        <field name="serial_no">33733</field>
+        <field name="range_description">0.001% to 100% aerosol concentration | Challenge concentration 20-80 ug/lit</field>
+        <field name="resolution">0.001% penetration</field>
+        <field name="accuracy_class">Per ISO 14644-3:2019 Annex B6 — HEPA filter integrity test standard</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-01-12</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_apm_0030" model="hvac.calibration">
+        <field name="name">MHPL/APM/0030/CAL/2026</field>
+        <field name="instrument_id" ref="inst_apm_0030"/>
+        <field name="calibration_date">2026-01-12</field>
+        <field name="valid_until">2027-01-11</field>
+        <field name="calibrated_by">ATI (Air Techniques International) — Accredited Service Centre</field>
+        <field name="lab_accreditation_no">NABL-CC-3205</field>
+        <field name="reference_standard">NIST SRM 1003c Glass Bead standard — aerosol photometry reference</field>
+        <field name="traceability">NABL / NIST USA</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Aerosol Photometer #2 — ATI 2i (for simultaneous upstream/downstream) -->
+    <record id="inst_apm_0031" model="hvac.instrument">
+        <field name="name">Aerosol Photometer (PAO / DOP) #2</field>
+        <field name="asset_code">MHPL/APM/0031</field>
+        <field name="instrument_type">aerosol_photometer</field>
+        <field name="make">Airtech / ATI (Air Techniques International)</field>
+        <field name="model_no">ATI 2i Photometer</field>
+        <field name="serial_no">36493</field>
+        <field name="range_description">0.001% to 100% aerosol concentration</field>
+        <field name="resolution">0.001% penetration</field>
+        <field name="accuracy_class">Per ISO 14644-3:2019 Annex B6</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-03-10</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_apm_0031" model="hvac.calibration">
+        <field name="name">MHPL/APM/0031/CAL/2026</field>
+        <field name="instrument_id" ref="inst_apm_0031"/>
+        <field name="calibration_date">2026-03-10</field>
+        <field name="valid_until">2027-03-09</field>
+        <field name="calibrated_by">ATI — Accredited Service Centre</field>
+        <field name="lab_accreditation_no">NABL-CC-3205</field>
+        <field name="reference_standard">NIST SRM 1003c Glass Bead standard</field>
+        <field name="traceability">NABL / NIST USA</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Particle Counter — PMS Lasair III 310C (28.3 LPM) -->
+    <record id="inst_pc_0042" model="hvac.instrument">
+        <field name="name">Particle Counter — PMS Lasair III (28.3 LPM)</field>
+        <field name="asset_code">MHPL/PC1/0042</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="make">Particle Measuring Systems (PMS)</field>
+        <field name="model_no">Lasair III 310C</field>
+        <field name="serial_no">135166</field>
+        <field name="range_description">0.3 – 25 µm particle size | Flow 28.3 LPM | 6 channels</field>
+        <field name="resolution">0.3 µm minimum particle size</field>
+        <field name="accuracy_class">Per ISO 21501-4 — Airborne particle counter calibration standard</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-01-20</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_pc_0042" model="hvac.calibration">
+        <field name="name">MHPL/PC1/0042/CAL/2026</field>
+        <field name="instrument_id" ref="inst_pc_0042"/>
+        <field name="calibration_date">2026-01-20</field>
+        <field name="valid_until">2027-01-20</field>
+        <field name="calibrated_by">PMS (Particle Measuring Systems) — NABL Accredited Laboratory</field>
+        <field name="lab_accreditation_no">NABL-CC-4088</field>
+        <field name="reference_standard">NIST-traceable polystyrene latex (PSL) sphere reference particles</field>
+        <field name="traceability">NABL / NIST USA / ISO 21501-4</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Particle Counter #2 — PMS Lasair III 310C -->
+    <record id="inst_pc_0043" model="hvac.instrument">
+        <field name="name">Particle Counter — PMS Lasair III (28.3 LPM) #2</field>
+        <field name="asset_code">MHPL/PC1/0043</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="make">Particle Measuring Systems (PMS)</field>
+        <field name="model_no">Lasair III 310C</field>
+        <field name="serial_no">93361</field>
+        <field name="range_description">0.3 – 25 µm particle size | Flow 28.3 LPM | 6 channels</field>
+        <field name="resolution">0.3 µm minimum particle size</field>
+        <field name="accuracy_class">Per ISO 21501-4</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-04-04</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_pc_0043" model="hvac.calibration">
+        <field name="name">MHPL/PC1/0043/CAL/2026</field>
+        <field name="instrument_id" ref="inst_pc_0043"/>
+        <field name="calibration_date">2026-04-04</field>
+        <field name="valid_until">2027-04-04</field>
+        <field name="calibrated_by">PMS — NABL Accredited Laboratory</field>
+        <field name="lab_accreditation_no">NABL-CC-4088</field>
+        <field name="reference_standard">NIST-traceable PSL sphere reference particles</field>
+        <field name="traceability">NABL / NIST USA / ISO 21501-4</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Particle Counter #3 — PMS Lasair III 5100 (100 LPM — for ISO 8 large rooms) -->
+    <record id="inst_pc_5100" model="hvac.instrument">
+        <field name="name">Particle Counter — PMS Lasair III (100 LPM)</field>
+        <field name="asset_code">MHPL/PC2/0001</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="make">Particle Measuring Systems (PMS)</field>
+        <field name="model_no">Lasair III 5100</field>
+        <field name="serial_no">168867</field>
+        <field name="range_description">0.5 – 25 µm particle size | Flow 100 LPM | 6 channels</field>
+        <field name="resolution">0.5 µm minimum particle size</field>
+        <field name="accuracy_class">Per ISO 21501-4 — 100 LPM high-flow version for ISO 8 rooms</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2025-05-22</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_pc_5100" model="hvac.calibration">
+        <field name="name">MHPL/PC2/0001/CAL/2025</field>
+        <field name="instrument_id" ref="inst_pc_5100"/>
+        <field name="calibration_date">2025-05-22</field>
+        <field name="valid_until">2026-05-22</field>
+        <field name="calibrated_by">PMS — NABL Accredited Laboratory</field>
+        <field name="lab_accreditation_no">NABL-CC-4088</field>
+        <field name="reference_standard">NIST-traceable PSL sphere reference particles</field>
+        <field name="traceability">NABL / NIST USA / ISO 21501-4</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Temperature and RH Data Logger — Testo 174H -->
+    <record id="inst_rh_logger_01" model="hvac.instrument">
+        <field name="name">Temperature and RH Data Logger</field>
+        <field name="asset_code">MHPL/TRH/0001</field>
+        <field name="instrument_type">temp_rh_logger</field>
+        <field name="make">Testo</field>
+        <field name="model_no">Testo 174H Mini Data Logger</field>
+        <field name="serial_no">TESTO-174H-0061</field>
+        <field name="range_description">Temp: -20 to +70 deg C | RH: 0-100% | Logging: up to 16000 readings</field>
+        <field name="resolution">0.1 deg C / 0.1% RH</field>
+        <field name="accuracy_class">Temp: +/-0.5 deg C | RH: +/-3% RH</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-02-10</field>
+        <field name="location">Equipment Store — Validation Instrument Rack</field>
+    </record>
+    <record id="cal_rh_logger_01" model="hvac.calibration">
+        <field name="name">MHPL/TRH/0001/CAL/2026</field>
+        <field name="instrument_id" ref="inst_rh_logger_01"/>
+        <field name="calibration_date">2026-02-10</field>
+        <field name="valid_until">2027-02-09</field>
+        <field name="calibrated_by">Testo India Pvt. Ltd. — NABL Accredited Service Centre</field>
+        <field name="lab_accreditation_no">NABL-CC-2901</field>
+        <field name="reference_standard">NPL-traceable temperature and humidity references</field>
+        <field name="traceability">NABL / NPL India</field>
+        <field name="result">pass</field>
+    </record>
+
+    <!-- Pressure Gauge for PAO upstream line — Waaree (MHPL/PG/1180) -->
+    <record id="inst_pg_1180" model="hvac.instrument">
+        <field name="name">Pressure Gauge (PAO Upstream / HVAC)</field>
+        <field name="asset_code">MHPL/PG/1180</field>
+        <field name="instrument_type">pressure_gauge</field>
+        <field name="make">Waaree Instruments</field>
+        <field name="model_no">Bourdon Type Dial Gauge</field>
+        <field name="serial_no">NIL-PG-1180</field>
+        <field name="range_description">0 – 10 bar / 0 – 150 PSI</field>
+        <field name="resolution">0.1 bar</field>
+        <field name="accuracy_class">+/-1.6% FS (Class 1.6 per EN 837)</field>
+        <field name="calibration_interval">365</field>
+        <field name="last_calibration_date">2026-02-08</field>
+        <field name="location">Equipment Store — Instrument Room</field>
+    </record>
+    <record id="cal_pg_1180" model="hvac.calibration">
+        <field name="name">MHPL/PG/1180/CAL/2026</field>
+        <field name="instrument_id" ref="inst_pg_1180"/>
+        <field name="calibration_date">2026-02-08</field>
+        <field name="valid_until">2027-02-07</field>
+        <field name="calibrated_by">Trescal India Pvt. Ltd. — NABL Accredited Lab</field>
+        <field name="lab_accreditation_no">NABL-CC-1893</field>
+        <field name="reference_standard">Dead Weight Tester — NABL Traceable</field>
+        <field name="traceability">NABL / NPL India</field>
+        <field name="result">pass</field>
+    </record>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION SOP 1 — AIR VELOCITY AND CFM MEASUREMENT
+     Code: MHPL-SOP-VL-001 | Revision 03 (current: MHPL-VL-001-03)
+═══════════════════════════════════════════════════════════════════ -->
+
+    <record id="sop_vl_001" model="hvac.sop">
+        <field name="name">Air Velocity and CFM Measurement — Cleanroom Validation</field>
+        <field name="code">MHPL-SOP-VL-001</field>
+        <field name="category">cleanroom_validation</field>
+        <field name="scope">Applicable to all HEPA-filtered cleanroom spaces, Laminar Air Flow (LAF) units, clean benches, Biosafety Cabinets (BSC), and AHU-supplied classified areas in pharmaceutical, biotechnology, and medical device manufacturing facilities. Covers both unidirectional flow (LAF) velocity verification and room-level Air Changes Per Hour (ACPH) determination.</field>
+        <field name="purpose">To verify that: (a) air velocity at HEPA filter face meets design specification of 0.45 m/s +/-20% for unidirectional flow zones; (b) total supply air volume (CFM) to each room meets design requirement; and (c) resulting ACPH meets regulatory minimum (20 ACPH minimum for ISO 8 per ISO 14644-3:2019). Results support cleanroom classification validation per ISO 14644-1 and EU GMP Annex 1.</field>
+    </record>
+
+    <record id="sop_rev_vl001_v3" model="hvac.sop.revision">
+        <field name="sop_id" ref="sop_vl_001"/>
+        <field name="revision_no">3</field>
+        <field name="version_label">Rev 03</field>
+        <field name="state">approved</field>
+        <field name="effective_date">2024-04-01</field>
+        <field name="next_review_date">2026-04-01</field>
+        <field name="change_summary">Rev 03: Added 5-point velocity traverse grid method for LAF units with area &gt;= 2 m2; included hot wire anemometer procedure for low-velocity zones (&lt;0.15 m/s); updated ACPH formula to align with ISO 14644-3:2019 Annex B1; added test condition documentation (at-rest vs in-operation).</field>
+        <field name="ppe_requirements">Full cleanroom gown, hood, gloves, mask, and shoe covers appropriate for the room classification. For Grade A/ISO 5 areas: sterile double gloves, sterile gown. Safety glasses when working near aerosol generators. No jewelry, watches, or personal items inside cleanroom.</field>
+        <field name="safety_precautions">1. Obtain gowning clearance and follow all cleanroom gowning procedures before entry.
+2. Do not touch HEPA filter face media — risk of puncture and contamination of the classified zone.
+3. Switch off critical equipment (open process vessels, product containers) before starting tests.
+4. All measurement equipment must be cleaned and wiped with 70% IPA before introduction into cleanroom.
+5. Anemometer probe must not touch filter face or frame — minimum 150mm clearance.
+6. Test must be conducted under stable HVAC conditions — minimum 30 min run time before measurement.
+7. Record room condition (At Rest / In Operation) at time of test — state change is not permitted mid-test.</field>
+        <field name="references">ISO 14644-1:2015 — Classification of Air Cleanliness by Particle Concentration
+ISO 14644-3:2019 (E) — Test Methods for Cleanrooms — Annex B1 Airflow Tests
+EU GMP Annex 1:2022 — Manufacture of Sterile Medicinal Products — Section 4 Cleanroom Design
+ISPE Baseline Guide Volume 5 — Commissioning and Qualification (C&amp;Q)
+WHO Technical Report Series No. 986 Annex 3 — Cleanroom Classification
+Schedule M (Revised) 2023 — Good Manufacturing Practices (Indian GMP)</field>
+        <field name="required_instrument_ids" eval="[(4, ref('inst_ach_1062')),(4, ref('inst_ach_1116')),(4, ref('inst_vta_1329')),(4, ref('inst_hwa_0018'))]"/>
+    </record>
+
+    <!-- VL-001 Steps -->
+    <record id="step_vl001_01" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">1</field>
+        <field name="name">Pre-Test Preparation and Gowning</field>
+        <field name="description">1.1 Review and obtain approved test protocol / validation master plan (VMP) for the area under test. Confirm test conditions (At Rest or In Operation) as specified in protocol.
+1.2 Gown per the SOG for the room classification — Grade D / ISO 8: dedicated cleanroom garments. Grade C / ISO 7: full cleanroom suit. Grade A/B / ISO 5/6: sterile garments.
+1.3 Wipe all instruments (anemometer probe, flow hood, data recorder) with lint-free IPA-70% wipes before bringing into cleanroom. Allow to dry.
+1.4 Allow all instruments to acclimatize inside the cleanroom for minimum 15 minutes before measurements.
+1.5 Verify instrument calibration certificates are valid and within calibration period.
+1.6 Ensure HVAC system has been running for minimum 30 minutes at stable conditions. Confirm no AHU alarms on BMS.
+1.7 Record room number, area, AHU tag, date, start time, ambient temperature, and RH at start of test.</field>
+        <field name="warning">Do NOT enter classified area without proper gowning. Any breach of gowning will contaminate the environment and invalidate test results.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl001_02" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">2</field>
+        <field name="name">Identification of Test Points and Filter Numbering</field>
+        <field name="description">2.1 Identify all HEPA filters in the room or LAF unit. Number each filter sequentially (F1, F2, F3...) from left to right, front to back.
+2.2 For each HEPA filter, mark the 5-point velocity measurement grid on the filter face using a reference diagram:
+    Point 1: Top-Left (150mm from corner)
+    Point 2: Top-Right (150mm from corner)
+    Point 3: Centre (geometric centre of filter)
+    Point 4: Bottom-Left (150mm from corner)
+    Point 5: Bottom-Right (150mm from corner)
+    For large filters (&gt; 1.2m x 0.6m): use 9-point grid (3x3 matrix).
+2.3 Record filter tag number as per equipment/cleanroom drawing (e.g., AHU-B01-14-SH-07).
+2.4 Record filter size (dimensions) and rated airflow (from filter data plate or schedule).
+2.5 Identify supply diffusers or ceiling HEPA filter positions and match to balance drawing.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">15</field>
+    </record>
+    <record id="step_vl001_03" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">3</field>
+        <field name="name">Air Velocity Measurement (5-Point Traverse Method)</field>
+        <field name="description">3.1 Select instrument: Digital Vane Probe Anemometer (for velocities &gt;0.15 m/s) or Hot Wire Anemometer (for velocities &lt;0.15 m/s or for precision LAF measurement).
+3.2 Position probe 150mm below the filter face at each of the 5 grid points (or 9 points for large filters). Hold probe steady for minimum 5 seconds at each point. Do not move probe during measurement.
+3.3 Record velocity reading at each point in m/s. Take reading when instrument reading is stable (not fluctuating &gt;0.02 m/s).
+3.4 Calculate average velocity: Avg. Velocity (m/s) = Sum of all readings / Number of readings.
+3.5 Uniformity Index = (Max reading - Min reading) / Average x 100. Should be &lt;20% for good uniformity.
+3.6 Repeat for all filters in the room / LAF unit.
+3.7 Acceptance: Average velocity = 0.45 m/s +/-20% (i.e., 0.36 to 0.54 m/s) for LAF unidirectional flow zones (ISO 14644-3 Annex B1.4 and EU GMP Annex 1).</field>
+        <field name="warning">Do not touch filter face with probe tip. Minimum clearance from filter face: 150mm. Physical contact will damage HEPA filter and invalidate the test.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl001_04" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">4</field>
+        <field name="name">CFM Measurement Using Air Capture Hood</field>
+        <field name="description">4.1 Select correct flow hood cone size for the diffuser / filter face. Standard 610mm x 610mm cone for HEPA filters. Custom adapter for non-standard sizes.
+4.2 Centre the flow hood over the diffuser or HEPA filter terminal. Hold firmly against ceiling / housing to ensure airtight seal. No visible air bypass around the hood periphery.
+4.3 Allow flow hood reading to stabilize (minimum 10 seconds after placement). Record CFM displayed.
+4.4 Repeat for all supply diffusers and HEPA filter terminals in the room.
+4.5 Sum all individual filter CFM values to obtain Total Supply Air Flow (TSAF) to the room.
+4.6 ACPH Calculation:
+    ACPH = (Total CFM x 60) / Room Volume (Ft3)
+    Or: ACPH = (Total LPS x 3.6) / Room Volume (m3)
+4.7 Room Volume (Ft3) = Room Length (ft) x Room Width (ft) x Room Height (ft) from civil drawings.
+4.8 Acceptance: ACPH &gt;= 20 for ISO 8 areas; &gt;= 240 ACPH for ISO 5 LAF zones.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl001_05" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">5</field>
+        <field name="name">Return Air and Differential Pressure Verification</field>
+        <field name="description">5.1 Verify return air grilles are unobstructed and free from dust accumulation.
+5.2 Using magnehelic gauge or digital manometer, measure room-to-corridor differential pressure. Record in Pa.
+5.3 Room pressure cascade (clean to less clean): Grade A/B rooms must maintain positive pressure vs. Grade C; Grade C vs. Grade D; Grade D vs. unclassified.
+5.4 Minimum positive pressure: 10-15 Pa between adjacent rooms of different classification (EU GMP Annex 1).
+5.5 Record all room pressure differentials on the test certificate.
+5.6 If room is at negative pressure (e.g., oncology, containment): verify negative pressure per protocol specification.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">15</field>
+    </record>
+    <record id="step_vl001_06" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">6</field>
+        <field name="name">Documentation, Reporting and Sign-Off</field>
+        <field name="description">6.1 Complete all fields in the Air Velocity and CFM Test Certificate:
+    - Client name and address
+    - AHU number, room name and room number
+    - Instrument used, calibration date, calibration due date
+    - Filter number, 5 velocity readings, average velocity (m/s)
+    - Filter CFM, total CFM, room volume, ACPH
+    - Acceptance criteria and Pass/Fail result
+6.2 If any result FAILS: Do not sign certificate. Record observation, raise NCR with root cause. Common causes: filter blockage, VFD speed error, duct leakage, damper misalignment, incorrect filter installation.
+6.3 After all results are compliant: Lead Engineer signs "Test Carried Out By". Client QA representative signs "Test Witnessed By". QA reviews and signs "Test Reviewed By".
+6.4 Submit completed certificate as part of validation package (DQ/IQ/OQ/PQ report).</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+
+    <!-- VL-001 Parameters -->
+    <record id="param_vl001_01" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">10</field>
+        <field name="parameter_code">FACE-VEL</field>
+        <field name="name">Filter Face Velocity — Average (5-point traverse)</field>
+        <field name="unit">m/s</field>
+        <field name="nominal_value">0.45</field>
+        <field name="min_value">0.36</field>
+        <field name="max_value">0.54</field>
+        <field name="tolerance">0.45 m/s +/-20% (ISO 14644-3:2019 / EU GMP Annex 1)</field>
+        <field name="test_method">ISO 14644-3:2019 Annex B1 — 5-point velocity traverse at 150mm from filter face</field>
+        <field name="instrument_type">anemometer</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One parameter row per HEPA filter. Enter filter tag in remarks. 3 of 5 readings in R1/R2/R3.</field>
+    </record>
+    <record id="param_vl001_02" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">20</field>
+        <field name="parameter_code">ACT-CFM</field>
+        <field name="name">Actual CFM per Supply Diffuser / HEPA Filter</field>
+        <field name="unit">CFM</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">0</field>
+        <field name="tolerance">Design CFM per room schedule +/-10% (ASHRAE 111 / ISO 14644-3)</field>
+        <field name="test_method">ISO 14644-3:2019 Annex B1 — Air capture hood (balometer) over each supply terminal</field>
+        <field name="instrument_type">flow_hood</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One row per filter/diffuser. Design CFM from room schedule. Enter tag number in remarks.</field>
+    </record>
+    <record id="param_vl001_03" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">30</field>
+        <field name="parameter_code">TOTAL-CFM</field>
+        <field name="name">Total Supply Air Flow to Room</field>
+        <field name="unit">CFM</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">0</field>
+        <field name="tolerance">Sum of all filter CFMs — design total +/-10%</field>
+        <field name="test_method">Summation of all individual filter CFM readings (flow hood method)</field>
+        <field name="instrument_type">flow_hood</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Enter calculated total CFM. Cross-check against AHU design airflow.</field>
+    </record>
+    <record id="param_vl001_04" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">40</field>
+        <field name="parameter_code">ACPH</field>
+        <field name="name">Air Changes Per Hour (ACPH)</field>
+        <field name="unit">ACPH</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">20</field>
+        <field name="max_value">0</field>
+        <field name="tolerance">Minimum 20 ACPH for ISO 8 (Grade D) — adjust per room classification</field>
+        <field name="test_method">ISO 14644-3:2019 / WHO TRS 986 — ACPH = (Total CFM x 60) / Room Volume (ft3)</field>
+        <field name="instrument_type">none</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Calculated value. ISO 7/Grade C: min 40 ACPH. ISO 6: min 100 ACPH. ISO 5 LAF: min 240 ACPH.</field>
+    </record>
+    <record id="param_vl001_05" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl001_v3"/>
+        <field name="sequence">50</field>
+        <field name="parameter_code">ROOM-DP</field>
+        <field name="name">Room Differential Pressure (vs. adjacent)</field>
+        <field name="unit">Pa</field>
+        <field name="nominal_value">12.5</field>
+        <field name="min_value">10</field>
+        <field name="max_value">25</field>
+        <field name="tolerance">+10 to +25 Pa positive pressure vs. adjacent less-clean area (EU GMP Annex 1)</field>
+        <field name="test_method">Digital micro-manometer via pressure tap or under-door gap — adjacent room reference</field>
+        <field name="instrument_type">manometer</field>
+        <field name="is_mandatory">False</field>
+        <field name="remarks">For negative pressure / containment rooms: spec is negative. Enter actual sign as +/- in value.</field>
+    </record>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION SOP 2 — HEPA FILTER INTEGRITY TEST (PAO / DOP TEST)
+     Code: MHPL-SOP-VL-002 | Revision 02 (current: MHPL-VL-002-02)
+═══════════════════════════════════════════════════════════════════ -->
+
+    <record id="sop_vl_002" model="hvac.sop">
+        <field name="name">HEPA Filter Integrity Test — PAO / DOP Aerosol Challenge</field>
+        <field name="code">MHPL-SOP-VL-002</field>
+        <field name="category">cleanroom_validation</field>
+        <field name="scope">Applicable to all HEPA (H13/H14) and ULPA (U15/U16) filters installed in cleanroom terminal filter housings, LAF units, Biosafety Cabinets, AHU filter banks, and isolators in pharmaceutical, biotech, and medical device manufacturing facilities. Covers both in-situ installed filters and newly replaced filters.</field>
+        <field name="purpose">To verify the integrity of HEPA filters — detecting leaks in filter media, gasket/seal, housing, and frame using PAO (Poly-Alpha-Olefin) aerosol photometry. Acceptance limit: downstream leakage Not More Than (NMT) 0.01% of upstream challenge concentration, per ISO 14644-3:2019 Annex B6 and EU GMP Annex 1.</field>
+    </record>
+
+    <record id="sop_rev_vl002_v2" model="hvac.sop.revision">
+        <field name="sop_id" ref="sop_vl_002"/>
+        <field name="revision_no">2</field>
+        <field name="version_label">Rev 02</field>
+        <field name="state">approved</field>
+        <field name="effective_date">2023-01-15</field>
+        <field name="next_review_date">2025-01-15</field>
+        <field name="change_summary">Rev 02: Updated PAO challenge concentration range to 20-80 ug/lit (replacing fixed 60 ug/lit); added upstream recovery check (85-115%) as pass criterion to ensure challenge was maintained during scan; clarified scanning speed max 50mm/sec; added mandatory upstream re-check after each 5 filters scanned.</field>
+        <field name="ppe_requirements">Full cleanroom gown appropriate for the area. Chemical-resistant gloves when handling PAO aerosol generator. Safety glasses / goggles — PAO is an irritant to eyes. Lab coat and gloves for technician operating generator outside the cleanroom. PAO aerosol is not toxic but may cause irritation at high concentrations — ensure ventilation in photometer operation area.</field>
+        <field name="safety_precautions">1. PAO (Poly-Alpha-Olefin) aerosol — non-toxic at test concentrations but avoid prolonged inhalation. Work with adequate ventilation.
+2. Do not use DOP (Di-Octyl-Phthalate) — banned in pharmaceutical applications due to potential carcinogenicity. Use only PAO or Emery 3004 alternatives.
+3. The aerosol generator must be placed upstream of the AHU fan (in AHU plenum) — never inject aerosol into room air directly.
+4. Disable fire detection systems (smoke detectors) in the area before aerosol generation — PAO will trigger smoke alarms.
+5. Re-enable fire detection immediately after test completion.
+6. All process equipment, open containers, and product must be removed from room before testing.
+7. After test: run HVAC for minimum 30 minutes to purge PAO residue from the room.</field>
+        <field name="references">ISO 14644-3:2019 (E) Annex B6 — Filter Leakage Test (Aerosol Photometer Method)
+EU GMP Annex 1:2022 — Manufacture of Sterile Medicinal Products — HEPA Filter Integrity
+EN 1822-4 — High Efficiency Air Filters (EPA, HEPA, ULPA) — Filter Type Determination
+IEST-RP-CC034.3 — HEPA and ULPA Filter Leak Tests
+WHO Technical Report Series No. 986 Annex 3 — Clean Room Classification
+Schedule M (Revised) 2023 — Indian GMP — Filter Integrity</field>
+        <field name="required_instrument_ids" eval="[(4, ref('inst_apm_0030')),(4, ref('inst_apm_0031')),(4, ref('inst_pg_1180'))]"/>
+    </record>
+
+    <!-- VL-002 Steps -->
+    <record id="step_vl002_01" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">1</field>
+        <field name="name">Pre-Test Preparation and Safety Measures</field>
+        <field name="description">1.1 Remove all product, open containers, process equipment from the cleanroom. Confirm with QA/Production supervisor before proceeding.
+1.2 Disable smoke/fire detection sensors in the test room and adjacent areas that may be affected by aerosol — obtain permit from safety officer. Document disabling time.
+1.3 Gown per room classification procedures.
+1.4 Wipe all test equipment with IPA-70% before entry into cleanroom.
+1.5 Verify aerosol photometer (downstream sampler) calibration certificate is valid.
+1.6 Verify PAO aerosol generator is functional — check oil reservoir, heater, and air pressure supply (typically 5-7 bar compressed air).
+1.7 Position PAO generator upstream: in AHU return air plenum, or inject through dedicated injection port on AHU upstream face.
+1.8 Zero the photometer in clean air (no aerosol) — reading must display 0.000% before test.</field>
+        <field name="warning">CRITICAL: Disable ALL fire/smoke detectors before aerosol generation. Failure to do so will trigger fire suppression system activation — severe consequences for facility and personnel safety.</field>
+        <field name="responsible">supervisor</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl002_02" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">2</field>
+        <field name="name">PAO Challenge — Upstream Concentration Establishment</field>
+        <field name="description">2.1 Start PAO aerosol generator. Allow aerosol to distribute through AHU ducting for minimum 5 minutes before measuring upstream concentration.
+2.2 Insert the upstream photometer sampling probe through the AHU upstream sampling port. Measure upstream PAO concentration.
+2.3 REQUIRED: Upstream concentration must be between 20 and 80 µg/lit (micrograms per liter) during the downstream scan. Record actual upstream concentration (Before value).
+2.4 If upstream concentration is &lt;20 µg/lit: increase PAO generator output or reduce air supply pressure to generator to increase concentration.
+2.5 If upstream concentration is &gt;80 µg/lit: reduce PAO generator output.
+2.6 Once upstream concentration is stable within 20-80 µg/lit range: proceed to downstream scanning.
+2.7 Note upstream concentration at start of scan — this is the "Before" value for recovery calculation.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+    <record id="step_vl002_03" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">3</field>
+        <field name="name">Downstream Filter Scanning</field>
+        <field name="description">3.1 Position downstream photometer probe approximately 25-50mm from the downstream face of the HEPA filter (within the terminal housing or diffuser).
+3.2 SCAN SPEED: Move the probe slowly and continuously across the entire downstream filter face in overlapping W-pattern or S-pattern. Maximum scan speed: 50mm per second.
+3.3 Scan entire filter face including all corners, edges, seals/gaskets, and filter frame joints — these are the most likely leak locations.
+3.4 If photometer reading exceeds 0.01%: mark the leak location with tape on the filter frame. Note exact position (grid coordinates) on test data sheet.
+3.5 After scanning all filters in the room: re-check upstream concentration (After value). Record.
+3.6 UPSTREAM RECOVERY CHECK: (After / Before) x 100 must be between 85% and 115%. If not: upstream concentration was not stable during scan — re-test required.
+3.7 ACCEPTANCE: Downstream leakage NMT 0.01% of upstream concentration.
+3.8 FAIL: Any reading &gt;0.01% = filter leak detected. Do not pass. Document leak location and raise NCR.</field>
+        <field name="warning">If leak is detected: Do NOT attempt to repair filter in-situ with tape or sealant unless specifically approved by validation protocol. Most pharmaceutical sites require replacement of the defective filter.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">45</field>
+    </record>
+    <record id="step_vl002_04" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">4</field>
+        <field name="name">Aerosol Purge and System Restoration</field>
+        <field name="description">4.1 Stop PAO generator. Remove generator from AHU plenum or injection port. Re-seal injection port.
+4.2 Run HVAC at full airflow for minimum 30 minutes to purge PAO residue from ductwork, filters, and room air.
+4.3 Re-enable smoke/fire detection systems — document re-enable time. Verify detectors are operational (test function if required).
+4.4 Wipe down all surfaces in room that may have accumulated PAO residue using IPA-70% wipes.
+4.5 Verify HVAC is running normally — check BMS for alarms.
+4.6 Allow room to return to steady-state conditions before any manufacturing activity.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">45</field>
+    </record>
+    <record id="step_vl002_05" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">5</field>
+        <field name="name">Documentation and Test Certificate Completion</field>
+        <field name="description">5.1 Complete HEPA Filter Integrity Test Certificate for each room tested:
+    - AHU number, room name, room number
+    - Instruments: aerosol photometer model, serial, calibration dates; pressure gauge
+    - For each filter: Filter tag number, upstream conc. (Before), leakage %, upstream conc. (After), upstream recovery %, PAO test result (PASS/FAIL), remarks
+    - Overall room result (PASS/FAIL)
+    - Acceptance criteria reference: ISO 14644-3:2019
+5.2 For PASS: Lead Engineer and client QA representative sign. Submit with validation package.
+5.3 For FAIL: Do not certify. Raise NCR. Arrange filter replacement. Re-test after replacement. Attach NCR number to test certificate.
+5.4 Re-enable all fire detection systems (if not already done in Step 4.3) — obtain written confirmation.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+
+    <!-- VL-002 Parameters -->
+    <record id="param_vl002_01" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">10</field>
+        <field name="parameter_code">UPSTREAM</field>
+        <field name="name">Upstream Challenge Concentration (Before Scan)</field>
+        <field name="unit">µg/lit</field>
+        <field name="nominal_value">50</field>
+        <field name="min_value">20</field>
+        <field name="max_value">80</field>
+        <field name="tolerance">20 to 80 µg/lit (ISO 14644-3:2019 Annex B6 requirement)</field>
+        <field name="test_method">ATI Aerosol Photometer upstream sampling port — stable reading for 30 seconds</field>
+        <field name="instrument_type">aerosol_photometer</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">If outside 20-80 range: do not proceed. Adjust generator output and re-check.</field>
+    </record>
+    <record id="param_vl002_02" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">20</field>
+        <field name="parameter_code">LEAKAGE</field>
+        <field name="name">Downstream Filter Leakage (Maximum Reading During Scan)</field>
+        <field name="unit">%</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">0.01</field>
+        <field name="tolerance">NMT 0.01% — Not More Than (ISO 14644-3:2019 / EU GMP Annex 1)</field>
+        <field name="test_method">ATI Aerosol Photometer downstream scanning at max 50mm/sec — W-pattern across full filter face</field>
+        <field name="instrument_type">aerosol_photometer</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One row per filter. Enter max reading encountered during scan. Record filter tag in remarks.</field>
+    </record>
+    <record id="param_vl002_03" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">30</field>
+        <field name="parameter_code">UPSTREAM-A</field>
+        <field name="name">Upstream Challenge Concentration (After Scan)</field>
+        <field name="unit">µg/lit</field>
+        <field name="nominal_value">50</field>
+        <field name="min_value">20</field>
+        <field name="max_value">80</field>
+        <field name="tolerance">20 to 80 µg/lit (must remain within range throughout scan)</field>
+        <field name="test_method">ATI Aerosol Photometer upstream — re-read after completing all filter scans</field>
+        <field name="instrument_type">aerosol_photometer</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Must be within 20-80 range. If outside: upstream unstable during scan — re-test required.</field>
+    </record>
+    <record id="param_vl002_04" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl002_v2"/>
+        <field name="sequence">40</field>
+        <field name="parameter_code">RECOVERY</field>
+        <field name="name">Upstream Concentration Recovery Check (After/Before x 100)</field>
+        <field name="unit">%</field>
+        <field name="nominal_value">100</field>
+        <field name="min_value">85</field>
+        <field name="max_value">115</field>
+        <field name="tolerance">85% to 115% — confirms upstream concentration was stable during scan</field>
+        <field name="test_method">Calculated: (Upstream After / Upstream Before) x 100</field>
+        <field name="instrument_type">none</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Calculated parameter. If outside 85-115%: concentration was unstable. Invalidate and re-test.</field>
+    </record>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION SOP 3 — NON-VIABLE PARTICLE COUNT TEST (NVPC)
+     Code: MHPL-SOP-VL-003 | Revision 02 (current: MHPL-VL-003-02)
+═══════════════════════════════════════════════════════════════════ -->
+
+    <record id="sop_vl_003" model="hvac.sop">
+        <field name="name">Non-Viable Particle Count Test — Cleanroom Classification</field>
+        <field name="code">MHPL-SOP-VL-003</field>
+        <field name="category">cleanroom_validation</field>
+        <field name="scope">Applicable to all classified cleanrooms and clean zones (ISO 5 through ISO 8) in pharmaceutical, biotech, medical device, and food manufacturing facilities. Covers both At-Rest and In-Operation state testing as required by ISO 14644-1, EU GMP Annex 1, and Schedule M (Revised).</field>
+        <field name="purpose">To determine the concentration of airborne non-viable particles at 0.5 µm and 5.0 µm size thresholds at defined sampling locations within classified spaces, and to verify compliance with the ISO 14644-1 cleanliness classification for the designated room grade. Results establish the particle cleanliness class for validation purposes.</field>
+    </record>
+
+    <record id="sop_rev_vl003_v2" model="hvac.sop.revision">
+        <field name="sop_id" ref="sop_vl_003"/>
+        <field name="revision_no">2</field>
+        <field name="version_label">Rev 02</field>
+        <field name="state">approved</field>
+        <field name="effective_date">2023-03-01</field>
+        <field name="next_review_date">2025-03-01</field>
+        <field name="change_summary">Rev 02: Updated to ISO 14644-1:2015 (replaces 1999 edition); revised sampling location calculation method (Equation A.1 in ISO 14644-1:2015 Annex A); minimum sample volume updated to 2L per location for ISO 5; added requirement for 5 sampling locations minimum per room; clarified 95% UCL statistical analysis requirement for rooms with &gt;2 sampling locations.</field>
+        <field name="ppe_requirements">Full cleanroom gown per area classification. For Grade A/ISO 5: sterile double gloves, sterile gown, face shield. For Grade B/ISO 6: dedicated cleanroom suit, face mask, gloves. Particle counter sampling tube must not be touched with bare hands. All equipment IPA-wiped before entry.</field>
+        <field name="safety_precautions">1. Personnel must minimize movement during particle counting — walking, talking, or activity generates particles that will inflate readings.
+2. Do not sample near air supply diffusers or HEPA filters — turbulence gives non-representative readings.
+3. Particle counter must be placed on a stable surface or stand — vibration causes false counts.
+4. Wait minimum 5 minutes after entering/positioning equipment before starting sample.
+5. For In-Operation tests: minimum personnel in room = those required for routine operation. Visitors should minimize entry during sampling.
+6. Sample tubing must be straight (no kinks) and minimum bends — particle loss in bends affects accuracy.</field>
+        <field name="references">ISO 14644-1:2015 — Cleanrooms — Classification of Air Cleanliness by Particle Concentration
+ISO 14644-2:2015 — Monitoring to Provide Evidence of Cleanroom Performance
+ISO 14644-3:2019 — Test Methods — Annex B3 Airborne Particle Counting
+ISO 21501-4 — Liquid-borne and airborne particle counters — Calibration standard
+EU GMP Annex 1:2022 — Sections 4.3 to 4.12 — Cleanroom Grade Classification
+WHO TRS 986 Annex 3:2014 — Classification of clean zones and cleanrooms
+Schedule M (Revised) 2023 — Indian GMP — Clean Room Requirements</field>
+        <field name="required_instrument_ids" eval="[(4, ref('inst_pc_0042')),(4, ref('inst_pc_0043')),(4, ref('inst_pc_5100'))]"/>
+    </record>
+
+    <!-- VL-003 Steps -->
+    <record id="step_vl003_01" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">1</field>
+        <field name="name">Pre-Test Preparation and Sampling Location Planning</field>
+        <field name="description">1.1 Confirm room ISO classification and test state (At Rest / In Operation) from validation protocol.
+1.2 Calculate minimum number of sampling locations (NL) using ISO 14644-1:2015 Annex A Equation A.1:
+    NL = A (room area in m2) ^ 0.5
+    Round up to nearest whole number. Minimum: 1 sampling location for rooms &lt; 1 m2, maximum based on area.
+    Typical: &lt;10 m2 = 2 locations; 10-25 m2 = 3-5 locations; 25-50 m2 = 5-7 locations.
+1.3 Mark sampling locations on the room layout drawing. Distribute locations evenly — avoid corners (within 1m of wall), near return grilles, or directly below supply diffusers.
+1.4 Sampling height: 0.7-1.2m from floor for ISO 8-7 rooms; working zone height for ISO 6-5 rooms.
+1.5 Calculate minimum sample volume (Vs) per ISO 14644-1:2015 Annex A:
+    Vs = (20 / C_n) x 1000 (litres) where C_n = ISO class limit for 0.5 µm
+    ISO 8: Vs = (20 / 3520000) x 1000 x 1,000,000 = ~5.7 L (round up to 10 L minimum)
+    ISO 7: ~57 L | ISO 6: ~570 L | ISO 5: &gt;5700 L (use 100 LPM instrument).
+1.6 Select appropriate particle counter: Lasair III 310C (28.3 LPM) for ISO 5-7; Lasair III 5100 (100 LPM) for ISO 8 large rooms.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+    <record id="step_vl003_02" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">2</field>
+        <field name="name">Particle Counter Setup and Verification</field>
+        <field name="description">2.1 Wipe particle counter housing (NOT the sampling inlet) with IPA-70%. Allow to dry.
+2.2 Bring particle counter into cleanroom. Allow 10-15 minutes acclimatization before sampling.
+2.3 Power on the particle counter. Check battery level — minimum 50% before starting test.
+2.4 Verify particle counter settings:
+    - Flow rate: 28.3 LPM (310C model) or 100 LPM (5100 model)
+    - Sample volume: as calculated (minimum 2 m3 per location for ISO 8)
+    - Sample time: Auto-calculated from volume and flow rate
+    - Channels: 0.5 µm and 5.0 µm (for ISO classification)
+2.5 Perform zero count check: cover inlet with HEPA-filtered zero-count cap for 1 minute. Count should be zero. If not: counter requires maintenance.
+2.6 Record: instrument serial number, calibration certificate number, calibration date, flow rate, sample volume per location, sample time per location.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">20</field>
+    </record>
+    <record id="step_vl003_03" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">3</field>
+        <field name="name">Particle Counting at Designated Locations</field>
+        <field name="description">3.1 Position particle counter at Location L1 (pre-marked). Ensure sampling inlet faces upward (for horizontal unidirectional flow: face into airflow direction).
+3.2 Sampling tube: orient vertically upward or in direction of airflow. Minimize tube length (max 1m). No kinks or tight bends.
+3.3 Allow counter to run and reach stable airflow (watch flow rate indicator) — typically 1 minute warm-up time after positioning.
+3.4 Start sample. Do not move counter, speak, or make sudden movements near the counter during sampling.
+3.5 Record results at 0.5 µm and 5.0 µm channels (particles per m3). System auto-converts from counts/sample to per-m3.
+3.6 Take minimum 3 consecutive sample runs at each location (for rooms with &lt;= 2 locations) OR 1 run per location (for rooms with &gt;= 3 locations).
+3.7 Repeat for all sampling locations (L1 through LN).
+3.8 For In-Operation test: normal room activity must continue during sampling (same personnel and activities as routine production).</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">60</field>
+    </record>
+    <record id="step_vl003_04" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">4</field>
+        <field name="name">Statistical Analysis and Classification Verification</field>
+        <field name="description">4.1 For rooms with &lt;= 2 sampling locations: use the highest single reading at each location for comparison vs. ISO class limit.
+4.2 For rooms with &gt; 2 sampling locations: calculate mean (average) particle count across all locations for each particle size. Also calculate 95% Upper Confidence Limit (95% UCL):
+    95% UCL = Mean + (t x SD / sqrt(N))
+    where t = 1.645 (one-sided for 95%), SD = standard deviation, N = number of locations.
+4.3 Compare mean (or 95% UCL) against ISO class limits:
+    ISO 8 (Grade D): 0.5 µm &lt;= 3,520,000 / m3 | 5.0 µm &lt;= 29,300 / m3
+    ISO 7 (Grade C): 0.5 µm &lt;= 352,000 / m3 | 5.0 µm &lt;= 2,930 / m3
+    ISO 6:           0.5 µm &lt;= 35,200 / m3  | 5.0 µm &lt;= 293 / m3
+    ISO 5 (Grade A/B): 0.5 µm &lt;= 3,520 / m3 | 5.0 µm &lt;= 29 / m3
+4.4 PASS: All values (or 95% UCL) &lt;= ISO class limit for designated grade — room PASSES classification at tested state.
+4.5 FAIL: Any value exceeds limit — room does NOT meet classification. Investigate: check HVAC performance, HEPA integrity, garment contamination, activity levels.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+    <record id="step_vl003_05" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">5</field>
+        <field name="name">Documentation and Test Certificate</field>
+        <field name="description">5.1 Complete Non-Viable Particle Count Test Certificate:
+    - Client, AHU, room name and number, test date
+    - Test state: At Rest / In Operation
+    - Instrument details: make, model, serial number, flow rate, sampling volume, calibration dates
+    - For each location (L1...LN): particle counts at 0.5 µm and 5.0 µm
+    - Mean, SD, 95% UCL (if &gt;2 locations)
+    - ISO class limit table for reference
+    - Overall classification result: Passes / Does Not Pass ISO _ _ at [At Rest / In Operation]
+5.2 Attach raw data printout from particle counter (if available) to the certificate.
+5.3 Both parties sign: Test Carried Out By (Micron HVAC Engineer) and Test Witnessed By (Client QA).
+5.4 Submit with validation package (IQ/OQ/PQ dossier).</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">20</field>
+    </record>
+
+    <!-- VL-003 Parameters (ISO 8 room — most common for pharmaceutical support areas) -->
+    <record id="param_vl003_01" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">10</field>
+        <field name="parameter_code">PC-0.5-AT-REST</field>
+        <field name="name">Particle Count at 0.5 µm — At Rest (per m3)</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">3520000</field>
+        <field name="tolerance">Max 3,520,000 particles/m3 at 0.5 µm — ISO 8 / Grade D (At Rest)</field>
+        <field name="test_method">ISO 14644-1:2015 / ISO 14644-3:2019 Annex B3 — Lasair III particle counter, min sample volume per standard</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One row per sampling location. Enter location (L1, L2...) in remarks. For ISO 7/Grade C: max 352,000. For ISO 5/Grade A: max 3,520.</field>
+    </record>
+    <record id="param_vl003_02" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">20</field>
+        <field name="parameter_code">PC-5.0-AT-REST</field>
+        <field name="name">Particle Count at 5.0 µm — At Rest (per m3)</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">29300</field>
+        <field name="tolerance">Max 29,300 particles/m3 at 5.0 µm — ISO 8 / Grade D (At Rest)</field>
+        <field name="test_method">ISO 14644-1:2015 — Lasair III particle counter, concurrent with 0.5 µm measurement</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">ISO 7/Grade C: max 2,930. ISO 6: max 293. ISO 5/Grade A: max 29. Adjust limit per protocol.</field>
+    </record>
+    <record id="param_vl003_03" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">30</field>
+        <field name="parameter_code">PC-0.5-IN-OP</field>
+        <field name="name">Particle Count at 0.5 µm — In Operation (per m3)</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">3520000</field>
+        <field name="tolerance">Max 3,520,000 particles/m3 — ISO 8 / Grade D In Operation</field>
+        <field name="test_method">ISO 14644-1:2015 — Same method as At Rest, during normal production activity</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">False</field>
+        <field name="remarks">Only if In-Operation test specified in protocol. Grade C (ISO 7) in operation: max 352,000.</field>
+    </record>
+    <record id="param_vl003_04" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl003_v2"/>
+        <field name="sequence">40</field>
+        <field name="parameter_code">PC-5.0-IN-OP</field>
+        <field name="name">Particle Count at 5.0 µm — In Operation (per m3)</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">29300</field>
+        <field name="tolerance">Max 29,300 particles/m3 — ISO 8 / Grade D In Operation</field>
+        <field name="test_method">ISO 14644-1:2015 — Concurrent with 0.5 µm In-Operation measurement</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">False</field>
+        <field name="remarks">Grade C in operation: max 2,930. Grade A/B: same at-rest and in-operation limits apply.</field>
+    </record>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION SOP 4 — RECOVERY STUDY
+     Code: MHPL-SOP-VL-004 | Revision 02 (current: MHPL-VL-004-02)
+═══════════════════════════════════════════════════════════════════ -->
+
+    <record id="sop_vl_004" model="hvac.sop">
+        <field name="name">Recovery Study — Cleanroom Self-Recovery Performance</field>
+        <field name="code">MHPL-SOP-VL-004</field>
+        <field name="category">cleanroom_validation</field>
+        <field name="scope">Applicable to all classified cleanrooms (ISO 5 through ISO 8) that require recovery performance qualification as part of cleanroom validation. Particularly required for: (a) sterile manufacturing areas Grade A/B, (b) rooms recovering from gross contamination events, and (c) facilities requiring EU GMP Annex 1 / ISPE Baseline compliance.</field>
+        <field name="purpose">To demonstrate that the HVAC system can restore the cleanroom to its specified ISO cleanliness classification within NMT 15 minutes (NMT 20 minutes for some protocols) following a deliberate airborne contamination challenge. This confirms that the air handling system has sufficient capacity and efficiency to recover from contamination events that may occur during actual manufacturing operations.</field>
+    </record>
+
+    <record id="sop_rev_vl004_v2" model="hvac.sop.revision">
+        <field name="sop_id" ref="sop_vl_004"/>
+        <field name="revision_no">2</field>
+        <field name="version_label">Rev 02</field>
+        <field name="state">approved</field>
+        <field name="effective_date">2023-06-01</field>
+        <field name="next_review_date">2025-06-01</field>
+        <field name="change_summary">Rev 02: Clarified challenge agent (compressed air or aerosol generator) and challenge concentration requirement (&gt;= 100x ISO class limit); added minimum 3 consecutive recovery cycles for statistical reliability; updated to reference ISO 14644-3:2019 Annex B12; included washout time calculation method.</field>
+        <field name="ppe_requirements">Full cleanroom gown per room classification. Safety glasses when operating compressed air lance (high pressure spray — potential for particle splash). No open food, drink, or biological material inside cleanroom. For Grade A/B rooms: sterile garments required throughout test.</field>
+        <field name="safety_precautions">1. Ensure no product, open process containers, or critical equipment in the cleanroom during challenge phase.
+2. Challenge agent (compressed air lance or aerosol generator): do not direct at personnel or equipment.
+3. After artificial contamination: do not open cleanroom doors during recovery period — pressure cascade must be maintained.
+4. Allow full recovery before re-entering for manufacturing.
+5. All personnel non-essential to the test must exit the cleanroom before challenge generation.</field>
+        <field name="references">ISO 14644-3:2019 (E) Annex B12 — Recovery Test Method
+ISPE Baseline Guide Vol. 5 — C&amp;Q Appendix M7 — Recovery Study
+EU GMP Annex 1:2022 — Clean Room Design and Qualification
+WHO TRS 986 Annex 3 — Supplementary guideline on GMP for cleanrooms
+PDA TR-13 — Fundamentals of an Environmental Monitoring Program
+Schedule M (Revised) 2023 — Indian GMP — Cleanroom Performance Testing</field>
+        <field name="required_instrument_ids" eval="[(4, ref('inst_pc_0042')),(4, ref('inst_pc_0043'))]"/>
+    </record>
+
+    <!-- VL-004 Steps -->
+    <record id="step_vl004_01" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">1</field>
+        <field name="name">Pre-Test Setup and Initial Particle Count Verification</field>
+        <field name="description">1.1 Gown and enter cleanroom. Ensure cleanroom is in At-Rest condition per ISO 14644-1:2015 definition (all equipment running, no personnel activity).
+1.2 Allow HVAC to operate at full airflow for minimum 30 minutes before starting.
+1.3 Set up particle counter at the room's worst-case location (typically centre of room or furthest from supply diffuser).
+1.4 Take INITIAL baseline particle count: minimum 3 consecutive 1-minute samples at 0.5 µm and 5.0 µm. Average the counts.
+1.5 VERIFICATION: Initial count MUST be at or below the ISO class limit for the room's designated grade. If initial count exceeds class limit: room is already out-of-specification. Stop test — investigate HVAC, HEPA, and contamination sources before proceeding.
+1.6 Record: Initial count (particles/m3 at 0.5 µm and 5.0 µm), time of reading.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">45</field>
+    </record>
+    <record id="step_vl004_02" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">2</field>
+        <field name="name">Artificial Contamination Challenge</field>
+        <field name="description">2.1 CHALLENGE METHOD: Use compressed air lance or particle generator to introduce challenge particles into room air.
+    Option A (Compressed Air): Direct a compressed air jet (5-7 bar) at a particle-generating source (floor surface, cardboard, clothing fabric) for 30-60 seconds. Generate a visible dust cloud.
+    Option B (Aerosol Generator): Use aerosol generator to inject a controlled particle cloud (same PAO as VL-002 or water-based aerosol).
+2.2 CHALLENGE QUANTITY: Continue challenge until particle counter shows particle counts &gt;= 100 times the ISO class limit at 0.5 µm.
+    Example for ISO 6 room (limit: 35,200): challenge until count &gt;= 3,520,000 particles/m3.
+    Example for ISO 8 room (limit: 3,520,000): challenge until count &gt;= 100,000,000 (if achievable) — some protocols specify achieving any count significantly above ISO class limit.
+2.3 Record: Peak particle count during challenge (particles/m3 at 0.5 µm), time challenge started (AHU Condition: Generation — Start time).
+2.4 Stop challenge agent. Immediately start timing the recovery period.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">15</field>
+    </record>
+    <record id="step_vl004_03" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">3</field>
+        <field name="name">Recovery Monitoring — Continuous Particle Counting</field>
+        <field name="description">3.1 Immediately after stopping the challenge agent: begin continuous particle counting at 1-minute intervals.
+3.2 Record particle count at 0.5 µm and 5.0 µm for EACH 1-minute interval. Record exact Start and End time for each interval.
+3.3 Continue monitoring until particle count at 0.5 µm falls BELOW the ISO class limit for the room's designated grade AND STAYS below for minimum 2 consecutive readings.
+3.4 RECOVERY TIME = Time at which class limit is first achieved and sustained minus Time at which challenge was stopped.
+    B = Time at which room achieved ISO class (first reading at or below limit)
+    A = Time at which AHU condition returned to normal (challenge stopped)
+    Recovery Period = B - A (in minutes and seconds)
+3.5 Record all intermediate readings — these form the recovery curve. The data should show a smooth exponential decay from peak count to ISO class.
+3.6 After room achieves class: continue monitoring for 5 more minutes to confirm sustained compliance.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl004_04" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">4</field>
+        <field name="name">Repeat Cycles and Statistical Confirmation</field>
+        <field name="description">4.1 Allow room to return fully to At-Rest condition (all particle counts stable at or below ISO class limit) before starting the next recovery cycle.
+4.2 Repeat Steps 2 and 3 for minimum 3 total recovery cycles (as required by most validation protocols and ISPE Baseline Guide Vol. 5).
+4.3 Record recovery time for each cycle. Calculate mean recovery time across all cycles.
+4.4 All 3 cycles must achieve recovery within NMT 15 minutes.
+4.5 If any cycle exceeds 15 minutes: FAIL — investigate HVAC airflow, filter condition, room integrity (door seals, pressure cascade), and ACPH.
+4.6 Document each cycle's: Initial count, Peak challenge count, Recovery time (minutes:seconds), Final confirmatory count.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">60</field>
+    </record>
+    <record id="step_vl004_05" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">5</field>
+        <field name="name">Documentation and Test Certificate Completion</field>
+        <field name="description">5.1 Complete Recovery Study Test Certificate:
+    - Client, AHU, room name and number, test date
+    - Instrument details (particle counter make, model, serial, calibration dates, flow rate, sample volume)
+    - Tabular data: AHU Condition | Start Time | End Time | 0.5 µm count | 5.0 µm count | Remarks
+    - AHU Conditions: Initial | Generation | Recovery (each 1-minute interval)
+    - Time A (challenge stopped) and Time B (class achieved)
+    - Recovery Period = B - A
+    - Acceptance criteria: NMT 15 minutes (ISO 14644-3:2019 / ISPE)
+    - ISO class reference limits for the room
+    - PASS / FAIL result
+5.2 Attach particle counter raw data printout to certificate.
+5.3 Both parties sign the certificate. Submit to validation dossier.
+5.4 For FAIL: raise NCR, investigate, correct HVAC, and repeat recovery test after corrections.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">25</field>
+    </record>
+
+    <!-- VL-004 Parameters -->
+    <record id="param_vl004_01" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">10</field>
+        <field name="parameter_code">INIT-CNT</field>
+        <field name="name">Initial Baseline Particle Count (0.5 µm) — At Rest</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">35200</field>
+        <field name="tolerance">Must be at or below ISO class limit at start. ISO 6 limit: 35,200/m3 at 0.5 µm</field>
+        <field name="test_method">ISO 14644-3:2019 Annex B12 — Lasair III particle counter, 3 x 1-minute samples, average</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">If initial count exceeds ISO class limit: room is out-of-specification. Stop test and investigate. Adjust limit per room grade.</field>
+    </record>
+    <record id="param_vl004_02" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">20</field>
+        <field name="parameter_code">PEAK-CNT</field>
+        <field name="name">Peak Challenge Particle Count (0.5 µm) — During Generation</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">3520000</field>
+        <field name="max_value">0</field>
+        <field name="tolerance">Must be &gt;= 100x ISO class limit to constitute a valid challenge</field>
+        <field name="test_method">Continuous monitoring during challenge generation — record maximum count</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">ISO 6 room: peak must be &gt;= 3,520,000 (100x35,200). Challenge is valid only if this is achieved.</field>
+    </record>
+    <record id="param_vl004_03" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">30</field>
+        <field name="parameter_code">RECOV-TIME</field>
+        <field name="name">Recovery Time (Challenge Stopped to ISO Class Achieved)</field>
+        <field name="unit">min</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">15</field>
+        <field name="tolerance">NMT 15 minutes per ISO 14644-3:2019 Annex B12 and ISPE Baseline Guide Vol. 5</field>
+        <field name="test_method">Time difference: B (class achieved) minus A (challenge stopped). Measured in minutes:seconds.</field>
+        <field name="instrument_type">none</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Enter time in decimal minutes (e.g., 3 min 00 sec = 3.00 min). All 3 cycles must pass.</field>
+    </record>
+    <record id="param_vl004_04" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl004_v2"/>
+        <field name="sequence">40</field>
+        <field name="parameter_code">FINAL-CNT</field>
+        <field name="name">Final Confirmatory Count (0.5 µm) After Recovery</field>
+        <field name="unit">particles/m3</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">35200</field>
+        <field name="tolerance">Must be at or below ISO class limit and sustained for min 2 consecutive readings</field>
+        <field name="test_method">Continuous monitoring — first reading below class limit triggers timer B. Confirm with next reading also below limit.</field>
+        <field name="instrument_type">particle_counter</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Record the count at which recovery was declared. Should be well below class limit, not borderline.</field>
+    </record>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VALIDATION SOP 5 — TEMPERATURE AND RH STUDY
+     Code: MHPL-SOP-VL-005 | Revision 02 (current: MHPL-VL-005-02)
+═══════════════════════════════════════════════════════════════════ -->
+
+    <record id="sop_vl_005" model="hvac.sop">
+        <field name="name">Temperature and Relative Humidity Study — Cleanroom Mapping</field>
+        <field name="code">MHPL-SOP-VL-005</field>
+        <field name="category">cleanroom_validation</field>
+        <field name="scope">Applicable to all temperature- and humidity-controlled cleanrooms, cold rooms, stability chambers, biological safety cabinets, and HVAC-controlled storage areas in pharmaceutical, biotech, and medical device manufacturing facilities. Covers both single-point measurement and multi-point 24-hour (or extended) temperature and humidity mapping studies.</field>
+        <field name="purpose">To verify that temperature and relative humidity within classified manufacturing and storage spaces are maintained within specified limits at all measurement locations, both during operational hours and outside operational hours, ensuring product quality, personnel comfort, and regulatory compliance with EU GMP, WHO, and Schedule M requirements.</field>
+    </record>
+
+    <record id="sop_rev_vl005_v2" model="hvac.sop.revision">
+        <field name="sop_id" ref="sop_vl_005"/>
+        <field name="revision_no">2</field>
+        <field name="version_label">Rev 02</field>
+        <field name="state">approved</field>
+        <field name="effective_date">2023-09-01</field>
+        <field name="next_review_date">2025-09-01</field>
+        <field name="change_summary">Rev 02: Extended monitoring period from 12 hours to 24 hours per regulatory expectation; added monitoring during HVAC off-cycle (night-time setback) where applicable; included door-open/door-close impact test; updated data logger placement grid and minimum number of loggers per room area.</field>
+        <field name="ppe_requirements">Standard cleanroom gown per room classification for data logger installation and retrieval. No special PPE required for routine temperature/RH monitoring (loggers are passive). For Biosafety Cabinet work: follow BSL-2 procedures. For cold room entry: appropriate thermal clothing.</field>
+        <field name="safety_precautions">1. Data loggers must be calibrated and not introduce particulate contamination — wipe with IPA before placement in classified areas.
+2. Do not place loggers in direct supply airflow — readings will be artificially low and not representative of room conditions.
+3. For cold rooms: do not stay inside longer than necessary — hypothermia risk for temperatures &lt;5 deg C.
+4. Ensure all data loggers are fully charged / battery replaced before extended monitoring periods.
+5. Do not disturb or relocate loggers during the monitoring period — data continuity is required.
+6. Inform Production and QA teams about the monitoring period — abnormal events (door left open, HVAC fault) must be documented.</field>
+        <field name="references">ISO 14644-1:2015 — Cleanroom Classification (T &amp; RH as supporting parameters)
+EU GMP Annex 1:2022 — Sections 4.4, 4.9 — Temperature and Humidity in Cleanrooms
+WHO TRS 986 Annex 3 — Clean Room Classification — Environmental Monitoring
+ICH Q1A(R2) — Stability Testing — Storage Conditions (25 deg C +/-2 / 60% RH +/-5)
+Schedule M (Revised) 2023 — Indian GMP — Environmental Conditions for Manufacturing
+ISPE Good Practice Guide: Heating, Ventilation, and Air Conditioning (HVAC)</field>
+        <field name="required_instrument_ids" eval="[(4, ref('inst_rh_logger_01')),(4, ref('inst_hwa_0018'))]"/>
+    </record>
+
+    <!-- VL-005 Steps -->
+    <record id="step_vl005_01" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">1</field>
+        <field name="name">Data Logger Preparation and Calibration Verification</field>
+        <field name="description">1.1 Select calibrated data loggers for the study. Minimum number per room:
+    Room &lt;= 10 m2:  2 loggers (one supply zone, one return zone)
+    Room 10-25 m2:  3 loggers
+    Room 25-50 m2:  5 loggers
+    Room &gt; 50 m2:   1 logger per 10 m2 (rounding up)
+    Additional logger: 1 near AHU supply / 1 near return grille (reference positions)
+1.2 Verify each data logger calibration certificate is valid and NABL accredited.
+1.3 Program data loggers: logging interval = 5 minutes (or per protocol). Monitoring period: minimum 24 hours (or as specified in validation protocol).
+1.4 Sync time on all loggers to the same reference clock (use a synchronized phone/server clock).
+1.5 Label each logger with unique ID, room number, and placement position (e.g., Room-14, Logger-3, Position P3 — Near Window).
+1.6 Wipe loggers with IPA-70% wipes before entering cleanroom.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">30</field>
+    </record>
+    <record id="step_vl005_02" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">2</field>
+        <field name="name">Data Logger Placement and Monitoring Start</field>
+        <field name="description">2.1 Map placement positions on room layout drawing before entering the room. Avoid:
+    - Within 300mm of air supply diffusers or HEPA terminals
+    - Within 300mm of walls or corners
+    - Near doors, windows, or other significant thermal loads
+    - Inside equipment or on top of product
+2.2 Place loggers at working zone height: 0.7-1.5m from floor for manufacturing areas; 1.0-1.5m for storage areas.
+2.3 START MONITORING: activate all loggers simultaneously. Record exact start time and date.
+2.4 For the initial equilibration check: remain in room for 5 minutes and observe logger displays are reading expected values. If any logger reads significantly outside expected range: check placement and calibration.
+2.5 DO NOT DISTURB loggers for the duration of the monitoring period. Instruct all room users accordingly.
+2.6 Document any extraordinary events during monitoring: HVAC fault, door left open &gt;5 min, power outage, equipment failure. These must be noted in the report and excursions explained.</field>
+        <field name="responsible">technician</field>
+        <field name="estimated_time">20</field>
+    </record>
+    <record id="step_vl005_03" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">3</field>
+        <field name="name">Data Retrieval and Analysis</field>
+        <field name="description">3.1 After the monitoring period ends: retrieve all data loggers from the room. Record exact end time and date. Verify each logger was active throughout (check battery and memory).
+3.2 Download data from each logger to laptop/PC using manufacturer software. Export as Excel or CSV.
+3.3 For EACH LOGGER: calculate Mean Temperature, Min Temperature, Max Temperature, Mean RH, Min RH, Max RH over the monitoring period.
+3.4 Calculate:
+    - Temperature Uniformity = Max Temperature - Min Temperature across ALL loggers at same time point. Should be &lt;= 2 deg C variation between locations.
+    - RH Uniformity = Max RH - Min RH across ALL loggers. Should be &lt;= 5% RH variation.
+    - Overall room mean temperature and RH.
+3.5 ACCEPTANCE CRITERIA — Pharmaceutical cleanrooms (general):
+    Temperature: 18 to 25 deg C (+/-2 deg C of setpoint)
+    Relative Humidity: 40% to 60% RH (+/-5% RH of setpoint)
+    Uniformity: Max variation between locations &lt;= 2 deg C and &lt;= 5% RH at any point in time
+    (Note: exact limits as specified in site validation protocol / GMP design basis)
+3.6 Identify any excursions: time periods when temperature or RH was outside specification. Document duration and severity.</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">60</field>
+    </record>
+    <record id="step_vl005_04" model="hvac.sop.step">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">4</field>
+        <field name="name">Documentation, Certificate, and Impact Assessment</field>
+        <field name="description">4.1 Complete Temperature and RH Study Report / Certificate:
+    - Client, room name, room number, AHU tag, study dates
+    - Instrument details: data logger make, model, serial numbers, calibration dates
+    - Placement position map (room drawing with logger positions P1...PN)
+    - Summary table: Logger ID | Position | Mean Temp | Min Temp | Max Temp | Mean RH | Min RH | Max RH | Result
+    - Maximum temperature variation (uniformity) and maximum RH variation
+    - Acceptance criteria and Pass/Fail result for each logger and overall room
+    - Time-series graphs: Temperature vs. Time and RH vs. Time for all loggers (attach as annexure)
+    - Any deviations / excursions with explanation
+4.2 PASS: All logger readings within acceptance criteria throughout monitoring period. Sign and certify.
+4.3 FAIL: One or more logger exceeds acceptance criteria. Raise NCR. Identify root cause: AHU control issues, setpoint calibration drift, room insulation, equipment heat generation, door sealing. Correct and re-test.
+4.4 Submit certified report as part of Qualification Dossier (IQ/OQ/PQ).</field>
+        <field name="responsible">engineer</field>
+        <field name="estimated_time">45</field>
+    </record>
+
+    <!-- VL-005 Parameters -->
+    <record id="param_vl005_01" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">10</field>
+        <field name="parameter_code">ROOM-TEMP</field>
+        <field name="name">Room Temperature — Mean Over Monitoring Period</field>
+        <field name="unit">deg C</field>
+        <field name="nominal_value">22</field>
+        <field name="min_value">18</field>
+        <field name="max_value">25</field>
+        <field name="tolerance">18 to 25 deg C — EU GMP / Schedule M pharmaceutical cleanroom requirement</field>
+        <field name="test_method">NABL calibrated data logger at working height, 5-minute logging interval, 24-hour monitoring</field>
+        <field name="instrument_type">temp_rh_logger</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One row per data logger position. Enter logger position (P1, P2...) in remarks. Enter mean temp as actual_value.</field>
+    </record>
+    <record id="param_vl005_02" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">20</field>
+        <field name="parameter_code">TEMP-RANGE</field>
+        <field name="name">Temperature Range (Max - Min) at Each Logger Position</field>
+        <field name="unit">deg C</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">2</field>
+        <field name="tolerance">Max 2 deg C variation at any single logger over the entire monitoring period</field>
+        <field name="test_method">Data logger analysis: (Max reading - Min reading) at each position over 24 hours</field>
+        <field name="instrument_type">temp_rh_logger</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">This measures stability at each position. Uniformity (variation between positions) is TEMP-UNIF.</field>
+    </record>
+    <record id="param_vl005_03" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">30</field>
+        <field name="parameter_code">TEMP-UNIF</field>
+        <field name="name">Temperature Uniformity (Max between all loggers at same time)</field>
+        <field name="unit">deg C</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">2</field>
+        <field name="tolerance">Max 2 deg C spatial uniformity — variation between any two loggers at the same time point</field>
+        <field name="test_method">Calculated: Maximum (Logger_i Temp - Logger_j Temp) across all logger pairs at all time points</field>
+        <field name="instrument_type">none</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">Calculated from exported data. For rooms with setpoint other than 22 deg C: adjust limits per protocol.</field>
+    </record>
+    <record id="param_vl005_04" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">40</field>
+        <field name="parameter_code">ROOM-RH</field>
+        <field name="name">Relative Humidity — Mean Over Monitoring Period</field>
+        <field name="unit">% RH</field>
+        <field name="nominal_value">50</field>
+        <field name="min_value">40</field>
+        <field name="max_value">60</field>
+        <field name="tolerance">40% to 60% RH — EU GMP / Schedule M pharmaceutical cleanroom requirement</field>
+        <field name="test_method">NABL calibrated data logger at working height, 5-minute logging interval, 24-hour monitoring</field>
+        <field name="instrument_type">temp_rh_logger</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">One row per data logger position. Enter logger position in remarks. Mean RH as actual_value.</field>
+    </record>
+    <record id="param_vl005_05" model="hvac.sop.parameter">
+        <field name="revision_id" ref="sop_rev_vl005_v2"/>
+        <field name="sequence">50</field>
+        <field name="parameter_code">RH-UNIF</field>
+        <field name="name">Relative Humidity Uniformity (Max between all loggers)</field>
+        <field name="unit">% RH</field>
+        <field name="nominal_value">0</field>
+        <field name="min_value">0</field>
+        <field name="max_value">5</field>
+        <field name="tolerance">Max 5% RH spatial variation between any two logger positions at the same time point</field>
+        <field name="test_method">Calculated from exported data: maximum (RH_i - RH_j) across all pairs at all time points</field>
+        <field name="instrument_type">none</field>
+        <field name="is_mandatory">True</field>
+        <field name="remarks">If RH uniformity exceeds 5%: check for moisture sources (leaks, water evaporation) and AHU humidifier/dehumidifier control.</field>
+    </record>
+
+
+</data>
+</odoo>

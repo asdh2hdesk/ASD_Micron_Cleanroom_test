@@ -1,0 +1,1043 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════════════════════════
+         LIST VIEW
+    ══════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_job_order_tree" model="ir.ui.view">
+        <field name="name">micron.job.order.list</field>
+        <field name="model">micron.job.order</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'draft'"
+                  decoration-warning="state in ('confirmed','review')"
+                  decoration-success="state == 'done'"
+                  decoration-danger="state == 'cancel'"
+                  decoration-muted="state == 'in_progress'">
+                <field name="priority" widget="priority"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="ahu_no" optional="show"/>
+                <field name="area_id"/>
+                <field name="engineer_id"/>
+                <field name="planned_date" string="Planned Date"/>
+                <field name="actual_start" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-secondary="state == 'draft'"
+                       decoration-info="state == 'confirmed'"
+                       decoration-warning="state == 'in_progress'"
+                       decoration-danger="state == 'review'"
+                       decoration-success="state == 'done'"
+                       decoration-muted="state == 'cancel'"/>
+                <field name="air_velocity_result"   optional="show" widget="badge"
+                       decoration-success="air_velocity_result == 'pass'"
+                       decoration-danger="air_velocity_result == 'fail'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SEARCH VIEW
+    ══════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_job_order_search" model="ir.ui.view">
+        <field name="name">micron.job.order.search</field>
+        <field name="model">micron.job.order</field>
+        <field name="arch" type="xml">
+            <search string="Search Job Orders">
+                <field name="name" string="Job No."/>
+                <field name="client_id"/>
+                <field name="ahu_no"/>
+                <field name="area_id"/>
+                <field name="engineer_id"/>
+                <separator/>
+                <filter name="my_jobs"     string="My Assigned Jobs"
+                        domain="[('engineer_id','=',uid)]"/>
+                <filter name="needs_action" string="Needs My Action"
+                        domain="['|',
+                            '&amp;', ('state','=','confirmed'), ('engineer_id','=',uid),
+                            '&amp;', ('state','=','review'), ('engineer_id','!=',uid)
+                        ]"/>
+                <separator/>
+                <filter name="f_draft"       string="Scheduling"       domain="[('state','=','draft')]"/>
+                <filter name="f_confirmed"   string="Confirmed"         domain="[('state','=','confirmed')]"/>
+                <filter name="f_in_progress" string="Test In Progress"  domain="[('state','=','in_progress')]"/>
+                <filter name="f_review"      string="Pending Review"    domain="[('state','=','review')]"/>
+                <filter name="f_done"        string="Completed"         domain="[('state','=','done')]"/>
+                <filter name="f_cancel"      string="Cancelled"         domain="[('state','=','cancel')]"/>
+                <separator/>
+                <filter name="f_urgent"      string="Urgent / High"
+                        domain="[('priority','in',['1','2'])]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Client"    name="group_client"   context="{'group_by':'client_id'}"/>
+                    <filter string="Status"    name="group_state"    context="{'group_by':'state'}"/>
+                    <filter string="Engineer"  name="group_engineer" context="{'group_by':'engineer_id'}"/>
+                    <filter string="Month"     name="group_month"    context="{'group_by':'planned_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         KANBAN VIEW — Grouped by State
+    ══════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_job_order_kanban" model="ir.ui.view">
+        <field name="name">micron.job.order.kanban</field>
+        <field name="model">micron.job.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="priority"/>
+                <field name="client_id"/>
+                <field name="ahu_no"/>
+                <field name="area_id"/>
+                <field name="engineer_id"/>
+                <field name="planned_date"/>
+                <field name="actual_start"/>
+                <field name="state"/>
+                <field name="run_air_velocity"/>
+                <field name="run_ach"/>
+                <field name="run_filter_integrity"/>
+                <field name="run_particle_count"/>
+                <field name="run_recovery"/>
+                <field name="run_temp_humidity"/>
+                <field name="run_diff_pressure"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <!-- Priority + Job Number -->
+                            <div class="d-flex align-items-center mb-1">
+                                <field name="priority" widget="priority" class="me-2"/>
+                                <strong class="text-primary"><field name="name"/></strong>
+                            </div>
+                            <!-- Client + AHU -->
+                            <div><i class="fa fa-building-o me-1 text-muted"/><field name="client_id"/></div>
+                            <t t-if="record.ahu_no.raw_value">
+                                <div><i class="fa fa-cogs me-1 text-muted"/><field name="ahu_no"/></div>
+                            </t>
+                            <div><i class="fa fa-map-marker me-1 text-muted"/><field name="area_id"/></div>
+                            <!-- Engineer -->
+                            <div class="mt-1">
+                                <i class="fa fa-user-circle me-1 text-muted"/>
+                                <field name="engineer_id"/>
+                            </div>
+                            <!-- Dates -->
+                            <div class="text-muted small mt-1">
+                                <t t-if="record.actual_start.raw_value">
+                                    <i class="fa fa-play-circle me-1"/>Started: <field name="actual_start"/>
+                                </t>
+                                <t t-else="">
+                                    <i class="fa fa-calendar me-1"/>Planned: <field name="planned_date"/>
+                                </t>
+                            </div>
+                            <!-- Tests badges -->
+                            <div class="mt-1" style="font-size:10px; line-height:1.8;">
+                                <t t-if="record.run_air_velocity.raw_value"><span class="badge text-bg-secondary me-1">Velocity</span></t>
+                                <t t-if="record.run_ach.raw_value"><span class="badge text-bg-secondary me-1">CFM</span></t>
+                                <t t-if="record.run_filter_integrity.raw_value"><span class="badge text-bg-secondary me-1">PAO</span></t>
+                                <t t-if="record.run_particle_count.raw_value"><span class="badge text-bg-secondary me-1">NVPC</span></t>
+                                <t t-if="record.run_recovery.raw_value"><span class="badge text-bg-secondary me-1">Recovery</span></t>
+                                <t t-if="record.run_temp_humidity.raw_value"><span class="badge text-bg-secondary me-1">T&amp;H</span></t>
+                                <t t-if="record.run_diff_pressure.raw_value"><span class="badge text-bg-secondary me-1">ΔP</span></t>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FORM VIEW — Two-Phase Design
+    ══════════════════════════════════════════════════════════════════ -->
+    <record id="view_micron_job_order_form" model="ir.ui.view">
+        <field name="name">micron.job.order.form</field>
+        <field name="model">micron.job.order</field>
+        <field name="arch" type="xml">
+            <form string="Job Order">
+                <!-- ════ HEADER BUTTONS ════ -->
+                <header>
+                    <!-- SCHEDULING phase buttons -->
+                    <button name="action_confirm"
+                            string="✔ Confirm Schedule"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"
+                            confirm="This will confirm the schedule and notify the assigned engineer. Continue?"/>
+
+                    <!-- CONFIRMED phase -->
+                    <button name="action_start_test"
+                            string="▶ Start Test"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'confirmed'"
+                            confirm="Starting the test will lock the schedule details. The test clock begins now. Continue?"/>
+                    <button name="action_reset_draft"
+                            string="↩ Reschedule"
+                            type="object"
+                            invisible="state != 'confirmed'"/>
+
+                    <!-- IN PROGRESS phase -->
+                    <button name="action_submit_review"
+                            string="📋 Submit for Review"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'in_progress'"
+                            confirm="Submit all test data for manager review? You will not be able to edit after submission."/>
+
+                    <!-- REVIEW phase -->
+                    <button name="action_approve_done"
+                            string="✅ Approve &amp; Complete"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'review'"/>
+                    <button name="action_send_back"
+                            string="↩ Send Back for Correction"
+                            type="object"
+                            invisible="state != 'review'"/>
+
+                    <!-- DONE phase -->
+                    <button name="action_print_test_certificate"
+                            string="🖨 Print Certificate"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'done'"/>
+                    <button name="action_download_test_certificate_direct"
+                            string="⬇ Download PDF"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'done'"/>
+                    <button name="action_download_test_certificate_excel"
+                            string="📊 Download Excel"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'done'"/>
+
+                    <!-- Cancel always available (except done) -->
+                    <button name="action_cancel"
+                            string="Cancel"
+                            type="object"
+                            invisible="state in ('done', 'cancel')"
+                            confirm="Are you sure you want to cancel this job order?"/>
+                    <button name="action_reset_draft"
+                            string="↩ Reset to Scheduling"
+                            type="object"
+                            invisible="state != 'cancel'"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,in_progress,review,done"/>
+                </header>
+
+                <sheet>
+                    <!-- ════ JOB IDENTITY STRIP ════ -->
+                    <div class="oe_title d-flex align-items-center gap-3 mb-0">
+                        <field name="priority" widget="priority"/>
+                        <div>
+                            <label for="name" string="Job Order"/>
+                            <h1><field name="name" readonly="1"/></h1>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════════
+                         PHASE 1 — SCHEDULING PANEL
+                         (visible in draft and confirmed states)
+                    ═══════════════════════════════════════════════════ -->
+                    <div invisible="state not in ('draft', 'confirmed')">
+
+                        <!-- Job & Client Details -->
+                        <div class="row mt-3">
+                            <div class="col-lg-6">
+                                <div class="card border-primary mb-3">
+                                    <div class="card-header bg-primary text-white fw-bold">
+                                        📋 Job Details
+                                    </div>
+                                    <div class="card-body">
+                                        <group col="2">
+                                            <field name="client_id"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="area_id"
+                                                   readonly="state == 'confirmed'"
+                                                   domain="[('client_id','=',client_id)]"/>
+                                            <field name="ahu_no"
+                                                   placeholder="e.g. AHU B 01"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="room_no"
+                                                   placeholder="e.g. PRODUCTION OFFICE (14)"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="test_condition"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="validation_date"
+                                                   readonly="state == 'confirmed'"/>
+                                        </group>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card border-info mb-3">
+                                    <div class="card-header bg-info text-white fw-bold">
+                                        👷 Assignment &amp; Schedule
+                                    </div>
+                                    <div class="card-body">
+                                        <group col="2">
+                                            <field name="engineer_id"
+                                                   readonly="state == 'confirmed'"
+                                                   widget="many2one_avatar_user"/>
+                                            <field name="planned_date"
+                                                   string="Planned Test Date"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="scheduled_by"
+                                                   readonly="1"
+                                                   widget="many2one_avatar_user"/>
+                                            <field name="priority"
+                                                   widget="priority"
+                                                   readonly="state == 'confirmed'"/>
+                                        </group>
+                                    </div>
+                                </div>
+
+                                <!-- Scheduling Notes -->
+                                <div class="card border-warning mb-3">
+                                    <div class="card-header bg-warning text-dark fw-bold">
+                                        📝 Instructions to Engineer
+                                    </div>
+                                    <div class="card-body">
+                                        <field name="scheduling_notes"
+                                               nolabel="1"
+                                               placeholder="Write any special instructions, site conditions, or client requirements for the engineer..."
+                                               readonly="state == 'confirmed'"
+                                               rows="4"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tests to Perform -->
+                        <div class="card border-secondary mb-3">
+                            <div class="card-header bg-secondary text-white fw-bold">
+                                🔬 Tests to Perform &amp; SOP Assignment
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Column 1: Test checkboxes -->
+                                    <div class="col-lg-4">
+                                        <h6 class="text-muted mb-2">Select Tests</h6>
+                                        <group col="1">
+                                            <field name="run_air_velocity"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_ach" string="CFM / Air Change Rate (ACPH)"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_filter_integrity" string="HEPA Filter Integrity (PAO)"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_particle_count" string="Particle Count (NVPC)"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_recovery"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_temp_humidity"
+                                                   readonly="state == 'confirmed'"/>
+                                            <field name="run_diff_pressure" string="Differential Pressure"
+                                                   readonly="state == 'confirmed'"/>
+                                        </group>
+                                    </div>
+
+                                    <!-- Column 2: SOP assignments -->
+                                    <div class="col-lg-4">
+                                        <h6 class="text-muted mb-2">SOP Reference</h6>
+                                        <group col="1">
+                                            <field name="sop_air_velocity_id"
+                                                   invisible="not run_air_velocity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Air Velocity)"
+                                                   domain="[('test_type','=','air_velocity')]"/>
+                                            <field name="sop_cfm_id"
+                                                   invisible="not run_ach"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (CFM/ACPH)"
+                                                   domain="[('test_type','=','ach')]"/>
+                                            <field name="sop_pao_id"
+                                                   invisible="not run_filter_integrity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Filter Integrity)"
+                                                   domain="[('test_type','=','filter_integrity')]"/>
+                                            <field name="sop_particle_id"
+                                                   invisible="not run_particle_count"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Particle Count)"
+                                                   domain="[('test_type','=','particle_count')]"/>
+                                            <field name="sop_recovery_id"
+                                                   invisible="not run_recovery"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Recovery)"
+                                                   domain="[('test_type','=','recovery')]"/>
+                                            <field name="sop_temp_humidity_id"
+                                                   invisible="not run_temp_humidity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Temp &amp; Humidity)"
+                                                   domain="[('test_type','=','temp_humidity')]"/>
+                                            <field name="sop_diff_pressure_id"
+                                                   invisible="not run_diff_pressure"
+                                                   readonly="state == 'confirmed'"
+                                                   string="SOP (Diff. Pressure)"
+                                                   domain="[('test_type','=','diff_pressure')]"/>
+                                        </group>
+                                    </div>
+
+                                    <!-- Column 3: Equipment assignments -->
+                                    <div class="col-lg-4">
+                                        <h6 class="text-muted mb-2">Instrument Assignment</h6>
+                                        <group col="1">
+                                            <field name="equipment_used_name"
+                                                   invisible="not run_air_velocity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Anemometer (Air Velocity)"
+                                                   domain="[('instrument_type','=','anemometer')]"/>
+                                            <field name="cfm_equipment_id"
+                                                   invisible="not run_ach"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Air Capture Hood (CFM)"
+                                                   domain="[('instrument_type','=','air_capture_hood')]"/>
+                                            <field name="pao_photometer_id"
+                                                   invisible="not run_filter_integrity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Aerosol Photometer (PAO)"
+                                                   domain="[('instrument_type','=','aerosol_photometer')]"/>
+                                            <field name="particle_equipment_id"
+                                                   invisible="not run_particle_count"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Particle Counter (NVPC)"
+                                                   domain="[('instrument_type','=','particle_counter')]"/>
+                                            <field name="recovery_equipment_id"
+                                                   invisible="not run_recovery"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Particle Counter (Recovery)"
+                                                   domain="[('instrument_type','=','particle_counter')]"/>
+                                            <field name="temp_humidity_equipment_id"
+                                                   invisible="not run_temp_humidity"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Thermo-Hygrometer"
+                                                   domain="[('instrument_type','=','thermohygrometer')]"/>
+                                            <field name="diff_pressure_equipment_id"
+                                                   invisible="not run_diff_pressure"
+                                                   readonly="state == 'confirmed'"
+                                                   string="Pressure Gauge"
+                                                   domain="[('instrument_type','=','manometer')]"/>
+                                        </group>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirmed info banner -->
+                        <div invisible="state != 'confirmed'"
+                             class="alert alert-info d-flex align-items-center">
+                            <i class="fa fa-info-circle fa-lg me-2"/>
+                            <div>
+                                <strong>Schedule Confirmed.</strong>
+                                Waiting for <strong><field name="engineer_id" readonly="1" nolabel="1"/></strong>
+                                to start the test on <field name="planned_date" readonly="1" nolabel="1"/>.
+                                The engineer will click <em>"▶ Start Test"</em> to begin.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════════
+                         JOB IDENTITY SUMMARY (shown in test/review/done)
+                         Read-only summary header
+                    ═══════════════════════════════════════════════════ -->
+                    <div invisible="state in ('draft', 'confirmed')">
+                        <div class="row">
+                            <!-- Left: Job info summary (read-only) -->
+                            <div class="col-lg-6">
+                                <div class="card border-0 bg-light mb-3">
+                                    <div class="card-body py-2">
+                                        <table class="table table-sm table-borderless mb-0" style="font-size:13px;">
+                                            <tr>
+                                                <td class="fw-bold text-muted" style="width:130px;">Client</td>
+                                                <td><field name="client_id" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">Area</td>
+                                                <td><field name="area_id" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">AHU No.</td>
+                                                <td><field name="ahu_no" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">Room No.</td>
+                                                <td><field name="room_no" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">Condition</td>
+                                                <td><field name="test_condition" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Right: Assignment + timing -->
+                            <div class="col-lg-6">
+                                <div class="card border-0 bg-light mb-3">
+                                    <div class="card-body py-2">
+                                        <table class="table table-sm table-borderless mb-0" style="font-size:13px;">
+                                            <tr>
+                                                <td class="fw-bold text-muted" style="width:130px;">Engineer</td>
+                                                <td><field name="engineer_id" readonly="1" nolabel="1" widget="many2one_avatar_user"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">Planned Date</td>
+                                                <td><field name="planned_date" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted">Test Started</td>
+                                                <td><field name="actual_start" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                            <tr invisible="state not in ('done','review')">
+                                                <td class="fw-bold text-muted">Test Ended</td>
+                                                <td><field name="actual_end" readonly="1" nolabel="1"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scheduler instructions banner (read-only for engineer) -->
+                        <div invisible="not scheduling_notes"
+                             class="alert alert-warning mb-3">
+                            <strong><i class="fa fa-sticky-note me-1"/>Instructions from Scheduler:</strong>
+                            <div class="mt-1"><field name="scheduling_notes" readonly="1" nolabel="1"/></div>
+                        </div>
+
+                        <!-- Engineer notes (editable only while in progress) -->
+                        <div class="card border-secondary mb-3">
+                            <div class="card-header fw-bold text-secondary">
+                                🔧 Engineer's Field Observations &amp; Notes
+                            </div>
+                            <div class="card-body">
+                                <field name="engineer_notes"
+                                       nolabel="1"
+                                       placeholder="Record any field observations, deviations from SOP, equipment issues, or client feedback here..."
+                                       readonly="state not in ('in_progress')"
+                                       rows="3"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════════
+                         PHASE 2 — TEST EXECUTION TABS
+                         (visible from in_progress onwards)
+                    ═══════════════════════════════════════════════════ -->
+                    <notebook invisible="state in ('draft', 'confirmed')">
+
+                        <!-- ── Tab: Certificate Info ── -->
+                        <page string="📄 Certificate Info" name="cert_info">
+                            <group string="Certificate Details">
+                                <group>
+                                    <field name="certificate_client_name"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="test_carried_out_by"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="test_witnessed_by"
+                                           readonly="state not in ('in_progress')"
+                                           domain="[('parent_id','=',client_id)]"/>
+                                    <field name="test_type"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="area_name_text"
+                                           readonly="state not in ('in_progress')"/>
+                                </group>
+                                <group>
+                                    <field name="certificate_client_address"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="validation_date"
+                                           readonly="state not in ('in_progress')"/>
+                                </group>
+                            </group>
+
+                            <group string="Equipment Used (Air Velocity)">
+                                <group>
+                                    <field name="equipment_used_name"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="equipment_model_no"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="equipment_serial_no"
+                                           readonly="state not in ('in_progress')"/>
+                                </group>
+                                <group>
+                                    <field name="calibration_date"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="calibration_due_date"
+                                           readonly="state not in ('in_progress')"/>
+                                </group>
+                            </group>
+
+                            <group string="Result Statement">
+                                <field name="acceptance_criteria_text"
+                                       readonly="state not in ('in_progress')"/>
+                                <field name="result_statement"
+                                       readonly="state not in ('in_progress')"/>
+                            </group>
+
+                            <group string="Signatures">
+                                <group>
+                                    <field name="engineer_sign_date"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="witness_sign_date"
+                                           readonly="state not in ('in_progress')"/>
+                                    <field name="reviewer_sign_date"
+                                           readonly="state not in ('in_progress')"/>
+                                </group>
+                                <group>
+                                    <field name="reviewed_by"
+                                           readonly="state not in ('in_progress')"
+                                           domain="[('parent_id','=',client_id)]"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ── Tab: Air Velocity ── -->
+                        <page string="💨 Air Velocity" name="tab_air_velocity"
+                              invisible="not run_air_velocity">
+                            <group string="SOP &amp; Result">
+                                <group>
+                                    <field name="sop_air_velocity_id" readonly="1"/>
+                                    <field name="equipment_used_name" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="air_velocity_avg" string="Overall Avg (m/s)" readonly="1"/>
+                                    <field name="air_velocity_min" string="Min (m/s)" readonly="1"/>
+                                    <field name="air_velocity_max" string="Max (m/s)" readonly="1"/>
+                                    <field name="air_velocity_result" readonly="1" widget="badge"
+                                           decoration-success="air_velocity_result == 'pass'"
+                                           decoration-danger="air_velocity_result == 'fail'"/>
+                                </group>
+                            </group>
+
+                            <group string="Import From Instrument" invisible="state not in ('in_progress')">
+                                <group>
+                                    <field name="air_velocity_source_file"
+                                           filename="air_velocity_source_filename"/>
+                                    <field name="air_velocity_source_filename" invisible="1"/>
+                                </group>
+                                <group>
+                                    <field name="air_velocity_samples_text"
+                                           placeholder="Paste instrument text here (optional)"/>
+                                </group>
+                                <group>
+                                    <button name="action_import_air_velocity_from_file"
+                                            string="Import From PDF/Image" type="object" class="oe_highlight"/>
+                                    <button name="action_import_air_velocity_from_text"
+                                            string="Import From Text" type="object"/>
+                                </group>
+                            </group>
+
+                            <field name="air_velocity_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="row_pass"
+                                      decoration-danger="row_fail">
+                                    <field name="row_pass" column_invisible="1"/>
+                                    <field name="row_fail" column_invisible="1"/>
+                                    <field name="sr_no"/>
+                                    <field name="equipment_name_id" string="Equipment Name &amp; ID"/>
+                                    <field name="filter_no"/>
+                                    <field name="reading_1" string="R1"/>
+                                    <field name="reading_2" string="R2"/>
+                                    <field name="reading_3" string="R3"/>
+                                    <field name="reading_4" string="R4"/>
+                                    <field name="reading_5" string="R5"/>
+                                    <field name="row_avg" string="Avg (m/s)" readonly="1"/>
+                                    <field name="unit"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: CFM / ACPH ── -->
+                        <page string="🌬 CFM / ACPH" name="tab_cfm" invisible="not run_ach">
+                            <group string="SOP &amp; Result">
+                                <group>
+                                    <field name="sop_cfm_id" readonly="1"/>
+                                    <field name="cfm_equipment_id" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="cfm_result" readonly="1" widget="badge"
+                                           decoration-success="cfm_result == 'pass'"
+                                           decoration-danger="cfm_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="cfm_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="acph_result == 'pass'"
+                                      decoration-danger="acph_result == 'fail'">
+                                    <field name="sr_no"/>
+                                    <field name="room_name"/>
+                                    <field name="filter_code"/>
+                                    <field name="actual_cfm"/>
+                                    <field name="total_cfm" readonly="1"/>
+                                    <field name="room_vol_ft3" string="Room Vol. (Ft³)"/>
+                                    <field name="acph" readonly="1"/>
+                                    <field name="acph_result" readonly="1"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Filter Integrity (PAO) ── -->
+                        <page string="🔬 Filter Integrity (PAO)" name="tab_pao"
+                              invisible="not run_filter_integrity">
+                            <group string="SOP &amp; Result">
+                                <group>
+                                    <field name="sop_pao_id" readonly="1"/>
+                                    <field name="pao_photometer_id" readonly="1"/>
+                                    <field name="pao_pressure_gauge_id" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="pao_result" readonly="1" widget="badge"
+                                           decoration-success="pao_result == 'pass'"
+                                           decoration-danger="pao_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="pao_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="pao_result == 'pass'"
+                                      decoration-danger="pao_result == 'fail'">
+                                    <field name="sr_no"/>
+                                    <field name="filter_no"/>
+                                    <field name="upstream_conc_before" string="Upstream (µg/L)"/>
+                                    <field name="downstream_conc_after" string="Downstream"/>
+                                    <field name="leakage_pct" string="Leakage (%)" readonly="1"/>
+                                    <field name="pao_result" readonly="1"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Particle Count (NVPC) ── -->
+                        <page string="🌫 Particle Count (NVPC)" name="tab_particle"
+                              invisible="not run_particle_count">
+                            <group string="Instrument &amp; ISO Class">
+                                <group>
+                                    <field name="sop_particle_id" readonly="1"/>
+                                    <field name="particle_equipment_id" readonly="1"/>
+                                    <field name="iso_class"/>
+                                </group>
+                                <group>
+                                    <field name="particle_flow_rate" readonly="state not in ('in_progress')"/>
+                                    <field name="particle_sampling_volume" readonly="state not in ('in_progress')"/>
+                                    <field name="particle_sampling_time" readonly="state not in ('in_progress')"/>
+                                    <field name="particle_result" readonly="1" widget="badge"
+                                           decoration-success="particle_result == 'pass'"
+                                           decoration-danger="particle_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="particle_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="result_05 == 'pass' and result_50 == 'pass'"
+                                      decoration-danger="result_05 == 'fail' or result_50 == 'fail'">
+                                    <field name="sr_no"/>
+                                    <field name="room_name"/>
+                                    <field name="location"/>
+                                    <field name="condition"/>
+                                    <field name="particles_05um" string="0.5µm (per m³)"/>
+                                    <field name="particles_50um" string="5.0µm (per m³)"/>
+                                    <field name="result_05" readonly="1"/>
+                                    <field name="result_50" readonly="1"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Recovery Test ── -->
+                        <page string="⏱ Recovery Test" name="tab_recovery"
+                              invisible="not run_recovery">
+                            <group string="Instrument &amp; Result">
+                                <group>
+                                    <field name="sop_recovery_id" readonly="1"/>
+                                    <field name="recovery_equipment_id" readonly="1"/>
+                                    <field name="recovery_flow_rate" readonly="state not in ('in_progress')"/>
+                                    <field name="recovery_sampling_time" readonly="state not in ('in_progress')"/>
+                                </group>
+                                <group>
+                                    <field name="recovery_period" readonly="state not in ('in_progress')"/>
+                                    <field name="recovery_result" readonly="state not in ('in_progress')" widget="badge"
+                                           decoration-success="recovery_result == 'pass'"
+                                           decoration-danger="recovery_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="recovery_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom">
+                                    <field name="sr_no"/>
+                                    <field name="ahu_condition"/>
+                                    <field name="time_start" widget="float_time"/>
+                                    <field name="time_end" widget="float_time"/>
+                                    <field name="particles_05um" string="0.5µm (per m³)"/>
+                                    <field name="particles_50um" string="5.0µm (per m³)"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Temperature &amp; Humidity ── -->
+                        <page string="🌡 Temp &amp; Humidity" name="tab_temp_humidity"
+                              invisible="not run_temp_humidity">
+                            <group string="Instrument &amp; Result">
+                                <group>
+                                    <field name="sop_temp_humidity_id" readonly="1"/>
+                                    <field name="temp_humidity_equipment_id" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="temp_humidity_result" readonly="1" widget="badge"
+                                           decoration-success="temp_humidity_result == 'pass'"
+                                           decoration-danger="temp_humidity_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="temp_humidity_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="temp_result == 'pass' and humidity_result == 'pass'"
+                                      decoration-danger="temp_result == 'fail' or humidity_result == 'fail'">
+                                    <field name="sr_no"/>
+                                    <field name="location"/>
+                                    <field name="temperature" string="Temp (°C)"/>
+                                    <field name="humidity" string="Humidity (%RH)"/>
+                                    <field name="temp_result" readonly="1"/>
+                                    <field name="humidity_result" readonly="1"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Differential Pressure ── -->
+                        <page string="⚖ Diff. Pressure" name="tab_diff_pressure"
+                              invisible="not run_diff_pressure">
+                            <group string="Instrument &amp; Result">
+                                <group>
+                                    <field name="sop_diff_pressure_id" readonly="1"/>
+                                    <field name="diff_pressure_equipment_id" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="diff_pressure_result" readonly="1" widget="badge"
+                                           decoration-success="diff_pressure_result == 'pass'"
+                                           decoration-danger="diff_pressure_result == 'fail'"/>
+                                </group>
+                            </group>
+                            <field name="diff_pressure_line_ids"
+                                   context="{'default_job_id': id}"
+                                   readonly="state not in ('in_progress')">
+                                <list editable="bottom"
+                                      decoration-success="result == 'pass'"
+                                      decoration-danger="result == 'fail'">
+                                    <field name="sr_no"/>
+                                    <field name="room_from"/>
+                                    <field name="room_to"/>
+                                    <field name="pressure_pa" string="Pressure (Pa)"/>
+                                    <field name="result" readonly="1"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ── Tab: Test Summary (done/review) ── -->
+                        <page string="📊 Test Results Summary" name="tab_summary"
+                              invisible="state not in ('review', 'done')">
+                            <div class="row">
+                                <div class="col-lg-8 offset-lg-2">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Test</th>
+                                                <th style="width:15%; text-align:center;">Run</th>
+                                                <th style="width:20%; text-align:center;">Result</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Air Velocity Measurement</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_air_velocity" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="air_velocity_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="air_velocity_result == 'pass'"
+                                                           decoration-danger="air_velocity_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>CFM / Air Change Rate (ACPH)</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_ach" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="cfm_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="cfm_result == 'pass'"
+                                                           decoration-danger="cfm_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>HEPA Filter Integrity (PAO)</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_filter_integrity" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="pao_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="pao_result == 'pass'"
+                                                           decoration-danger="pao_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Particle Count (NVPC)</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_particle_count" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="particle_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="particle_result == 'pass'"
+                                                           decoration-danger="particle_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Recovery Test</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_recovery" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="recovery_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="recovery_result == 'pass'"
+                                                           decoration-danger="recovery_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Temperature &amp; Humidity</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_temp_humidity" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="temp_humidity_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="temp_humidity_result == 'pass'"
+                                                           decoration-danger="temp_humidity_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Differential Pressure</td>
+                                                <td style="text-align:center;">
+                                                    <field name="run_diff_pressure" readonly="1" nolabel="1"/>
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <field name="diff_pressure_result" readonly="1" nolabel="1"
+                                                           widget="badge"
+                                                           decoration-success="diff_pressure_result == 'pass'"
+                                                           decoration-danger="diff_pressure_result == 'fail'"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </page>
+
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         ACTIONS
+    ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Main: All Jobs -->
+    <record id="action_micron_job_order" model="ir.actions.act_window">
+        <field name="name">All Job Orders</field>
+        <field name="res_model">micron.job.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_micron_job_order_search"/>
+    </record>
+
+    <!-- Scheduling: Draft + Confirmed -->
+    <record id="action_micron_job_schedule" model="ir.actions.act_window">
+        <field name="name">Job Scheduling</field>
+        <field name="res_model">micron.job.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state','in',['draft','confirmed'])]</field>
+        <field name="search_view_id" ref="view_micron_job_order_search"/>
+        <field name="context">{"default_state": "draft"}</field>
+    </record>
+
+    <!-- Active Tests: In Progress only -->
+    <record id="action_micron_job_active_tests" model="ir.actions.act_window">
+        <field name="name">Active Tests</field>
+        <field name="res_model">micron.job.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state','=','in_progress')]</field>
+        <field name="search_view_id" ref="view_micron_job_order_search"/>
+        <field name="context">{"search_default_my_jobs": 1}</field>
+    </record>
+
+    <!-- Pending Review -->
+    <record id="action_micron_job_review" model="ir.actions.act_window">
+        <field name="name">Pending Review</field>
+        <field name="res_model">micron.job.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state','=','review')]</field>
+        <field name="search_view_id" ref="view_micron_job_order_search"/>
+    </record>
+
+    <!-- Completed Jobs -->
+    <record id="action_micron_job_done" model="ir.actions.act_window">
+        <field name="name">Completed Jobs</field>
+        <field name="res_model">micron.job.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state','=','done')]</field>
+        <field name="search_view_id" ref="view_micron_job_order_search"/>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         MENU ITEMS
+    ══════════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_micron_job_order"
+              name="All Jobs"
+              parent="menu_micron_jobs"
+              action="action_micron_job_order"
+              sequence="5"/>
+
+    <menuitem id="menu_micron_job_schedule"
+              name="📋 Schedule New Job"
+              parent="menu_micron_jobs"
+              action="action_micron_job_schedule"
+              sequence="10"/>
+
+    <menuitem id="menu_micron_job_active"
+              name="▶ Active Tests"
+              parent="menu_micron_jobs"
+              action="action_micron_job_active_tests"
+              sequence="20"/>
+
+    <menuitem id="menu_micron_job_review"
+              name="🔎 Pending Review"
+              parent="menu_micron_jobs"
+              action="action_micron_job_review"
+              sequence="30"/>
+
+    <menuitem id="menu_micron_job_done"
+              name="✅ Completed"
+              parent="menu_micron_jobs"
+              action="action_micron_job_done"
+              sequence="40"/>
+
+</odoo>

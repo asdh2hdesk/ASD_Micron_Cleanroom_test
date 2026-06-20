@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <menuitem id="menu_micron_hvac_root"
+              name="Micron HVAC"
+              sequence="50"
+              web_icon="micron_hvac,static/description/icon.png"/>
+
+    <!-- Job Scheduling -->
+    <menuitem id="menu_hvac_scheduling"
+              name="Job Scheduling"
+              parent="menu_micron_hvac_root"
+              sequence="10"/>
+    <menuitem id="menu_hvac_job"
+              name="Job Orders"
+              parent="menu_hvac_scheduling"
+              action="action_hvac_job"
+              sequence="10"/>
+
+    <!-- Testing -->
+    <menuitem id="menu_hvac_testing"
+              name="Testing"
+              parent="menu_micron_hvac_root"
+              sequence="20"/>
+    <menuitem id="menu_hvac_test_sheet"
+              name="Test Worksheets"
+              parent="menu_hvac_testing"
+              action="action_hvac_test_sheet"
+              sequence="10"/>
+    <menuitem id="menu_hvac_ncr"
+              name="Non-Conformances (NCR)"
+              parent="menu_hvac_testing"
+              action="action_hvac_ncr"
+              sequence="30"/>
+    <menuitem id="menu_hvac_capa"
+              name="CAPA"
+              parent="menu_hvac_testing"
+              action="action_hvac_capa"
+              sequence="40"/>
+
+    <!-- SOP Management -->
+    <menuitem id="menu_hvac_sop_root"
+              name="SOP Management"
+              parent="menu_micron_hvac_root"
+              sequence="30"/>
+    <menuitem id="menu_hvac_sop"
+              name="SOP Library"
+              parent="menu_hvac_sop_root"
+              action="action_hvac_sop"
+              sequence="10"/>
+    <menuitem id="menu_hvac_sop_revision"
+              name="Active Revisions"
+              parent="menu_hvac_sop_root"
+              action="action_hvac_sop_revision"
+              sequence="20"/>
+
+    <!-- Calibration -->
+    <menuitem id="menu_hvac_calibration_root"
+              name="Calibration"
+              parent="menu_micron_hvac_root"
+              sequence="40"/>
+    <menuitem id="menu_hvac_instrument"
+              name="Instrument Registry"
+              parent="menu_hvac_calibration_root"
+              action="action_hvac_instrument"
+              sequence="10"/>
+    <menuitem id="menu_hvac_calibration"
+              name="Calibration Records"
+              parent="menu_hvac_calibration_root"
+              action="action_hvac_calibration"
+              sequence="20"/>
+
+</data>
+</odoo>

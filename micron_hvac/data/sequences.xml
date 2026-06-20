@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_hvac_job" model="ir.sequence">
+            <field name="name">HVAC Job Order</field>
+            <field name="code">hvac.job</field>
+            <field name="prefix">MHVAC/JOB/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_hvac_calibration" model="ir.sequence">
+            <field name="name">Instrument Calibration Certificate</field>
+            <field name="code">hvac.calibration</field>
+            <field name="prefix">MHVAC/CAL/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_hvac_test_sheet" model="ir.sequence">
+            <field name="name">HVAC Test Worksheet</field>
+            <field name="code">hvac.test.sheet</field>
+            <field name="prefix">MHVAC/TS/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_hvac_ncr" model="ir.sequence">
+            <field name="name">Non-Conformance Report</field>
+            <field name="code">hvac.ncr</field>
+            <field name="prefix">MHVAC/NCR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_hvac_capa" model="ir.sequence">
+            <field name="name">CAPA</field>
+            <field name="code">hvac.capa</field>
+            <field name="prefix">MHVAC/CAPA/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

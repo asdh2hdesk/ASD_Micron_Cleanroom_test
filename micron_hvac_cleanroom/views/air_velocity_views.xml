@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_micron_air_velocity_line_tree" model="ir.ui.view">
+        <field name="name">micron.air.velocity.line.list</field>
+        <field name="model">micron.air.velocity.line</field>
+        <field name="arch" type="xml">
+            <list decoration-success="row_pass" decoration-danger="row_fail">
+                <field name="row_pass" column_invisible="1"/>
+                <field name="row_fail" column_invisible="1"/>
+                <field name="job_id"/>
+                <field name="sr_no"/>
+                <field name="equipment_name_id"/>
+                <field name="filter_no"/>
+                <field name="reading_1"/>
+                <field name="reading_2"/>
+                <field name="reading_3"/>
+                <field name="reading_4"/>
+                <field name="reading_5"/>
+                <field name="row_avg"/>
+                <field name="unit"/>
+                <field name="remarks"/>
+            </list>
+        </field>
+    </record>
+</odoo>
