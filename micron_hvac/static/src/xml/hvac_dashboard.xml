@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="micron_hvac.HvacDashboard" owl="1">
+        <div class="o_hvac_dashboard">
+            <!-- Header with Date Filters & Print Action -->
+            <div class="o_dashboard_header">
+                <div class="header-content">
+                    <h2>
+                        <i class="fa fa-tachometer"/>
+                        HVAC Quality &amp; Operations Dashboard
+                    </h2>
+                    <div class="header-controls">
+                        <div class="date-range-picker">
+                            <label>From:</label>
+                            <input type="date" class="date-input"
+                                   t-att-value="state.dateFrom" t-on-input="(ev) => this.onDateInput(ev, 'dateFrom')"/>
+                        </div>
+                        <div class="date-range-picker">
+                            <label>To:</label>
+                            <input type="date" class="date-input"
+                                   t-att-value="state.dateTo" t-on-input="(ev) => this.onDateInput(ev, 'dateTo')"/>
+                        </div>
+                        <button class="btn btn-primary download-btn" t-on-click="() => this.downloadReport()">
+                            <i class="fa fa-print"/>
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <t t-if="state.loading">
+                <div class="text-center p-5 mt-5">
+                    <i class="fa fa-spinner fa-spin fa-3x text-primary"/>
+                    <p class="mt-3 text-muted" style="font-weight: 500;">Retrieving operational metrics...</p>
+                </div>
+            </t>
+            <t t-else="">
+                <!-- Executive Metrics Section -->
+                <div class="dashboard-section">
+                    <h3 class="section-title">
+                        <i class="fa fa-bar-chart-o"/>
+                        Executive Operations Summary
+                    </h3>
+                    <div class="kpi-row">
+                        <!-- Total Jobs -->
+                        <div class="kpi-card kpi-primary" t-on-click="() => this.openJobs()">
+                            <div class="kpi-icon">
+                                <i class="fa fa-briefcase"/>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Total Job Orders</div>
+                                <div class="kpi-value"><t t-esc="state.stats.totalJobs"/></div>
+                                <div class="kpi-subtext">Registered jobs in period</div>
+                            </div>
+                        </div>
+
+                        <!-- Active Jobs -->
+                        <div class="kpi-card kpi-warning" t-on-click="() => this.openJobs('in_progress')">
+                            <div class="kpi-icon">
+                                <i class="fa fa-gears"/>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Active (In Progress)</div>
+                                <div class="kpi-value"><t t-esc="state.stats.activeJobs"/></div>
+                                <div class="kpi-subtext">Currently executing on site</div>
+                            </div>
+                        </div>
+
+                        <!-- Calibration Alerts -->
+                        <div class="kpi-card kpi-danger" t-on-click="() => this.openInstruments('alerts')">
+                            <div class="kpi-icon">
+                                <i class="fa fa-wrench"/>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Calibration Alerts</div>
+                                <div class="kpi-value"><t t-esc="state.stats.calibrationAlerts"/></div>
+                                <div class="kpi-subtext">Instruments due / overdue</div>
+                            </div>
+                        </div>
+
+                        <!-- Open NCRs -->
+                        <div class="kpi-card kpi-info" t-on-click="() => this.openNCRs('open')">
+                            <div class="kpi-icon">
+                                <i class="fa fa-exclamation-triangle"/>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Open NCRs</div>
+                                <div class="kpi-value"><t t-esc="state.stats.openNcrs"/></div>
+                                <div class="kpi-subtext">Awaiting corrective CAPA</div>
+                            </div>
+                        </div>
+
+                        <!-- Worksheet Pass Rate -->
+                        <div class="kpi-card kpi-success" t-on-click="() => this.openWorksheets()">
+                            <div class="kpi-icon">
+                                <i class="fa fa-check-circle"/>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Worksheet Pass Rate</div>
+                                <div class="kpi-value"><t t-esc="state.stats.passRate"/>%</div>
+                                <div class="kpi-subtext">Tested HVAC rooms OK</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Section -->
+                <div class="dashboard-section">
+                    <h3 class="section-title">
+                        <i class="fa fa-line-chart"/>
+                        Analytics &amp; Trend Charts
+                    </h3>
+                    <div class="charts-row">
+                        <!-- Job Status Doughnut Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5>Job Status Distribution</h5>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="jobStatusChart"/>
+                            </div>
+                        </div>
+
+                        <!-- Test Trend Stacked Bar Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5>Test Results History</h5>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="testTrendChart"/>
+                            </div>
+                        </div>
+
+                        <!-- Calibration Status Pie Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5>Calibration Status Registry</h5>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="instrumentCalChart"/>
+                            </div>
+                        </div>
+
+                        <!-- NCR Severity Breakdown Horizontal Bar Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h5>Non-Conformances by Severity</h5>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="ncrSeverityChart"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tables Section -->
+                <div class="dashboard-section">
+                    <h3 class="section-title">
+                        <i class="fa fa-list-alt"/>
+                        Operational Schedules &amp; Action Items
+                    </h3>
+                    <div class="tables-grid">
+                        <!-- Recent Job Orders Table -->
+                        <div class="table-card">
+                            <div class="chart-header">
+                                <h5>Recent Dispatch Schedules</h5>
+                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openJobs()">
+                                    View All <i class="fa fa-arrow-right"/>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <t t-if="state.recentJobs.length === 0">
+                                    <div class="empty-state">
+                                        <i class="fa fa-info-circle"/>
+                                        <p>No job orders found in this period</p>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <table class="table-modern">
+                                        <thead>
+                                            <tr>
+                                                <th>Job No.</th>
+                                                <th>Client</th>
+                                                <th>Scheduled Date</th>
+                                                <th>Lead Tech</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.recentJobs" t-as="job" t-key="job.id">
+                                                <tr style="cursor:pointer;" t-on-click="() => this.openJobs()">
+                                                    <td><strong><t t-esc="job.name"/></strong></td>
+                                                    <td><t t-esc="job.partner_id[1]"/></td>
+                                                    <td><t t-esc="this.formatOdooDatetime(job.scheduled_date)"/></td>
+                                                    <td><t t-esc="job.lead_technician_id ? job.lead_technician_id[1] : 'Unassigned'"/></td>
+                                                    <td>
+                                                        <span t-attf-class="badge-modern badge-{{job.state}}">
+                                                            <t t-esc="job.state.replace('_', ' ')"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Calibration Warning List Table -->
+                        <div class="table-card">
+                            <div class="chart-header">
+                                <h5>Calibration Status Warnings</h5>
+                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openInstruments('alerts')">
+                                    View All <i class="fa fa-arrow-right"/>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <t t-if="state.calibrationAlertsList.length === 0">
+                                    <div class="empty-state">
+                                        <i class="fa fa-check-circle text-success"/>
+                                        <p>All instruments are calibrated and valid!</p>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <table class="table-modern">
+                                        <thead>
+                                            <tr>
+                                                <th>Instrument Name</th>
+                                                <th>Asset Code</th>
+                                                <th>Type</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.calibrationAlertsList" t-as="inst" t-key="inst.id">
+                                                <tr style="cursor:pointer;" t-on-click="() => this.openInstruments()">
+                                                    <td><strong><t t-esc="inst.name"/></strong></td>
+                                                    <td><t t-esc="inst.asset_code"/></td>
+                                                    <td><t t-esc="inst.instrument_type.replace('_', ' ')"/></td>
+                                                    <td>
+                                                        <span t-att-class="inst.calibration_status === 'overdue' ? 'text-danger font-weight-bold' : ''">
+                                                            <t t-esc="this.formatOdooDate(inst.next_calibration_date) || 'N/A'"/>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span t-attf-class="badge-modern badge-cal-{{inst.calibration_status}}">
+                                                            <t t-esc="inst.calibration_status.replace('_', ' ')"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Recent NCRs Table -->
+                        <div class="table-card">
+                            <div class="chart-header">
+                                <h5>Pending Non-Conformances (NCR)</h5>
+                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openNCRs()">
+                                    View All <i class="fa fa-arrow-right"/>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <t t-if="state.recentNcrs.length === 0">
+                                    <div class="empty-state">
+                                        <i class="fa fa-check-circle text-success"/>
+                                        <p>No non-conformances reported</p>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <table class="table-modern">
+                                        <thead>
+                                            <tr>
+                                                <th>NCR No.</th>
+                                                <th>Job Ref</th>
+                                                <th>Raised Date</th>
+                                                <th>Severity</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.recentNcrs" t-as="ncr" t-key="ncr.id">
+                                                <tr style="cursor:pointer;" t-on-click="() => this.openNCRs()">
+                                                    <td><strong><t t-esc="ncr.name"/></strong></td>
+                                                    <td><t t-esc="ncr.job_id ? ncr.job_id[1] : 'N/A'"/></td>
+                                                    <td><t t-esc="this.formatOdooDate(ncr.raised_date)"/></td>
+                                                    <td>
+                                                        <span t-attf-class="badge-modern badge-{{ncr.severity}}">
+                                                            <t t-esc="ncr.severity"/>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span t-attf-class="badge-modern badge-{{ncr.state}}">
+                                                            <t t-esc="ncr.state.replace('_', ' ')"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

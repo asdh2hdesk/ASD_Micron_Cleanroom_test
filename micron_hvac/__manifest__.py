@@ -14,7 +14,7 @@
     """,
     'author': 'Rakesh ASD',
     'website': 'https://www.asdsoftwares.com',
-    'depends': ['base', 'mail', 'hr', 'calendar'],
+    'depends': ['base', 'mail', 'hr', 'calendar', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'data/sequences.xml',
@@ -24,6 +24,7 @@
         'views/hvac_test_views.xml',
         'views/hvac_job_views.xml',
         'views/hvac_ncr_views.xml',
+        'views/hvac_dashboard_views.xml',
         'views/menu.xml',
         'report/report_actions.xml',
         'report/report_sop_template.xml',
@@ -34,6 +35,13 @@
         'report/report_vl004_annexures.xml',
         'report/report_vl005_annexures.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'micron_hvac/static/src/css/hvac_dashboard.css',
+            'micron_hvac/static/src/js/hvac_dashboard.js',
+            'micron_hvac/static/src/xml/hvac_dashboard.xml',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,
