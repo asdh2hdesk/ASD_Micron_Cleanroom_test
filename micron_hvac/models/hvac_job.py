@@ -9,8 +9,8 @@ class HvacJob(models.Model):
     _order = 'name desc'
 
     name = fields.Char('Job No.', required=True, copy=False, default='New', tracking=True)
-    partner_id = fields.Many2one('res.partner', string='Client', required=True, tracking=True)
-    contact_person = fields.Char('Client Contact Person')
+    partner_id = fields.Many2one('res.partner', string='Client', required=True, tracking=True, domain="[('is_company', '=', True)]")
+    contact_person = fields.Many2one('res.partner', string='Client Contact Person', domain="[('parent_id', '=', partner_id)]")
     contact_phone = fields.Char('Contact Phone / Email')
     project_name = fields.Char('Project / Building Name', required=True)
     site_address = fields.Text('Site Address')

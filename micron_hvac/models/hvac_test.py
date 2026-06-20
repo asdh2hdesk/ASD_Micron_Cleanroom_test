@@ -625,3 +625,15 @@ class HvacTestSheet(models.Model):
             sheet.air_velocity_samples_text = text
             parsed = sheet._parse_air_velocity_samples_text(text)
             sheet._load_air_velocity_rows_from_parsed(parsed)
+
+    @api.onchange('job_id')
+    def _onchange_job_id(self):
+        for sheet in self:
+            if sheet.job_id:
+                sheet.lead_tech_id = sheet.job_id.lead_technician_id
+                sheet.technician_ids = sheet.job_id.technician_ids
+                sheet.client_rep = sheet.job_id.contact_person.name if sheet.job_id.contact_person else False
+                
+                # Auto-fill instrument list from instruments taken on job
+                instruments = sheet.job_id.instrument_line_ids.mapped('instrument_id')
+                sheet.instrument_used_ids = instruments

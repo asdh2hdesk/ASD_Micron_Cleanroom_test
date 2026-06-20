@@ -139,7 +139,7 @@
       <td style="padding:5px 10px;width:15%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;font-size:8pt;">Client</td>
       <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><strong><t t-esc="doc.partner_id.name if doc.partner_id else '—'"/></strong></td>
       <td style="padding:5px 10px;width:15%;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;border-left:1px solid #D5D8DC;font-size:8pt;">Contact Person</td>
-      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.client_rep or doc.job_id.contact_person or '—'"/></td>
+      <td style="padding:5px 10px;border-bottom:1px solid #D5D8DC;font-size:8.5pt;"><t t-esc="doc.client_rep or doc.job_id.contact_person.name or '—'"/></td>
     </tr>
     <tr>
       <td style="padding:5px 10px;background:#EAF2F8;font-weight:bold;color:#1B4F72;border-bottom:1px solid #D5D8DC;font-size:8pt;">Project Name</td>
