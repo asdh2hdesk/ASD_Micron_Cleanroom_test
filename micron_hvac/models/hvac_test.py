@@ -94,6 +94,19 @@ class HvacTestSheet(models.Model):
     air_velocity_samples_text = fields.Text(string="Air Velocity Samples Text")
     air_velocity_source_file = fields.Binary(string="Samples File (PDF/Image)")
     air_velocity_source_filename = fields.Char(string="File Name")
+
+    pao_source_file = fields.Binary(string="PAO Source File (PDF/Image)")
+    pao_source_filename = fields.Char(string="PAO Source Filename")
+    pao_samples_text = fields.Text(string="PAO Samples Text")
+
+    nvpc_source_file = fields.Binary(string="NVPC Source File (PDF/Image)")
+    nvpc_source_filename = fields.Char(string="NVPC Source Filename")
+    nvpc_samples_text = fields.Text(string="NVPC Samples Text")
+
+    recovery_source_file = fields.Binary(string="Recovery Source File (PDF/Image)")
+    recovery_source_filename = fields.Char(string="Recovery Source Filename")
+    recovery_samples_text = fields.Text(string="Recovery Samples Text")
+
     acceptance_criteria_html = fields.Html(
         string='Acceptance Criteria',
         compute='_compute_acceptance_criteria_html',
@@ -583,6 +596,37 @@ class HvacTestSheet(models.Model):
                 )
                 seq_counter += 10
 
+    def _extract_text_from_binary_file(self, binary_file, filename):
+        import base64
+        import io
+        if not binary_file:
+            raise UserError(_("Please upload a PDF or image file before importing."))
+        filename = (filename or "").lower()
+        data = base64.b64decode(binary_file)
+        buffer = io.BytesIO(data)
+
+        text = ""
+        if filename.endswith(".pdf"):
+            try:
+                import pdfplumber
+            except ImportError:
+                raise UserError(_("PDF import requires 'pdfplumber' to be installed on the Odoo server."))
+            with pdfplumber.open(buffer) as pdf:
+                pages_text = [page.extract_text() or "" for page in pdf.pages]
+                text = "\n".join(pages_text)
+        else:
+            try:
+                from PIL import Image
+                import pytesseract
+            except ImportError:
+                raise UserError(_("Image import requires 'Pillow' and 'pytesseract' to be installed on the Odoo server."))
+            image = Image.open(buffer)
+            text = pytesseract.image_to_string(image)
+
+        if not text.strip():
+            raise UserError(_("No text could be extracted from the uploaded file."))
+        return text
+
     def action_import_air_velocity_from_text(self):
         """User pastes text and clicks the button."""
         for sheet in self:
@@ -591,40 +635,283 @@ class HvacTestSheet(models.Model):
 
     def action_import_air_velocity_from_file(self):
         """User uploads PDF/image; this extracts text and then parses it."""
-        import base64
-        import io
         for sheet in self:
-            if not sheet.air_velocity_source_file:
-                raise UserError("Please upload a PDF or image file before importing.")
-
-            filename = (sheet.air_velocity_source_filename or "").lower()
-            data = base64.b64decode(sheet.air_velocity_source_file)
-            buffer = io.BytesIO(data)
-
-            text = ""
-            if filename.endswith(".pdf"):
-                try:
-                    import pdfplumber
-                except ImportError:
-                    raise UserError("PDF import requires 'pdfplumber' to be installed on the Odoo server.")
-                with pdfplumber.open(buffer) as pdf:
-                    pages_text = [page.extract_text() or "" for page in pdf.pages]
-                    text = "\n".join(pages_text)
-            else:
-                try:
-                    from PIL import Image
-                    import pytesseract
-                except ImportError:
-                    raise UserError("Image import requires 'Pillow' and 'pytesseract' to be installed on the Odoo server.")
-                image = Image.open(buffer)
-                text = pytesseract.image_to_string(image)
-
-            if not text.strip():
-                raise UserError("No text could be extracted from the uploaded file.")
-
+            text = sheet._extract_text_from_binary_file(sheet.air_velocity_source_file, sheet.air_velocity_source_filename)
             sheet.air_velocity_samples_text = text
             parsed = sheet._parse_air_velocity_samples_text(text)
             sheet._load_air_velocity_rows_from_parsed(parsed)
+
+    # ── PAO Test (VL-002) Parsers and Loaders ─────────────────────────────
+    def _parse_pao_samples_text(self, raw_text):
+        import re
+        raw = (raw_text or "").strip()
+        if not raw:
+            raise UserError(_("No samples text provided."))
+
+        raw = raw.replace("\r\n", "\n").replace("\r", "\n")
+        pattern_block = re.compile(r"\b(?:ID|IO|JO|10|1O)[:\s]+(\d+)", re.IGNORECASE)
+        matches = list(pattern_block.finditer(raw))
+        if not matches:
+            raise UserError(_("No valid photometer print slip markers (ID / IO) found in the text."))
+
+        results = []
+        for idx, match in enumerate(matches):
+            val_id = match.group(1)
+            start = match.end()
+            end = matches[idx + 1].start() if idx + 1 < len(matches) else len(raw)
+            block = raw[start:end]
+
+            conc_m = re.search(r"(?i)\bActual\s+(?:Conc|Cone)[:\s]+([0-9.,]+)", block)
+            conc = float(conc_m.group(1).replace(",", ".")) if conc_m else 0.0
+
+            pen_m = re.search(r"(?i)\bMax\s+(?:Pen|PE.>n)\.?[:\s]+([0-9.,]+)%?", block)
+            if pen_m:
+                pen = float(pen_m.group(1).replace(",", "."))
+                results.append({
+                    'id': val_id,
+                    'actual_conc': conc,
+                    'max_pen': pen,
+                    'is_leakage_scan': True
+                })
+            else:
+                results.append({
+                    'id': val_id,
+                    'actual_conc': conc,
+                    'max_pen': 0.0,
+                    'is_leakage_scan': False
+                })
+
+        return results
+
+    def _load_pao_rows_from_parsed(self, parsed_rows):
+        for sheet in self:
+            sheet.vl002_line_ids.unlink()
+            
+            leakage_scans = [r for r in parsed_rows if r['is_leakage_scan']]
+            upstream_scans = [r for r in parsed_rows if not r['is_leakage_scan']]
+
+            seq_counter = 10
+            for idx, row in enumerate(leakage_scans):
+                upstream_after = row['actual_conc']
+                if idx < len(leakage_scans) - 1:
+                    upstream_after = leakage_scans[idx + 1]['actual_conc']
+                elif upstream_scans:
+                    upstream_after = upstream_scans[-1]['actual_conc']
+
+                self.env["hvac.vl002.line"].create({
+                    "sheet_id": sheet.id,
+                    "sequence": seq_counter,
+                    "room_name": sheet.ahu_tag or "Room",
+                    "filter_id": f"HEPA-{row['id'][-3:]}" if len(row['id']) >= 3 else f"HEPA-{row['id']}",
+                    "filter_location": f"Aerosol scan point {idx + 1}",
+                    "upstream_before": row['actual_conc'],
+                    "downstream_pct": row['max_pen'],
+                    "upstream_after": upstream_after,
+                })
+                seq_counter += 10
+
+    def action_import_pao_from_text(self):
+        for sheet in self:
+            parsed = sheet._parse_pao_samples_text(sheet.pao_samples_text)
+            sheet._load_pao_rows_from_parsed(parsed)
+
+    def action_import_pao_from_file(self):
+        for sheet in self:
+            text = sheet._extract_text_from_binary_file(sheet.pao_source_file, sheet.pao_source_filename)
+            sheet.pao_samples_text = text
+            parsed = sheet._parse_pao_samples_text(text)
+            sheet._load_pao_rows_from_parsed(parsed)
+
+    # ── NVPC Test (VL-003) Parsers and Loaders ────────────────────────────
+    def _parse_nvpc_samples_text(self, raw_text):
+        import re
+        raw = (raw_text or "").strip()
+        if not raw:
+            raise UserError(_("No samples text provided."))
+
+        raw = raw.replace("\r\n", "\n").replace("\r", "\n")
+        blocks = raw.split("Final Sample Report")
+        results = []
+        for block in blocks:
+            if not block.strip():
+                continue
+            loc_m = re.search(r"(?i)\bLocation[:\s]+(\S+(?:\s+\S+)?)", block)
+            if not loc_m:
+                loc_m = re.search(r"(?i)\bLocation[:\s]+(\S+)", block)
+            location = loc_m.group(1).strip() if loc_m else "L1"
+            location = re.sub(r"[^a-zA-Z0-9\s-]", "", location).strip()
+
+            c05_m = re.search(r"\b0\.5\s*(?:\|)?\s*\d+\s*(?:\|)?\s*(\d+)", block)
+            if not c05_m:
+                c05_m = re.search(r"\b0\.5\s*(?:\|)?\s*(\d+)", block)
+            count_05 = float(c05_m.group(1)) if c05_m else 0.0
+
+            c50_m = re.search(r"\b5\.0\s*(?:\|)?\s*\d+\s*(?:\|)?\s*(\d+)", block)
+            if not c50_m:
+                c50_m = re.search(r"\b5\.0\s*(?:\|)?\s*(\d+)", block)
+            count_50 = float(c50_m.group(1)) if c50_m else 0.0
+
+            if c05_m or c50_m:
+                results.append({
+                    'location': location,
+                    'count_05': count_05,
+                    'count_50': count_50,
+                })
+        
+        if not results:
+            raise UserError(_("No valid particle count report blocks found in the text."))
+        return results
+
+    def _load_nvpc_rows_from_parsed(self, parsed_rows):
+        for sheet in self:
+            sheet.vl003_line_ids.unlink()
+            seq_counter = 10
+            for row in parsed_rows:
+                loc = row['location']
+                room = sheet.ahu_tag or "Room"
+                loc_id = loc
+                if " " in loc:
+                    parts = loc.rsplit(" ", 1)
+                    if re.match(r"^L\d+$", parts[1], re.IGNORECASE):
+                        room = parts[0]
+                        loc_id = parts[1].upper()
+                
+                self.env["hvac.vl003.line"].create({
+                    "sheet_id": sheet.id,
+                    "sequence": seq_counter,
+                    "room_name": room,
+                    "location_id": loc_id,
+                    "location_desc": f"Sampling point {loc_id}",
+                    "test_condition": "in_operation" if "operation" in (sheet.remarks or "").lower() else "at_rest",
+                    "count_05um": row['count_05'],
+                    "count_50um": row['count_50'],
+                    "iso_class": sheet.recovery_iso_class or "iso8",
+                })
+                seq_counter += 10
+
+    def action_import_nvpc_from_text(self):
+        for sheet in self:
+            parsed = sheet._parse_nvpc_samples_text(sheet.nvpc_samples_text)
+            sheet._load_nvpc_rows_from_parsed(parsed)
+
+    def action_import_nvpc_from_file(self):
+        for sheet in self:
+            text = sheet._extract_text_from_binary_file(sheet.nvpc_source_file, sheet.nvpc_source_filename)
+            sheet.nvpc_samples_text = text
+            parsed = sheet._parse_nvpc_samples_text(text)
+            sheet._load_nvpc_rows_from_parsed(parsed)
+
+    # ── Recovery Study (VL-004) Parsers and Loaders ───────────────────────
+    def _parse_recovery_samples_text(self, raw_text):
+        import re
+        raw = (raw_text or "").strip()
+        if not raw:
+            raise UserError(_("No samples text provided."))
+
+        raw = raw.replace("\r\n", "\n").replace("\r", "\n")
+        blocks = raw.split("Final Sample Report")
+        results = []
+        for block in blocks:
+            if not block.strip():
+                continue
+
+            times = re.findall(r"\b\d{1,2}:\d{2}:\d{2}\b", block)
+            if not times:
+                times = re.findall(r"\b\d{1,2}:\d{2}\b", block)
+
+            t_start = times[0] if len(times) >= 1 else "00:00"
+            t_end = times[1] if len(times) >= 2 else (times[0] if len(times) == 1 else "00:00")
+
+            c05_m = re.search(r"\b0\.5\s*(?:\|)?\s*\d+\s*(?:\|)?\s*(\d+)", block)
+            if not c05_m:
+                c05_m = re.search(r"\b0\.5\s*(?:\|)?\s*(\d+)", block)
+            count_05 = float(c05_m.group(1)) if c05_m else 0.0
+
+            c50_m = re.search(r"\b5\.0\s*(?:\|)?\s*\d+\s*(?:\|)?\s*(\d+)", block)
+            if not c50_m:
+                c50_m = re.search(r"\b5\.0\s*(?:\|)?\s*(\d+)", block)
+            count_50 = float(c50_m.group(1)) if c50_m else 0.0
+
+            if c05_m or c50_m:
+                results.append({
+                    'time_start': t_start,
+                    'time_end': t_end,
+                    'count_05': count_05,
+                    'count_50': count_50,
+                })
+
+        if not results:
+            raise UserError(_("No valid sample report intervals found in the text."))
+        return results
+
+    def _load_recovery_rows_from_parsed(self, parsed_rows):
+        for sheet in self:
+            sheet.vl004_line_ids.unlink()
+            
+            parsed_rows = sorted(parsed_rows, key=lambda x: x['time_start'])
+
+            max_05_idx = 0
+            max_05_val = -1.0
+            for idx, r in enumerate(parsed_rows):
+                if r['count_05'] > max_05_val:
+                    max_05_val = r['count_05']
+                    max_05_idx = idx
+
+            seq_counter = 10
+            generation_end = ""
+            recovery_regained = ""
+            
+            _ISO_LIMIT_05UM = {
+                'iso5': 3520.0,
+                'iso6': 35200.0,
+                'iso7': 352000.0,
+                'iso8': 3520000.0,
+                'iso9': 35200000.0,
+            }
+            iso_limit = _ISO_LIMIT_05UM.get(sheet.recovery_iso_class or 'iso8', 3520000.0)
+
+            for idx, row in enumerate(parsed_rows):
+                if idx < max_05_idx:
+                    condition = 'initial'
+                elif idx == max_05_idx:
+                    condition = 'generation'
+                    generation_end = row['time_end']
+                else:
+                    condition = 'recovery'
+                    if row['count_05'] <= iso_limit and not recovery_regained:
+                        recovery_regained = row['time_end']
+
+                self.env["hvac.vl004.line"].create({
+                    "sheet_id": sheet.id,
+                    "sequence": seq_counter,
+                    "room_name": sheet.ahu_tag or "Room",
+                    "ahu_condition": condition,
+                    "time_start": row['time_start'],
+                    "time_end": row['time_end'],
+                    "count_05um": row['count_05'],
+                    "count_50um": row['count_50'],
+                })
+                seq_counter += 10
+
+            if generation_end:
+                sheet.recovery_time_a = ":".join(generation_end.split(":")[:2])
+            if recovery_regained:
+                sheet.recovery_time_b = ":".join(recovery_regained.split(":")[:2])
+            elif parsed_rows:
+                last_time = parsed_rows[-1]['time_end']
+                sheet.recovery_time_b = ":".join(last_time.split(":")[:2])
+
+    def action_import_recovery_from_text(self):
+        for sheet in self:
+            parsed = sheet._parse_recovery_samples_text(sheet.recovery_samples_text)
+            sheet._load_recovery_rows_from_parsed(parsed)
+
+    def action_import_recovery_from_file(self):
+        for sheet in self:
+            text = sheet._extract_text_from_binary_file(sheet.recovery_source_file, sheet.recovery_source_filename)
+            sheet.recovery_samples_text = text
+            parsed = sheet._parse_recovery_samples_text(text)
+            sheet._load_recovery_rows_from_parsed(parsed)
 
     @api.onchange('job_id')
     def _onchange_job_id(self):
