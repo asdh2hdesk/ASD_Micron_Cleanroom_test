@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         LIST
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="view_hvac_criteria_list" model="ir.ui.view">
+        <field name="name">hvac.acceptance.criteria.list</field>
+        <field name="model">hvac.acceptance.criteria</field>
+        <field name="arch" type="xml">
+            <list string="Acceptance Criteria"
+                  decoration-muted="state == 'obsolete'"
+                  decoration-info="state == 'draft'"
+                  decoration-success="state == 'approved'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="project_name" optional="show"/>
+                <field name="room_grade" optional="show"/>
+                <field name="document_ref" optional="show"/>
+                <field name="document_rev" optional="hide"/>
+                <field name="effective_date"/>
+                <field name="criteria_type" optional="hide"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FORM
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="view_hvac_criteria_form" model="ir.ui.view">
+        <field name="name">hvac.acceptance.criteria.form</field>
+        <field name="model">hvac.acceptance.criteria</field>
+        <field name="arch" type="xml">
+            <form string="Acceptance Criteria Set">
+                <header>
+                    <button name="action_approve" type="object" string="Approve"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state != 'approved'"/>
+                    <button name="action_obsolete" type="object" string="Mark Obsolete"
+                            invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sheets" type="object"
+                                class="oe_stat_button" icon="fa-flask">
+                            <field name="sheet_count" widget="statinfo" string="Test Sheets"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Obsolete" bg_color="bg-danger"
+                            invisible="state != 'obsolete'"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Aptar Pharma — Cleanroom Requalification Protocol"/></h1>
+                        <h2 class="text-muted"><field name="code" readonly="1"/></h2>
+                    </div>
+                    <group>
+                        <group string="Applies To">
+                            <field name="criteria_type"/>
+                            <field name="partner_id"
+                                   required="criteria_type == 'client'"
+                                   options="{'no_create_edit': True}"/>
+                            <field name="project_name" placeholder="Project / building name"/>
+                            <field name="room_grade" placeholder="e.g. Grade C — Sterile Block"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Client Document">
+                            <field name="document_ref" placeholder="Protocol / URS number"/>
+                            <field name="document_rev" placeholder="e.g. 02"/>
+                            <field name="effective_date"/>
+                            <field name="standard_ref"
+                                   placeholder="e.g. EU GMP Annex 1 / ISPE Baseline Guide Vol. 5"/>
+                            <field name="document" filename="document_filename"
+                                   string="Protocol (PDF)"/>
+                            <field name="document_filename" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info" role="alert">
+                        For each test, choose whether the acceptance limits follow the
+                        <strong>SOP / ISO standard</strong> or the <strong>client's standard</strong>.
+                        Tests left on the SOP basis keep the limits held on the SOP revision —
+                        only the tests set to the client standard use the numbers typed below.
+                    </div>
+
+                    <notebook>
+                        <!-- ── VL-001 ─────────────────────────────────────── -->
+                        <page string="VL-001 Air Velocity &amp; ACPH" name="vl001">
+                            <group>
+                                <group string="Basis">
+                                    <field name="vl001_source" widget="radio"/>
+                                </group>
+                            </group>
+                            <group string="Client Limits" invisible="vl001_source != 'client'">
+                                <group>
+                                    <field name="vl001_limit_mode" widget="radio"/>
+                                    <field name="vl001_nominal_vel_ms"
+                                           invisible="vl001_limit_mode != 'nominal'"/>
+                                    <field name="vl001_tolerance_pct"
+                                           invisible="vl001_limit_mode != 'nominal'"/>
+                                </group>
+                                <group>
+                                    <field name="vl001_min_vel_ms"
+                                           readonly="vl001_limit_mode == 'nominal'"/>
+                                    <field name="vl001_max_vel_ms"
+                                           readonly="vl001_limit_mode == 'nominal'"/>
+                                    <field name="vl001_min_acph"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="vl001_source != 'sop'">
+                                Limits will be taken from the SOP revision parameters
+                                <code>FACE-VEL</code> and <code>ACPH</code>
+                                (default 0.36–0.54 m/s, min 20 ACPH).
+                            </div>
+                        </page>
+
+                        <!-- ── VL-002 ─────────────────────────────────────── -->
+                        <page string="VL-002 HEPA Integrity (PAO)" name="vl002">
+                            <group>
+                                <group string="Basis">
+                                    <field name="vl002_source" widget="radio"/>
+                                </group>
+                            </group>
+                            <group string="Client Limits" invisible="vl002_source != 'client'">
+                                <group>
+                                    <field name="vl002_max_leakage_pct"/>
+                                </group>
+                                <group>
+                                    <field name="vl002_min_recovery_pct"/>
+                                    <field name="vl002_max_recovery_pct"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="vl002_source != 'sop'">
+                                Limits will be taken from the SOP revision parameters
+                                <code>LEAKAGE</code> and <code>RECOVERY</code>
+                                (ISO 14644-3:2019 Annex B6 — NMT 0.01% leakage, 85–115% recovery).
+                            </div>
+                        </page>
+
+                        <!-- ── VL-003 ─────────────────────────────────────── -->
+                        <page string="VL-003 Particle Count" name="vl003">
+                            <group>
+                                <group string="Basis">
+                                    <field name="vl003_source" widget="radio"/>
+                                </group>
+                            </group>
+                            <group string="Client Limits" invisible="vl003_source != 'client'">
+                                <group>
+                                    <field name="vl003_iso_class"/>
+                                </group>
+                                <group>
+                                    <field name="vl003_limit_05um"
+                                           readonly="vl003_iso_class != 'custom'"/>
+                                    <field name="vl003_limit_50um"
+                                           readonly="vl003_iso_class != 'custom'"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="vl003_source != 'sop'">
+                                Limits will be taken from the SOP revision parameters
+                                <code>PC-0.5-AT-REST</code> and <code>PC-5.0-AT-REST</code>
+                                (ISO 14644-1:2015 class limits).
+                            </div>
+                        </page>
+
+                        <!-- ── VL-004 ─────────────────────────────────────── -->
+                        <page string="VL-004 Recovery Study" name="vl004">
+                            <group>
+                                <group string="Basis">
+                                    <field name="vl004_source" widget="radio"/>
+                                </group>
+                            </group>
+                            <group string="Client Limits" invisible="vl004_source != 'client'">
+                                <group>
+                                    <field name="vl004_iso_class"/>
+                                    <field name="vl004_limit_05um"
+                                           readonly="vl004_iso_class != 'custom'"/>
+                                </group>
+                                <group>
+                                    <field name="vl004_max_recovery_min"/>
+                                    <field name="vl004_challenge_factor"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="vl004_source != 'sop'">
+                                Limits will be taken from the SOP revision parameter
+                                <code>RECOV-TIME</code>
+                                (ISO 14644-3:2019 Annex B12 — NMT 15 minutes).
+                            </div>
+                        </page>
+
+                        <!-- ── VL-005 ─────────────────────────────────────── -->
+                        <page string="VL-005 Temperature &amp; RH" name="vl005">
+                            <group>
+                                <group string="Basis">
+                                    <field name="vl005_source" widget="radio"/>
+                                </group>
+                            </group>
+                            <group string="Client Limits" invisible="vl005_source != 'client'">
+                                <group string="Temperature">
+                                    <field name="vl005_temp_min"/>
+                                    <field name="vl005_temp_max"/>
+                                    <field name="vl005_max_temp_range"/>
+                                </group>
+                                <group string="Relative Humidity">
+                                    <field name="vl005_rh_min"/>
+                                    <field name="vl005_rh_max"/>
+                                    <field name="vl005_max_rh_range"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="vl005_source != 'sop'">
+                                Limits will be taken from the SOP revision parameters
+                                <code>ROOM-TEMP</code>, <code>ROOM-RH</code>,
+                                <code>TEMP-RANGE</code> and <code>RH-UNIF</code>.
+                            </div>
+                        </page>
+
+                        <page string="Notes" name="notes">
+                            <field name="notes"
+                                   placeholder="Deviations from the standard, client agreements, references…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SEARCH
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="view_hvac_criteria_search" model="ir.ui.view">
+        <field name="name">hvac.acceptance.criteria.search</field>
+        <field name="model">hvac.acceptance.criteria</field>
+        <field name="arch" type="xml">
+            <search string="Acceptance Criteria">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <field name="document_ref"/>
+                <field name="project_name"/>
+                <filter name="filter_approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter name="filter_draft" string="Draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter name="filter_client" string="Client Protocols"
+                        domain="[('criteria_type', '=', 'client')]"/>
+                <filter name="filter_generic" string="Available to All Clients"
+                        domain="[('partner_id', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_partner" string="Client"
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_type" string="Criteria Type"
+                            context="{'group_by': 'criteria_type'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         ACTION
+    ══════════════════════════════════════════════════════════════ -->
+    <record id="action_hvac_criteria" model="ir.actions.act_window">
+        <field name="name">Acceptance Criteria</field>
+        <field name="res_model">hvac.acceptance.criteria</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_hvac_criteria_search"/>
+        <field name="context">{'search_default_filter_approved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a client acceptance criteria set</p>
+            <p>
+                Record the acceptance limits a client specifies in their protocol or URS.
+                Test worksheets for that client are then judged against those numbers
+                instead of the SOP / ISO defaults — test by test.
+            </p>
+        </field>
+    </record>
+
+</odoo>

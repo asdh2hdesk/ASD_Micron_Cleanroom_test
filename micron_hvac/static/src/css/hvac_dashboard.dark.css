@@ -1,0 +1,58 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Micron HVAC dashboard — dark colour scheme.
+
+   Odoo 18 serves this only inside the "web.assets_web_dark" bundle, so no
+   extra selector is needed: if this file is loaded, dark mode is on.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.o_hvac_dash {
+    --hv-bg: #0b1120;
+    --hv-surface: #131c31;
+    --hv-surface-2: #16203a;
+    --hv-border: rgba(148, 163, 184, 0.16);
+    --hv-text: #e2e8f0;
+    --hv-muted: #94a3b8;
+    --hv-faint: #64748b;
+    --hv-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .6);
+    --hv-shadow-lg: 0 2px 4px rgba(0, 0, 0, .4), 0 20px 40px -18px rgba(0, 0, 0, .7);
+}
+
+/* The white sheen would blow out on a dark card */
+.o_hvac_dash .hv-kpi::after {
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .12), transparent);
+}
+
+/* Lift the semantic colours so they stay legible on dark surfaces */
+.o_hvac_dash .hv-chip.good,
+.o_hvac_dash .hv-badge.tone-success,
+.o_hvac_dash .tone-success .hv-feed__icon,
+.o_hvac_dash .hv-empty.good,
+.o_hvac_dash .hv-bar__rate.good,
+.o_hvac_dash .hv-client__rate.good { color: #4ade80; }
+
+.o_hvac_dash .hv-chip.danger,
+.o_hvac_dash .hv-badge.tone-danger,
+.o_hvac_dash .tone-danger .hv-feed__icon,
+.o_hvac_dash .hv-bar__rate.bad,
+.o_hvac_dash .hv-client__rate.bad,
+.o_hvac_dash .hz-red .hv-hz__n { color: #fca5a5; }
+
+.o_hvac_dash .hv-badge.tone-warning,
+.o_hvac_dash .tone-warning .hv-feed__icon,
+.o_hvac_dash .hv-bar__rate.warn,
+.o_hvac_dash .hv-client__rate.warn,
+.o_hvac_dash .hz-amber .hv-hz__n { color: #fcd34d; }
+
+.o_hvac_dash .hz-cyan .hv-hz__n { color: #67e8f9; }
+.o_hvac_dash .hz-teal .hv-hz__n { color: #5eead4; }
+
+.o_hvac_dash .hv-bar__code {
+    background: rgba(129, 140, 248, .18);
+    color: #a5b4fc;
+}
+
+.o_hvac_dash .hv-link { color: #a5b4fc; }
+
+.o_hvac_dash .hv-watch__row.is-overdue {
+    background: rgba(239, 68, 68, .12);
+}

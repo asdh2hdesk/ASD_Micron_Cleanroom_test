@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Calibration status is stored but depends on today's date. Without a
+            nightly recompute an instrument that expires overnight keeps reading
+            "Valid", and the job-start calibration gate lets it through.
+        -->
+        <record id="cron_refresh_calibration_status" model="ir.cron">
+            <field name="name">HVAC: Refresh Calibration Status &amp; Alerts</field>
+            <field name="model_id" ref="model_hvac_instrument"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_refresh_calibration_status()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+
+    </data>
+</odoo>
