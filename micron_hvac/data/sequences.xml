@@ -34,6 +34,14 @@
             <field name="company_id" eval="False"/>
         </record>
 
+        <record id="seq_hvac_acceptance_criteria" model="ir.sequence">
+            <field name="name">Acceptance Criteria Set</field>
+            <field name="code">hvac.acceptance.criteria</field>
+            <field name="prefix">MHVAC/AC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
         <record id="seq_hvac_capa" model="ir.sequence">
             <field name="name">CAPA</field>
             <field name="code">hvac.capa</field>

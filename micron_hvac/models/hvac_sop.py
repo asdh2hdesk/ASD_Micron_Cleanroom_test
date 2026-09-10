@@ -29,6 +29,7 @@ class HvacSop(models.Model):
             approved = rec.revision_ids.filtered(lambda r: r.state == 'approved').sorted('revision_no')
             rec.active_revision_id = approved[-1] if approved else False
 
+    @api.depends('revision_ids')
     def _compute_revision_count(self):
         for rec in self:
             rec.revision_count = len(rec.revision_ids)
@@ -102,6 +103,11 @@ class HvacSopRevision(models.Model):
     ppe_requirements = fields.Text('PPE Requirements')
     safety_precautions = fields.Text('Safety Precautions')
     references = fields.Text('References / Standards', help='e.g. ASHRAE 62.1, SMACNA, ISO 7730')
+    standard_ref = fields.Char(
+        'Governing Standard',
+        help='Short standard reference printed on certificates and annexures, '
+             'e.g. "ISO 14644-3:2019 Annex B1 / EU GMP Annex 1:2022".',
+    )
     step_ids = fields.One2many('hvac.sop.step', 'revision_id', string='Procedure Steps')
     parameter_ids = fields.One2many('hvac.sop.parameter', 'revision_id', string='Test Parameters')
     required_instrument_ids = fields.Many2many(

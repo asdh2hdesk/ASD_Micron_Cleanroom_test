@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<data>
+<!--
+    noupdate="1": these are seed records. Once loaded, upgrading the module
+    leaves them alone so SOPs, parameters and instruments edited in the UI
+    are never overwritten.
+-->
+<data noupdate="1">
 
 <!-- ═══════════════════════════════════════════════════════════════════
      VALIDATION INSTRUMENTS
@@ -334,6 +339,7 @@
 5. Anemometer probe must not touch filter face or frame — minimum 150mm clearance.
 6. Test must be conducted under stable HVAC conditions — minimum 30 min run time before measurement.
 7. Record room condition (At Rest / In Operation) at time of test — state change is not permitted mid-test.</field>
+        <field name="standard_ref">ISO 14644-3:2019 Annex B1 / EU GMP Annex 1:2022</field>
         <field name="references">ISO 14644-1:2015 — Classification of Air Cleanliness by Particle Concentration
 ISO 14644-3:2019 (E) — Test Methods for Cleanrooms — Annex B1 Airflow Tests
 EU GMP Annex 1:2022 — Manufacture of Sterile Medicinal Products — Section 4 Cleanroom Design
@@ -546,6 +552,7 @@ Schedule M (Revised) 2023 — Good Manufacturing Practices (Indian GMP)</field>
 5. Re-enable fire detection immediately after test completion.
 6. All process equipment, open containers, and product must be removed from room before testing.
 7. After test: run HVAC for minimum 30 minutes to purge PAO residue from the room.</field>
+        <field name="standard_ref">ISO 14644-3:2019 Annex B6 / EU GMP Annex 1:2022</field>
         <field name="references">ISO 14644-3:2019 (E) Annex B6 — Filter Leakage Test (Aerosol Photometer Method)
 EU GMP Annex 1:2022 — Manufacture of Sterile Medicinal Products — HEPA Filter Integrity
 EN 1822-4 — High Efficiency Air Filters (EPA, HEPA, ULPA) — Filter Type Determination
@@ -722,6 +729,7 @@ Schedule M (Revised) 2023 — Indian GMP — Filter Integrity</field>
 4. Wait minimum 5 minutes after entering/positioning equipment before starting sample.
 5. For In-Operation tests: minimum personnel in room = those required for routine operation. Visitors should minimize entry during sampling.
 6. Sample tubing must be straight (no kinks) and minimum bends — particle loss in bends affects accuracy.</field>
+        <field name="standard_ref">ISO 14644-1:2015 / ISO 14644-3:2019 Annex B3</field>
         <field name="references">ISO 14644-1:2015 — Cleanrooms — Classification of Air Cleanliness by Particle Concentration
 ISO 14644-2:2015 — Monitoring to Provide Evidence of Cleanroom Performance
 ISO 14644-3:2019 — Test Methods — Annex B3 Airborne Particle Counting
@@ -910,6 +918,7 @@ Schedule M (Revised) 2023 — Indian GMP — Clean Room Requirements</field>
 3. After artificial contamination: do not open cleanroom doors during recovery period — pressure cascade must be maintained.
 4. Allow full recovery before re-entering for manufacturing.
 5. All personnel non-essential to the test must exit the cleanroom before challenge generation.</field>
+        <field name="standard_ref">ISO 14644-3:2019 Annex B12 / ISPE Baseline Guide Vol. 5</field>
         <field name="references">ISO 14644-3:2019 (E) Annex B12 — Recovery Test Method
 ISPE Baseline Guide Vol. 5 — C&amp;Q Appendix M7 — Recovery Study
 EU GMP Annex 1:2022 — Clean Room Design and Qualification
@@ -1088,6 +1097,7 @@ Schedule M (Revised) 2023 — Indian GMP — Cleanroom Performance Testing</fiel
 4. Ensure all data loggers are fully charged / battery replaced before extended monitoring periods.
 5. Do not disturb or relocate loggers during the monitoring period — data continuity is required.
 6. Inform Production and QA teams about the monitoring period — abnormal events (door left open, HVAC fault) must be documented.</field>
+        <field name="standard_ref">EU GMP Annex 1:2022 / WHO TRS 986 Annex 3</field>
         <field name="references">ISO 14644-1:2015 — Cleanroom Classification (T &amp; RH as supporting parameters)
 EU GMP Annex 1:2022 — Sections 4.4, 4.9 — Temperature and Humidity in Cleanrooms
 WHO TRS 986 Annex 3 — Clean Room Classification — Environmental Monitoring

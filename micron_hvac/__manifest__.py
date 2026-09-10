@@ -1,6 +1,6 @@
 {
     'name': 'Micron HVAC — Digital Management System',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
     'category': 'Services/HVAC',
     'summary': 'HVAC Test Management, SOP Revisions, Instrument Calibration & Job Scheduling',
     'description': """
@@ -8,6 +8,7 @@
         - SOP Template Library with full revision control and approval workflow
         - Instrument Calibration Registry with due-date alerts and job gate
         - Test Management with parametric result recording and auto Pass/Fail
+        - Acceptance Criteria per client: each test judged against the SOP / ISO standard or the client protocol limits
         - Job Scheduling linked to Sales Orders with technician dispatch
         - Non-Conformance Reports (NCR) and CAPA tracking
         - Professional SOP Template PDF and Test Certificate PDF (mirrored structure)
@@ -18,9 +19,11 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sequences.xml',
+        'data/cron.xml',
         'data/validation_master_data.xml',
         'views/hvac_sop_views.xml',
         'views/hvac_instrument_views.xml',
+        'views/hvac_criteria_views.xml',
         'views/hvac_test_views.xml',
         'views/hvac_job_views.xml',
         'views/hvac_ncr_views.xml',
@@ -40,6 +43,10 @@
             'micron_hvac/static/src/css/hvac_dashboard.css',
             'micron_hvac/static/src/js/hvac_dashboard.js',
             'micron_hvac/static/src/xml/hvac_dashboard.xml',
+        ],
+        # Loaded only when the user runs Odoo in dark mode
+        'web.assets_web_dark': [
+            'micron_hvac/static/src/css/hvac_dashboard.dark.css',
         ],
     },
     'installable': True,

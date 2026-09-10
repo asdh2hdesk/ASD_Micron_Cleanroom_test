@@ -59,31 +59,31 @@
   <div class="atitle">Annexure I</div>
 
   <table class="ft">
-    <tr><td colspan="8" class="sec-hdr">RECOVERY STUDY (CLEANROOM RECOVERY TEST)</td></tr>
+    <tr><td colspan="10" class="sec-hdr">RECOVERY STUDY (CLEANROOM RECOVERY TEST)</td></tr>
 
     <!-- Client / Date / AHU -->
     <tr>
-      <td colspan="4" class="L">Client Name: -&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
-      <td colspan="4" class="L">Date: -&#160;&#160;
+      <td colspan="5" class="L">Client Name: -&#160;&#160;<t t-esc="o.partner_id.name or ''"/></td>
+      <td colspan="5" class="L">Date: -&#160;&#160;
         <t t-if="o.test_date"><t t-esc="o.test_date.strftime('%d/%m/%Y')"/></t>
       </td>
     </tr>
     <tr>
-      <td colspan="4" class="L">AHU No.: -&#160;&#160;<t t-esc="o.ahu_tag or ''"/></td>
-      <td colspan="4" class="L">Room Name &amp; No.: -&#160;&#160;<t t-esc="o.vl004_line_ids[0].room_name if o.vl004_line_ids else ''"/></td>
+      <td colspan="5" class="L">AHU No.: -&#160;&#160;<t t-esc="o.ahu_tag or ''"/></td>
+      <td colspan="5" class="L">Room Name &amp; No.: -&#160;&#160;<t t-esc="o.vl004_line_ids[0].room_name if o.vl004_line_ids else ''"/></td>
     </tr>
 
     <!-- Instrument details -->
     <tr>
-      <th colspan="8">INSTRUMENT DETAILS</th>
+      <th colspan="10">INSTRUMENT DETAILS</th>
     </tr>
     <tr style="height:55px;">
-      <td colspan="4" class="inst-td" style="font-size:7.5pt;">
+      <td colspan="5" class="inst-td" style="font-size:7.5pt;">
         Instrument Used: <t t-esc="ipc1.name or 'Lasair_III Particle Counter'"/><br/>
         Make: <t t-esc="ipc1.make or 'PMS'"/><br/>
         Sr. No.: <t t-esc="ipc1.serial_no or ''"/>&#160;|&#160;Model No.: <t t-esc="ipc1.model_no or ''"/>
       </td>
-      <td colspan="4" class="inst-td" style="font-size:7.5pt;">
+      <td colspan="5" class="inst-td" style="font-size:7.5pt;">
         Flow Rate: <t t-esc="o.vl004_line_ids[0].flow_rate if o.vl004_line_ids else '28.3 LPM'"/><br/>
         Sampling Volume: <t t-esc="o.vl004_line_ids[0].sample_volume if o.vl004_line_ids else '0.0283 m³/min'"/><br/>
         Calibration Date: <t t-if="ipc1.last_calibration_date"><t t-esc="ipc1.last_calibration_date.strftime('%d/%m/%Y')"/></t>&#160;|&#160;
@@ -93,12 +93,14 @@
 
     <!-- Column Headers -->
     <tr>
-      <th rowspan="2" style="width:6%">Sr. No.</th>
-      <th rowspan="2" style="width:16%">Room Name &amp; No.</th>
-      <th rowspan="2" style="width:16%">AHU Condition</th>
-      <th colspan="2" style="width:20%">Time of Reading</th>
-      <th colspan="2" style="width:24%">No of Particles in m³</th>
-      <th rowspan="2" style="width:18%">Remarks / Observations</th>
+      <th rowspan="2" style="width:5%">Sr. No.</th>
+      <th rowspan="2" style="width:14%">Room Name &amp; No.</th>
+      <th rowspan="2" style="width:14%">AHU Condition</th>
+      <th colspan="2" style="width:16%">Time of Reading</th>
+      <th colspan="2" style="width:20%">No of Particles in m³</th>
+      <th rowspan="2" style="width:12%">Class Limit 0.5 µm</th>
+      <th rowspan="2" style="width:7%">Result</th>
+      <th rowspan="2" style="width:12%">Remarks / Observations</th>
     </tr>
     <tr>
       <th>START</th>
@@ -117,7 +119,17 @@
         <td class="C"><t t-esc="line.time_end or ''"/></td>
         <td class="C"><t t-esc="('{:,.0f}'.format(line.count_05um)) if line.count_05um else '0'"/></td>
         <td class="C"><t t-esc="('{:,.0f}'.format(line.count_50um)) if line.count_50um else '0'"/></td>
-        <td class="L"><t t-esc="line.remark or ''"/></td>
+        <td class="C"><t t-esc="('{:,.0f}'.format(line.limit_05um)) if line.limit_05um else ''"/></td>
+        <td class="C">
+          <t t-if="line.result == 'pass'"><strong style="color:#1e8449;">PASS</strong></t>
+          <t t-elif="line.result == 'fail'"><strong style="color:#C0392B;">FAIL</strong></t>
+          <t t-elif="line.result == 'recovering'"><span style="color:#E67E22;">RECOVERING</span></t>
+          <t t-else=""></t>
+        </td>
+        <td class="L">
+          <t t-if="line.class_regained"><strong>ISO class regained (B)</strong><br/></t>
+          <t t-esc="line.remark or ''"/>
+        </td>
       </tr>
     </t>
 
@@ -126,26 +138,26 @@
       <t t-foreach="range(MIN_ROWS - n_lines)" t-as="r">
         <tr class="dr">
           <td class="C"><t t-esc="n_lines + r + 1"/></td>
-          <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
       </t>
     </t>
 
     <!-- Recovery Study Summary Math -->
     <tr>
-      <th colspan="8" style="text-align:left;">RECOVERY CALCULATIONS &amp; ANALYSIS</th>
+      <th colspan="10" style="text-align:left;">RECOVERY CALCULATIONS &amp; ANALYSIS</th>
     </tr>
     <tr>
-      <td colspan="4" class="L"><strong>A] Time at which aerosol injection stopped / challenge stopped :</strong></td>
-      <td colspan="4" class="C"><strong><t t-esc="o.recovery_time_a or '—'"/></strong></td>
+      <td colspan="5" class="L"><strong>A] Time at which aerosol injection stopped / challenge stopped :</strong></td>
+      <td colspan="5" class="C"><strong><t t-esc="o.recovery_time_a or '—'"/></strong></td>
     </tr>
     <tr>
-      <td colspan="4" class="L"><strong>B] Time at which design ISO cleanliness class was regained :</strong></td>
-      <td colspan="4" class="C"><strong><t t-esc="o.recovery_time_b or '—'"/></strong></td>
+      <td colspan="5" class="L"><strong>B] Time at which design ISO cleanliness class was regained :</strong></td>
+      <td colspan="5" class="C"><strong><t t-esc="o.recovery_time_b or '—'"/></strong></td>
     </tr>
     <tr>
-      <td colspan="4" class="L"><strong>RECOVERY PERIOD = [ B − A ] :</strong></td>
-      <td colspan="4" class="C" style="font-size:10pt;">
+      <td colspan="5" class="L"><strong>RECOVERY PERIOD = [ B − A ] :</strong></td>
+      <td colspan="5" class="C" style="font-size:10pt;">
         <strong>
           <t t-if="o.recovery_period_min">
             <t t-esc="'%.1f minutes' % o.recovery_period_min"/>
@@ -155,8 +167,8 @@
       </td>
     </tr>
     <tr>
-      <td colspan="4" class="L"><strong>RECOVERY TEST RESULT :</strong></td>
-      <td colspan="4" class="C" style="font-size:10pt;">
+      <td colspan="5" class="L"><strong>RECOVERY TEST RESULT :</strong></td>
+      <td colspan="5" class="C" style="font-size:10pt;">
         <span t-att-class="o.recovery_result">
           <strong><t t-esc="o.recovery_result.upper() if o.recovery_result else 'PENDING'"/></strong>
         </span>
@@ -164,25 +176,37 @@
     </tr>
 
     <!-- Reference & Acceptance -->
+    <t t-if="o.recovery_validity_note">
+      <tr>
+        <td colspan="10" class="L" style="font-size:7.5pt;color:#C0392B;">
+          <strong>TEST VALIDITY :</strong> <t t-esc="o.recovery_validity_note"/>
+        </td>
+      </tr>
+    </t>
     <tr>
-      <td colspan="8" class="L" style="font-size:7.5pt;">
-        <strong>ACCEPTANCE CRITERIA :</strong> NMT 15 MINUTES AS PER ISO 14644-3:2019 ( E ) ANNEX B12.
+      <td colspan="10" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else="">AS PER <t t-esc="o.criteria_standard_ref"/></t>
       </td>
     </tr>
     <tr>
-      <td colspan="8" class="L" style="font-size:7.5pt;">
-        <strong>REFERENCE :</strong> AS PER PROTOCOL No. PSV/PRO/001 / ISO 14644-3:2019
+      <td colspan="10" class="L" style="font-size:7.5pt;">
+        <strong>REFERENCE :</strong>
+        <t t-if="o.criteria_id and o.criteria_id.document_ref">AS PER PROTOCOL No. <t t-esc="o.criteria_id.document_ref"/><t t-if="o.criteria_id.document_rev"> Rev <t t-esc="o.criteria_id.document_rev"/></t></t>
+        <t t-else="">AS PER <t t-esc="o.sop_revision_id.sop_code or 'SOP'"/> <t t-esc="o.sop_revision_id.version_label or ''"/></t> / ISO 14644-3:2019
       </td>
     </tr>
 
     <!-- Signatures -->
     <tr>
-      <th colspan="3" style="text-align:center">Performed By</th>
+      <th colspan="4" style="text-align:center">Performed By</th>
       <th colspan="3" style="text-align:center">Witnessed By</th>
-      <th colspan="2" style="text-align:center">Reviewed By</th>
+      <th colspan="3" style="text-align:center">Reviewed By</th>
     </tr>
     <tr class="sr">
-      <td colspan="3" class="C" style="vertical-align:bottom; padding-bottom:5px;">
+      <td colspan="4" class="C" style="vertical-align:bottom; padding-bottom:5px;">
         <t t-if="o.tech_signature">
           <img t-att-src="'data:image/png;base64,' + o.tech_signature.decode()" style="max-height:35px; max-width:140px;"/>
         </t>
@@ -192,14 +216,14 @@
           <img t-att-src="'data:image/png;base64,' + o.client_signature.decode()" style="max-height:35px; max-width:140px;"/>
         </t>
       </td>
-      <td colspan="2"></td>
+      <td colspan="3"></td>
     </tr>
     <tr>
+      <td colspan="4" style="text-align:center">Sign &amp; Date</td>
       <td colspan="3" style="text-align:center">Sign &amp; Date</td>
       <td colspan="3" style="text-align:center">Sign &amp; Date</td>
-      <td colspan="2" style="text-align:center">Sign &amp; Date</td>
     </tr>
-    <tr><td colspan="8" class="ref">F/VL/004/01-02</td></tr>
+    <tr><td colspan="10" class="ref">F/VL/004/01-02</td></tr>
   </table>
 </div>
 

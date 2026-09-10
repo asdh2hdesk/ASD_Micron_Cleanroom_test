@@ -1,5 +1,6 @@
 from . import hvac_sop
 from . import hvac_instrument
+from . import hvac_criteria
 from . import hvac_vl001
 from . import hvac_vl002
 from . import hvac_vl003

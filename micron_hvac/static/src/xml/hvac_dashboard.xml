@@ -1,313 +1,434 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="micron_hvac.HvacDashboard" owl="1">
-        <div class="o_hvac_dashboard">
-            <!-- Header with Date Filters & Print Action -->
-            <div class="o_dashboard_header">
-                <div class="header-content">
-                    <h2>
-                        <i class="fa fa-tachometer"/>
-                        HVAC Quality &amp; Operations Dashboard
-                    </h2>
-                    <div class="header-controls">
-                        <div class="date-range-picker">
-                            <label>From:</label>
-                            <input type="date" class="date-input"
-                                   t-att-value="state.dateFrom" t-on-input="(ev) => this.onDateInput(ev, 'dateFrom')"/>
+        <div class="o_hvac_dash">
+
+            <!-- ══════════════ HERO ══════════════ -->
+            <header class="hv-hero">
+                <div class="hv-hero__aurora"/>
+                <div class="hv-hero__grid"/>
+                <div class="hv-hero__inner">
+                    <div class="hv-hero__titles">
+                        <div class="hv-hero__eyebrow">
+                            <span class="hv-live"><span class="hv-live__dot"/>LIVE</span>
+                            <span t-if="state.lastRefresh">Updated <t t-esc="state.lastRefresh"/></span>
                         </div>
-                        <div class="date-range-picker">
-                            <label>To:</label>
-                            <input type="date" class="date-input"
-                                   t-att-value="state.dateTo" t-on-input="(ev) => this.onDateInput(ev, 'dateTo')"/>
+                        <h1>Cleanroom Validation Control Centre</h1>
+                        <p>Air velocity · HEPA integrity · Particle count · Recovery · Temperature &amp; RH</p>
+                    </div>
+
+                    <div class="hv-hero__controls">
+                        <div class="hv-seg" role="group">
+                            <button t-foreach="['7','30','90']" t-as="p" t-key="p"
+                                    t-att-class="'hv-seg__btn' + (state.period === p ? ' is-active' : '')"
+                                    t-on-click="() => this.setPeriod(p)">
+                                <t t-esc="p"/>d
+                            </button>
+                            <button t-att-class="'hv-seg__btn' + (state.period === 'custom' ? ' is-active' : '')"
+                                    t-on-click="() => this.setPeriod('custom')">Custom</button>
                         </div>
-                        <button class="btn btn-primary download-btn" t-on-click="() => this.downloadReport()">
-                            <i class="fa fa-print"/>
-                            Print Report
+                        <div class="hv-dates" t-if="state.period === 'custom'">
+                            <input type="date" class="hv-date" t-att-value="state.dateFrom"
+                                   t-on-change="(ev) => this.onDateInput(ev, 'dateFrom')"/>
+                            <span class="hv-dates__sep">→</span>
+                            <input type="date" class="hv-date" t-att-value="state.dateTo"
+                                   t-on-change="(ev) => this.onDateInput(ev, 'dateTo')"/>
+                        </div>
+                        <button class="hv-btn-ghost" t-on-click="() => this.reload()" title="Refresh now">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                        <button class="hv-btn-solid" t-on-click="() => this.downloadReport()">
+                            <i class="fa fa-print"/><span>Print</span>
                         </button>
                     </div>
                 </div>
-            </div>
+                <div class="hv-hero__progress" t-if="state.refreshing"/>
+            </header>
 
-            <!-- Loader -->
+            <!-- ══════════════ SKELETON ══════════════ -->
             <t t-if="state.loading">
-                <div class="text-center p-5 mt-5">
-                    <i class="fa fa-spinner fa-spin fa-3x text-primary"/>
-                    <p class="mt-3 text-muted" style="font-weight: 500;">Retrieving operational metrics...</p>
+                <div class="hv-body">
+                    <div class="hv-kpis">
+                        <t t-foreach="[1,2,3,4,5]" t-as="i" t-key="i">
+                            <div class="hv-card hv-skel" t-attf-style="animation-delay:{{ i * 60 }}ms">
+                                <div class="hv-skel__line w40"/>
+                                <div class="hv-skel__line w70 tall"/>
+                                <div class="hv-skel__line w55"/>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="hv-grid">
+                        <div class="hv-card hv-skel span8" style="height:320px"/>
+                        <div class="hv-card hv-skel span4" style="height:320px"/>
+                    </div>
                 </div>
             </t>
+
+            <!-- ══════════════ DASHBOARD ══════════════ -->
             <t t-else="">
-                <!-- Executive Metrics Section -->
-                <div class="dashboard-section">
-                    <h3 class="section-title">
-                        <i class="fa fa-bar-chart-o"/>
-                        Executive Operations Summary
-                    </h3>
-                    <div class="kpi-row">
-                        <!-- Total Jobs -->
-                        <div class="kpi-card kpi-primary" t-on-click="() => this.openJobs()">
-                            <div class="kpi-icon">
-                                <i class="fa fa-briefcase"/>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-label">Total Job Orders</div>
-                                <div class="kpi-value"><t t-esc="state.stats.totalJobs"/></div>
-                                <div class="kpi-subtext">Registered jobs in period</div>
+            <div class="hv-body">
+
+                <!-- ── KPI ROW ── -->
+                <section class="hv-kpis">
+
+                    <!-- Jobs -->
+                    <article class="hv-card hv-kpi tone-indigo" t-on-click="() => this.openJobs()">
+                        <div class="hv-kpi__top">
+                            <span class="hv-kpi__label">Job Orders</span>
+                            <span class="hv-kpi__icon"><i class="fa fa-briefcase"/></span>
+                        </div>
+                        <div class="hv-kpi__value"><t t-esc="state.display.totalJobs"/></div>
+                        <div class="hv-kpi__foot">
+                            <svg class="hv-spark" viewBox="0 0 132 34" preserveAspectRatio="none">
+                                <polygon class="hv-spark__area" t-att-points="sparkArea(state.spark.jobs)"/>
+                                <polyline class="hv-spark__line" t-att-points="sparkPoints(state.spark.jobs)"/>
+                            </svg>
+                            <span class="hv-chip"><t t-esc="state.display.doneJobs"/> done</span>
+                        </div>
+                    </article>
+
+                    <!-- Active -->
+                    <article class="hv-card hv-kpi tone-amber" t-on-click="() => this.openJobs('in_progress')">
+                        <div class="hv-kpi__top">
+                            <span class="hv-kpi__label">On Site Now</span>
+                            <span class="hv-kpi__icon"><i class="fa fa-bolt"/></span>
+                        </div>
+                        <div class="hv-kpi__value">
+                            <t t-esc="state.display.activeJobs"/>
+                            <span class="hv-pulse" t-if="state.stats.activeJobs"/>
+                        </div>
+                        <div class="hv-kpi__foot">
+                            <span class="hv-chip" t-if="state.stats.activeJobs">Jobs in progress</span>
+                            <span class="hv-chip muted" t-else="">No active jobs</span>
+                        </div>
+                    </article>
+
+                    <!-- Pass rate ring -->
+                    <article class="hv-card hv-kpi tone-green" t-on-click="() => this.openWorksheets('pass')">
+                        <div class="hv-kpi__top">
+                            <span class="hv-kpi__label">First-Pass Rate</span>
+                            <span class="hv-kpi__icon"><i class="fa fa-check-circle"/></span>
+                        </div>
+                        <div class="hv-kpi__ringrow">
+                            <svg class="hv-ring" viewBox="0 0 70 70">
+                                <circle class="hv-ring__bg" cx="35" cy="35" r="30"/>
+                                <circle class="hv-ring__fg" cx="35" cy="35" r="30"
+                                        t-att-style="'stroke-dashoffset:' + ringOffset(state.display.passRate)"/>
+                            </svg>
+                            <div>
+                                <div class="hv-kpi__value sm"><t t-esc="state.display.passRate"/><span class="unit">%</span></div>
+                                <div class="hv-kpi__sub"><t t-esc="state.display.totalTests"/> worksheets</div>
                             </div>
                         </div>
+                    </article>
 
-                        <!-- Active Jobs -->
-                        <div class="kpi-card kpi-warning" t-on-click="() => this.openJobs('in_progress')">
-                            <div class="kpi-icon">
-                                <i class="fa fa-gears"/>
+                    <!-- Calibration -->
+                    <article class="hv-card hv-kpi tone-cyan" t-on-click="() => this.openInstruments('alerts')">
+                        <div class="hv-kpi__top">
+                            <span class="hv-kpi__label">Calibration Alerts</span>
+                            <span class="hv-kpi__icon"><i class="fa fa-wrench"/></span>
+                        </div>
+                        <div class="hv-kpi__value"><t t-esc="state.display.calibrationAlerts"/></div>
+                        <div class="hv-kpi__foot">
+                            <span class="hv-chip danger" t-if="state.stats.overdueCal">
+                                <t t-esc="state.display.overdueCal"/> overdue
+                            </span>
+                            <span class="hv-chip good" t-else="">Fleet compliant</span>
+                            <span class="hv-chip muted"><t t-esc="state.display.instrumentHealth"/>% valid</span>
+                        </div>
+                    </article>
+
+                    <!-- NCR -->
+                    <article class="hv-card hv-kpi tone-rose" t-on-click="() => this.openNCRs('open')">
+                        <div class="hv-kpi__top">
+                            <span class="hv-kpi__label">Open NCRs</span>
+                            <span class="hv-kpi__icon"><i class="fa fa-exclamation-triangle"/></span>
+                        </div>
+                        <div class="hv-kpi__value"><t t-esc="state.display.openNcrs"/></div>
+                        <div class="hv-kpi__foot">
+                            <span class="hv-chip danger" t-if="state.stats.criticalNcrs">
+                                <t t-esc="state.display.criticalNcrs"/> critical
+                            </span>
+                            <span class="hv-chip good" t-else="">None critical</span>
+                            <span class="hv-chip muted"><t t-esc="state.display.failedTests"/> failed tests</span>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ── CHART ROW 1 ── -->
+                <section class="hv-grid">
+                    <article class="hv-card span8">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Test Outcome Trend</h3>
+                                <p>Pass / fail / conditional over the last 14 days</p>
                             </div>
-                            <div class="kpi-content">
-                                <div class="kpi-label">Active (In Progress)</div>
-                                <div class="kpi-value"><t t-esc="state.stats.activeJobs"/></div>
-                                <div class="kpi-subtext">Currently executing on site</div>
+                            <div class="hv-legend">
+                                <span><i class="dot" style="background:#22c55e"/>Pass</span>
+                                <span><i class="dot" style="background:#ef4444"/>Fail</span>
+                                <span><i class="dot" style="background:#f59e0b"/>Conditional</span>
                             </div>
                         </div>
+                        <div class="hv-canvas" style="height:262px"><canvas id="hvacTrendChart"/></div>
+                    </article>
 
-                        <!-- Calibration Alerts -->
-                        <div class="kpi-card kpi-danger" t-on-click="() => this.openInstruments('alerts')">
-                            <div class="kpi-icon">
-                                <i class="fa fa-wrench"/>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-label">Calibration Alerts</div>
-                                <div class="kpi-value"><t t-esc="state.stats.calibrationAlerts"/></div>
-                                <div class="kpi-subtext">Instruments due / overdue</div>
+                    <article class="hv-card span4">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Job Pipeline</h3>
+                                <p>Distribution by stage</p>
                             </div>
                         </div>
-
-                        <!-- Open NCRs -->
-                        <div class="kpi-card kpi-info" t-on-click="() => this.openNCRs('open')">
-                            <div class="kpi-icon">
-                                <i class="fa fa-exclamation-triangle"/>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-label">Open NCRs</div>
-                                <div class="kpi-value"><t t-esc="state.stats.openNcrs"/></div>
-                                <div class="kpi-subtext">Awaiting corrective CAPA</div>
+                        <div class="hv-donutwrap">
+                            <div class="hv-canvas" style="height:262px"><canvas id="hvacJobChart"/></div>
+                            <div class="hv-donut__center">
+                                <span class="num"><t t-esc="state.display.totalJobs"/></span>
+                                <span class="cap">jobs</span>
                             </div>
                         </div>
+                    </article>
+                </section>
 
-                        <!-- Worksheet Pass Rate -->
-                        <div class="kpi-card kpi-success" t-on-click="() => this.openWorksheets()">
-                            <div class="kpi-icon">
-                                <i class="fa fa-check-circle"/>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-label">Worksheet Pass Rate</div>
-                                <div class="kpi-value"><t t-esc="state.stats.passRate"/>%</div>
-                                <div class="kpi-subtext">Tested HVAC rooms OK</div>
+                <!-- ── PASS RATE BY TEST TYPE ── -->
+                <section class="hv-grid">
+                    <article class="hv-card span7">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Performance by Validation Test</h3>
+                                <p>Pass rate per SOP — click a row to drill in</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Visual Charts Section -->
-                <div class="dashboard-section">
-                    <h3 class="section-title">
-                        <i class="fa fa-line-chart"/>
-                        Analytics &amp; Trend Charts
-                    </h3>
-                    <div class="charts-row">
-                        <!-- Job Status Doughnut Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h5>Job Status Distribution</h5>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="jobStatusChart"/>
-                            </div>
-                        </div>
-
-                        <!-- Test Trend Stacked Bar Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h5>Test Results History</h5>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="testTrendChart"/>
-                            </div>
-                        </div>
-
-                        <!-- Calibration Status Pie Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h5>Calibration Status Registry</h5>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="instrumentCalChart"/>
-                            </div>
-                        </div>
-
-                        <!-- NCR Severity Breakdown Horizontal Bar Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h5>Non-Conformances by Severity</h5>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="ncrSeverityChart"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tables Section -->
-                <div class="dashboard-section">
-                    <h3 class="section-title">
-                        <i class="fa fa-list-alt"/>
-                        Operational Schedules &amp; Action Items
-                    </h3>
-                    <div class="tables-grid">
-                        <!-- Recent Job Orders Table -->
-                        <div class="table-card">
-                            <div class="chart-header">
-                                <h5>Recent Dispatch Schedules</h5>
-                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openJobs()">
-                                    View All <i class="fa fa-arrow-right"/>
-                                </button>
-                            </div>
-                            <div class="table-responsive">
-                                <t t-if="state.recentJobs.length === 0">
-                                    <div class="empty-state">
-                                        <i class="fa fa-info-circle"/>
-                                        <p>No job orders found in this period</p>
+                        <div class="hv-bars" t-if="state.testTypes.length">
+                            <t t-foreach="state.testTypes" t-as="tt" t-key="tt.code">
+                                <div class="hv-bar" t-on-click="() => this.openTestType(tt.code)"
+                                     t-attf-style="animation-delay:{{ tt_index * 70 }}ms">
+                                    <div class="hv-bar__head">
+                                        <span class="hv-bar__code"><t t-esc="tt.code"/></span>
+                                        <span class="hv-bar__label"><t t-esc="tt.label"/></span>
+                                        <span class="hv-bar__rate"
+                                              t-att-class="'hv-bar__rate ' + (tt.rate >= 90 ? 'good' : tt.rate >= 70 ? 'warn' : 'bad')">
+                                            <t t-esc="tt.rate"/>%
+                                        </span>
                                     </div>
-                                </t>
-                                <t t-else="">
-                                    <table class="table-modern">
-                                        <thead>
-                                            <tr>
-                                                <th>Job No.</th>
-                                                <th>Client</th>
-                                                <th>Scheduled Date</th>
-                                                <th>Lead Tech</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="state.recentJobs" t-as="job" t-key="job.id">
-                                                <tr style="cursor:pointer;" t-on-click="() => this.openJobs()">
-                                                    <td><strong><t t-esc="job.name"/></strong></td>
-                                                    <td><t t-esc="job.partner_id[1]"/></td>
-                                                    <td><t t-esc="this.formatOdooDatetime(job.scheduled_date)"/></td>
-                                                    <td><t t-esc="job.lead_technician_id ? job.lead_technician_id[1] : 'Unassigned'"/></td>
-                                                    <td>
-                                                        <span t-attf-class="badge-modern badge-{{job.state}}">
-                                                            <t t-esc="job.state.replace('_', ' ')"/>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </t>
+                                    <div class="hv-bar__track">
+                                        <div class="hv-bar__fill"
+                                             t-att-class="'hv-bar__fill ' + (tt.rate >= 90 ? 'good' : tt.rate >= 70 ? 'warn' : 'bad')"
+                                             t-attf-style="width:{{ tt.rate }}%"/>
+                                    </div>
+                                    <div class="hv-bar__meta">
+                                        <t t-esc="tt.pass"/> passed · <t t-esc="tt.fail"/> failed · <t t-esc="tt.total"/> total
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="hv-empty" t-else="">
+                            <i class="fa fa-flask"/><span>No test worksheets in this period</span>
+                        </div>
+                    </article>
+
+                    <article class="hv-card span5">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Calibration Horizon</h3>
+                                <p>When the instrument fleet falls due</p>
+                            </div>
+                        </div>
+                        <div class="hv-horizon">
+                            <div class="hv-hz hz-red" t-on-click="() => this.openInstruments('overdue')">
+                                <span class="hv-hz__n"><t t-esc="state.horizon.overdue"/></span>
+                                <span class="hv-hz__c">Overdue</span>
+                            </div>
+                            <div class="hv-hz hz-amber" t-on-click="() => this.openInstruments('due_soon')">
+                                <span class="hv-hz__n"><t t-esc="state.horizon.d30"/></span>
+                                <span class="hv-hz__c">≤ 30 days</span>
+                            </div>
+                            <div class="hv-hz hz-cyan">
+                                <span class="hv-hz__n"><t t-esc="state.horizon.d60"/></span>
+                                <span class="hv-hz__c">31–60 days</span>
+                            </div>
+                            <div class="hv-hz hz-teal">
+                                <span class="hv-hz__n"><t t-esc="state.horizon.d90"/></span>
+                                <span class="hv-hz__c">61–90 days</span>
                             </div>
                         </div>
 
-                        <!-- Calibration Warning List Table -->
-                        <div class="table-card">
-                            <div class="chart-header">
-                                <h5>Calibration Status Warnings</h5>
-                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openInstruments('alerts')">
-                                    View All <i class="fa fa-arrow-right"/>
-                                </button>
+                        <div class="hv-split">
+                            <div class="hv-split__head">
+                                <span>Judged against</span>
+                                <span class="hv-split__hint">SOP / ISO vs client protocol</span>
                             </div>
-                            <div class="table-responsive">
-                                <t t-if="state.calibrationAlertsList.length === 0">
-                                    <div class="empty-state">
-                                        <i class="fa fa-check-circle text-success"/>
-                                        <p>All instruments are calibrated and valid!</p>
-                                    </div>
-                                </t>
-                                <t t-else="">
-                                    <table class="table-modern">
-                                        <thead>
-                                            <tr>
-                                                <th>Instrument Name</th>
-                                                <th>Asset Code</th>
-                                                <th>Type</th>
-                                                <th>Due Date</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="state.calibrationAlertsList" t-as="inst" t-key="inst.id">
-                                                <tr style="cursor:pointer;" t-on-click="() => this.openInstruments()">
-                                                    <td><strong><t t-esc="inst.name"/></strong></td>
-                                                    <td><t t-esc="inst.asset_code"/></td>
-                                                    <td><t t-esc="inst.instrument_type.replace('_', ' ')"/></td>
-                                                    <td>
-                                                        <span t-att-class="inst.calibration_status === 'overdue' ? 'text-danger font-weight-bold' : ''">
-                                                            <t t-esc="this.formatOdooDate(inst.next_calibration_date) || 'N/A'"/>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span t-attf-class="badge-modern badge-cal-{{inst.calibration_status}}">
-                                                            <t t-esc="inst.calibration_status.replace('_', ' ')"/>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </t>
+                            <div class="hv-split__bar">
+                                <div class="seg sop"
+                                     t-attf-style="flex:{{ state.criteriaSplit.sop || 0 }}"
+                                     t-attf-title="SOP / ISO standard: {{ state.criteriaSplit.sop }}"/>
+                                <div class="seg client"
+                                     t-attf-style="flex:{{ state.criteriaSplit.client || 0 }}"
+                                     t-attf-title="Client standard: {{ state.criteriaSplit.client }}"/>
+                            </div>
+                            <div class="hv-split__keys">
+                                <span><i class="dot sop"/>SOP / ISO · <t t-esc="state.criteriaSplit.sop"/></span>
+                                <span><i class="dot client"/>Client · <t t-esc="state.criteriaSplit.client"/></span>
                             </div>
                         </div>
+                    </article>
+                </section>
 
-                        <!-- Recent NCRs Table -->
-                        <div class="table-card">
-                            <div class="chart-header">
-                                <h5>Pending Non-Conformances (NCR)</h5>
-                                <button class="btn btn-sm btn-link text-primary text-end p-0" t-on-click="() => this.openNCRs()">
-                                    View All <i class="fa fa-arrow-right"/>
-                                </button>
-                            </div>
-                            <div class="table-responsive">
-                                <t t-if="state.recentNcrs.length === 0">
-                                    <div class="empty-state">
-                                        <i class="fa fa-check-circle text-success"/>
-                                        <p>No non-conformances reported</p>
-                                    </div>
-                                </t>
-                                <t t-else="">
-                                    <table class="table-modern">
-                                        <thead>
-                                            <tr>
-                                                <th>NCR No.</th>
-                                                <th>Job Ref</th>
-                                                <th>Raised Date</th>
-                                                <th>Severity</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="state.recentNcrs" t-as="ncr" t-key="ncr.id">
-                                                <tr style="cursor:pointer;" t-on-click="() => this.openNCRs()">
-                                                    <td><strong><t t-esc="ncr.name"/></strong></td>
-                                                    <td><t t-esc="ncr.job_id ? ncr.job_id[1] : 'N/A'"/></td>
-                                                    <td><t t-esc="this.formatOdooDate(ncr.raised_date)"/></td>
-                                                    <td>
-                                                        <span t-attf-class="badge-modern badge-{{ncr.severity}}">
-                                                            <t t-esc="ncr.severity"/>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span t-attf-class="badge-modern badge-{{ncr.state}}">
-                                                            <t t-esc="ncr.state.replace('_', ' ')"/>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </t>
+                <!-- ── CHART ROW 2 ── -->
+                <section class="hv-grid">
+                    <article class="hv-card span4">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Instrument Standing</h3>
+                                <p>Calibration status of the fleet</p>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        <div class="hv-donutwrap">
+                            <div class="hv-canvas" style="height:250px"><canvas id="hvacCalChart"/></div>
+                            <div class="hv-donut__center">
+                                <span class="num"><t t-esc="state.display.instrumentHealth"/>%</span>
+                                <span class="cap">valid</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="hv-card span4">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>NCR Severity</h3>
+                                <p>Non-conformances raised in period</p>
+                            </div>
+                        </div>
+                        <div class="hv-canvas" style="height:250px"><canvas id="hvacNcrChart"/></div>
+                    </article>
+
+                    <article class="hv-card span4">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Busiest Clients</h3>
+                                <p>Worksheets and pass rate</p>
+                            </div>
+                        </div>
+                        <div class="hv-clients" t-if="state.topClients.length">
+                            <t t-foreach="state.topClients" t-as="cl" t-key="cl.id">
+                                <div class="hv-client" t-on-click="() => this.openClient(cl.id)"
+                                     t-attf-style="animation-delay:{{ cl_index * 70 }}ms">
+                                    <span class="hv-client__avatar"><t t-esc="cl.name.slice(0,2).toUpperCase()"/></span>
+                                    <span class="hv-client__name"><t t-esc="cl.name"/></span>
+                                    <span class="hv-client__count"><t t-esc="cl.total"/></span>
+                                    <span t-att-class="'hv-client__rate ' + (cl.rate >= 90 ? 'good' : cl.rate >= 70 ? 'warn' : 'bad')">
+                                        <t t-esc="cl.rate"/>%
+                                    </span>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="hv-empty" t-else="">
+                            <i class="fa fa-building-o"/><span>No client activity yet</span>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ── LISTS ── -->
+                <section class="hv-grid">
+                    <!-- Activity feed -->
+                    <article class="hv-card span5">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Latest Activity</h3>
+                                <p>Tests and non-conformances as they land</p>
+                            </div>
+                        </div>
+                        <div class="hv-feed" t-if="state.feed.length">
+                            <t t-foreach="state.feed" t-as="f" t-key="f.id">
+                                <div t-attf-class="hv-feed__item tone-{{ f.tone }}"
+                                     t-attf-style="animation-delay:{{ f_index * 60 }}ms">
+                                    <span class="hv-feed__icon"><i t-attf-class="fa {{ f.icon }}"/></span>
+                                    <div class="hv-feed__body">
+                                        <span class="hv-feed__title"><t t-esc="f.title"/></span>
+                                        <span class="hv-feed__meta">
+                                            <t t-esc="f.meta"/>
+                                            <t t-if="f.meta"> · </t>
+                                            <t t-esc="formatOdooDate(f.date)"/>
+                                        </span>
+                                    </div>
+                                    <span t-attf-class="hv-badge tone-{{ f.tone }}"><t t-esc="f.badge"/></span>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="hv-empty" t-else="">
+                            <i class="fa fa-history"/><span>Nothing recorded in this period</span>
+                        </div>
+                    </article>
+
+                    <!-- Calibration watch -->
+                    <article class="hv-card span4">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Calibration Watch</h3>
+                                <p>Instruments needing attention first</p>
+                            </div>
+                            <button class="hv-link" t-on-click="() => this.openInstruments('alerts')">
+                                View all <i class="fa fa-arrow-right"/>
+                            </button>
+                        </div>
+                        <div class="hv-watch" t-if="state.calibrationAlertsList.length">
+                            <t t-foreach="state.calibrationAlertsList" t-as="ins" t-key="ins.id">
+                                <div t-attf-class="hv-watch__row {{ ins.calibration_status === 'overdue' ? 'is-overdue' : '' }}"
+                                     t-attf-style="animation-delay:{{ ins_index * 60 }}ms">
+                                    <div class="hv-watch__main">
+                                        <span class="hv-watch__name"><t t-esc="ins.name"/></span>
+                                        <span class="hv-watch__code"><t t-esc="ins.asset_code"/></span>
+                                    </div>
+                                    <div class="hv-watch__right">
+                                        <span class="hv-watch__date">
+                                            <t t-esc="formatOdooDate(ins.next_calibration_date)"/>
+                                        </span>
+                                        <span t-if="ins.days !== null and ins.days &lt; 0" class="hv-badge tone-danger">
+                                            <t t-esc="-ins.days"/>d late
+                                        </span>
+                                        <span t-elif="ins.days !== null" class="hv-badge tone-warning">
+                                            in <t t-esc="ins.days"/>d
+                                        </span>
+                                        <span t-else="" class="hv-badge tone-muted">never</span>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="hv-empty good" t-else="">
+                            <i class="fa fa-check-circle"/><span>Every instrument is in calibration</span>
+                        </div>
+                    </article>
+
+                    <!-- Recent jobs -->
+                    <article class="hv-card span3">
+                        <div class="hv-card__head">
+                            <div>
+                                <h3>Recent Jobs</h3>
+                                <p>Latest scheduled work</p>
+                            </div>
+                        </div>
+                        <div class="hv-jobs" t-if="state.recentJobs.length">
+                            <t t-foreach="state.recentJobs" t-as="job" t-key="job.id">
+                                <div class="hv-job" t-attf-style="animation-delay:{{ job_index * 60 }}ms">
+                                    <span t-attf-class="hv-job__state st-{{ job.state }}"/>
+                                    <div class="hv-job__body">
+                                        <span class="hv-job__name"><t t-esc="job.name"/></span>
+                                        <span class="hv-job__meta">
+                                            <t t-esc="job.partner_id ? job.partner_id[1] : ''"/>
+                                        </span>
+                                    </div>
+                                    <span class="hv-job__date">
+                                        <t t-esc="formatOdooDatetime(job.scheduled_date)"/>
+                                    </span>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="hv-empty" t-else="">
+                            <i class="fa fa-calendar-o"/><span>No jobs scheduled</span>
+                        </div>
+                    </article>
+                </section>
+
+            </div>
             </t>
         </div>
     </t>

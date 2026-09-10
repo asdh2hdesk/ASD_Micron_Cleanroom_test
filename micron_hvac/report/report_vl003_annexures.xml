@@ -169,12 +169,17 @@
     <!-- Reference & Acceptance -->
     <tr>
       <td colspan="7" class="L" style="font-size:7.5pt;">
-        <strong>ACCEPTANCE CRITERIA :</strong> MAXIMUM PERMITTED NUMBER OF PARTICLES/m³ EQUAL TO OR LESS THAN THE LIMITS SPECIFIED ABOVE FOR THE DESIGN ISO CLASS.
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else="">AS PER <t t-esc="o.criteria_standard_ref"/></t>
       </td>
     </tr>
     <tr>
       <td colspan="7" class="L" style="font-size:7.5pt;">
-        <strong>REFERENCE :</strong> AS PER PROTOCOL No. PSV/PRO/001 / ISO 14644-1:2015(E)
+        <strong>REFERENCE :</strong>
+        <t t-if="o.criteria_id and o.criteria_id.document_ref">AS PER PROTOCOL No. <t t-esc="o.criteria_id.document_ref"/><t t-if="o.criteria_id.document_rev"> Rev <t t-esc="o.criteria_id.document_rev"/></t></t>
+        <t t-else="">AS PER <t t-esc="o.sop_revision_id.sop_code or 'SOP'"/> <t t-esc="o.sop_revision_id.version_label or ''"/></t> / ISO 14644-1:2015(E)
       </td>
     </tr>
 

@@ -206,6 +206,11 @@
                                 </group>
                             </group>
                             <separator string="References / Standards"/>
+                            <group>
+                                <field name="standard_ref"
+                                       placeholder="e.g. ISO 14644-3:2019 Annex B1 / EU GMP Annex 1:2022"
+                                       help="Printed on certificates and annexures as the acceptance criteria reference."/>
+                            </group>
                             <field name="references" nolabel="1"/>
                         </page>
                         <page string="Document" name="document">

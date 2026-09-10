@@ -187,7 +187,25 @@
     <!-- ── Result ── -->
     <tr>
       <td colspan="12" class="L">
-        Result: - Meets / Does Not meet validation Acceptance Criteria As per Client Requirement.
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else=""><t t-esc="o.criteria_standard_ref"/></t>.
+      </td>
+    </tr>
+    <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">
+      <tr>
+        <td colspan="12" class="L" style="font-size:7.5pt;">
+          <strong>ACCEPTANCE CRITERIA :</strong>
+          <t t-esc="o.criteria_text"/>
+          AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/>
+        </td>
+      </tr>
+    </t>
+    <tr>
+      <td colspan="12" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        AS PER <t t-esc="o.criteria_standard_ref"/>
       </td>
     </tr>
 
@@ -310,7 +328,25 @@
 
     <tr>
       <td colspan="9" class="L">
-        Result: - Meets / Does Not meet validation Acceptance Criteria as per Client Requirement.
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else=""><t t-esc="o.criteria_standard_ref"/></t>.
+      </td>
+    </tr>
+    <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">
+      <tr>
+        <td colspan="9" class="L" style="font-size:7.5pt;">
+          <strong>ACCEPTANCE CRITERIA :</strong>
+          <t t-esc="o.criteria_text"/>
+          AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/>
+        </td>
+      </tr>
+    </t>
+    <tr>
+      <td colspan="9" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        AS PER <t t-esc="o.criteria_standard_ref"/>
       </td>
     </tr>
     <tr>
@@ -424,7 +460,25 @@
 
     <tr>
       <td colspan="6" class="L">
-        Result: - Meets / Does Not meet validation Acceptance Criteria as per Client Requirement.
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else=""><t t-esc="o.criteria_standard_ref"/></t>.
+      </td>
+    </tr>
+    <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">
+      <tr>
+        <td colspan="6" class="L" style="font-size:7.5pt;">
+          <strong>ACCEPTANCE CRITERIA :</strong>
+          <t t-esc="o.criteria_text"/>
+          AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/>
+        </td>
+      </tr>
+    </t>
+    <tr>
+      <td colspan="6" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        AS PER <t t-esc="o.criteria_standard_ref"/>
       </td>
     </tr>
     <tr>
@@ -538,7 +592,25 @@
 
     <tr>
       <td colspan="7" class="L">
-        Result: - Meets / Does Not meet validation Acceptance Criteria As per Client Requirement.
+        Result: - Meets / Does Not meet validation Acceptance Criteria as per
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else=""><t t-esc="o.criteria_standard_ref"/></t>.
+      </td>
+    </tr>
+    <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">
+      <tr>
+        <td colspan="7" class="L" style="font-size:7.5pt;">
+          <strong>ACCEPTANCE CRITERIA :</strong>
+          <t t-esc="o.criteria_text"/>
+          AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/>
+        </td>
+      </tr>
+    </t>
+    <tr>
+      <td colspan="7" class="L" style="font-size:7.5pt;">
+        <strong>ACCEPTANCE CRITERIA :</strong>
+        <t t-esc="o.criteria_text"/>
+        AS PER <t t-esc="o.criteria_standard_ref"/>
       </td>
     </tr>
     <tr>

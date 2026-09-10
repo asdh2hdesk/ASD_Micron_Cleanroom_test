@@ -46,6 +46,10 @@
                     <button name="action_verify" type="object" string="Verify &amp; Issue"
                             invisible="state != 'done'" class="btn-primary"
                             groups="base.group_system"/>
+                    <button name="action_apply_criteria" type="object"
+                            string="Apply Limits to Rows" icon="fa-check-square-o"
+                            invisible="state not in ('draft','in_progress')"
+                            class="btn-secondary"/>
                     <button name="action_print_certificate" type="object"
                             string="Print Test Certificate" icon="fa-certificate"
                             invisible="state not in ('done','verified')" class="btn-secondary"/>
@@ -122,6 +126,82 @@
                             <field name="client_rep_designation"/>
                         </group>
                     </group>
+                    <!-- Acceptance criteria: SOP / ISO standard vs. client standard -->
+                    <group string="Acceptance Criteria Applied">
+                        <group>
+                            <field name="criteria_id"
+                                   options="{'no_create_edit': True}"
+                                   readonly="state in ('done','verified')"/>
+                            <field name="criteria_source" readonly="1"/>
+                            <field name="criteria_text" readonly="1"/>
+                            <field name="criteria_standard_ref" readonly="1"/>
+                            <field name="criteria_protocol_ref" readonly="1"
+                                   invisible="not criteria_protocol_ref"/>
+                            <field name="criteria_label" invisible="1"/>
+                        </group>
+                        <group>
+                            <div class="text-muted" colspan="2">
+                                The limits below drive Pass/Fail on every reading row. They follow the
+                                SOP / ISO standard unless the client criteria set overrides this test.
+                                Edit a value here to record a one-off deviation, then press
+                                <strong>Apply Limits to Rows</strong>.
+                            </div>
+                        </group>
+                    </group>
+                    <group invisible="sop_test_code != 'VL-001'">
+                        <group string="VL-001 Limits">
+                            <field name="lim_nominal_vel_ms" readonly="state in ('done','verified')"/>
+                            <field name="lim_tolerance_pct" readonly="state in ('done','verified')"/>
+                        </group>
+                        <group>
+                            <field name="lim_min_vel_ms" readonly="state in ('done','verified')"/>
+                            <field name="lim_max_vel_ms" readonly="state in ('done','verified')"/>
+                            <field name="lim_min_acph" readonly="state in ('done','verified')"/>
+                        </group>
+                    </group>
+                    <group invisible="sop_test_code != 'VL-002'">
+                        <group string="VL-002 Limits">
+                            <field name="lim_max_leakage_pct" readonly="state in ('done','verified')"/>
+                        </group>
+                        <group>
+                            <field name="lim_min_recovery_pct" readonly="state in ('done','verified')"/>
+                            <field name="lim_max_recovery_pct" readonly="state in ('done','verified')"/>
+                        </group>
+                    </group>
+                    <group invisible="sop_test_code != 'VL-003'">
+                        <group string="VL-003 Limits">
+                            <field name="lim_iso_class" readonly="state in ('done','verified')"/>
+                        </group>
+                        <group>
+                            <field name="lim_limit_05um"
+                                   readonly="lim_iso_class != 'custom' or state in ('done','verified')"/>
+                            <field name="lim_limit_50um"
+                                   readonly="lim_iso_class != 'custom' or state in ('done','verified')"/>
+                        </group>
+                    </group>
+                    <group invisible="sop_test_code != 'VL-004'">
+                        <group string="VL-004 Limits">
+                            <field name="recovery_iso_class" readonly="state in ('done','verified')"/>
+                            <field name="lim_recovery_limit_05um"
+                                   readonly="state in ('done','verified')"/>
+                        </group>
+                        <group>
+                            <field name="lim_max_recovery_min" readonly="state in ('done','verified')"/>
+                            <field name="lim_challenge_factor" readonly="state in ('done','verified')"/>
+                        </group>
+                    </group>
+                    <group invisible="sop_test_code != 'VL-005'">
+                        <group string="VL-005 Temperature Limits">
+                            <field name="lim_temp_min" readonly="state in ('done','verified')"/>
+                            <field name="lim_temp_max" readonly="state in ('done','verified')"/>
+                            <field name="lim_max_temp_range" readonly="state in ('done','verified')"/>
+                        </group>
+                        <group string="VL-005 Humidity Limits">
+                            <field name="lim_rh_min" readonly="state in ('done','verified')"/>
+                            <field name="lim_rh_max" readonly="state in ('done','verified')"/>
+                            <field name="lim_max_rh_range" readonly="state in ('done','verified')"/>
+                        </group>
+                    </group>
                     <field name="acceptance_criteria_html" widget="html" readonly="1" nolabel="1"
                            invisible="not sop_revision_id"/>
                     <notebook>
@@ -150,7 +230,8 @@
                                 <strong>Add one row per HEPA filter / measurement point.</strong>
                                 Each row maps to one line in the Annexure tables. Enter Room Name, Filter ID, 5 velocity readings (FPM), Filter Size, and Room Volume — CFM, CMH, and ACPH are computed automatically.
                             </div>
-                            <field name="vl001_line_ids" mode="list">
+                            <field name="vl001_line_ids" mode="list"
+                                   context="{'default_min_vel_ms': lim_min_vel_ms, 'default_max_vel_ms': lim_max_vel_ms, 'default_min_acph': lim_min_acph}">
                                 <list editable="bottom" string="Air Velocity &amp; CFM Measurements"
                                       decoration-success="vel_result == 'pass' and acph_result == 'pass'"
                                       decoration-danger="vel_result == 'fail' or acph_result == 'fail'"
@@ -238,7 +319,8 @@
                                 Acceptance: Leakage NMT <strong>0.01%</strong> | Upstream Recovery 85–115%
                                 (ISO 14644-3:2019 Annex B6).
                             </div>
-                            <field name="vl002_line_ids" mode="list">
+                            <field name="vl002_line_ids" mode="list"
+                                   context="{'default_max_leakage_pct': lim_max_leakage_pct, 'default_min_recovery_pct': lim_min_recovery_pct, 'default_max_recovery_pct': lim_max_recovery_pct}">
                                 <list editable="bottom" string="HEPA Filter PAO Readings"
                                       decoration-success="pao_result == 'pass'"
                                       decoration-danger="pao_result == 'fail'"
@@ -304,7 +386,8 @@
                                 Min locations required: N = √(Room Area in m²).
                                 Standard: ISO 14644-1:2015 / ISO 14644-3:2019 Annex B3.
                             </div>
-                            <field name="vl003_line_ids" mode="list">
+                            <field name="vl003_line_ids" mode="list"
+                                   context="{'default_iso_class': lim_iso_class, 'default_limit_05um': lim_limit_05um, 'default_limit_50um': lim_limit_50um}">
                                 <list editable="bottom" string="Particle Count Locations"
                                       decoration-success="result_05 == 'pass' and result_50 == 'pass'"
                                       decoration-danger="result_05 == 'fail' or result_50 == 'fail'"
@@ -378,9 +461,16 @@
                                 (ISO 14644-3:2019 Annex B12). Minimum 3 cycles required.
                             </div>
                             <!-- Recovery summary header -->
+                            <div class="alert alert-warning" role="alert"
+                                 invisible="not recovery_validity_note">
+                                <strong>Test validity:</strong>
+                                <field name="recovery_validity_note" nolabel="1" readonly="1"/>
+                            </div>
                             <group string="Recovery Summary">
                                 <group>
                                     <field name="recovery_iso_class" string="Room ISO Class"/>
+                                    <field name="lim_recovery_limit_05um"
+                                           string="Class Limit 0.5 µm"/>
                                     <field name="recovery_time_a" string="Time A — Challenge Stopped"
                                            placeholder="e.g. 10:35"/>
                                     <field name="recovery_time_b" string="Time B — ISO Class Regained"
@@ -388,17 +478,27 @@
                                 </group>
                                 <group>
                                     <field name="recovery_period_min" string="Recovery Period (min)"
-                                           help="B − A in decimal minutes. NMT 15 min to PASS."/>
+                                           help="B − A in decimal minutes, from the rows below."/>
                                     <field name="recovery_result" readonly="1" widget="badge"
                                            decoration-success="recovery_result == 'pass'"
                                            decoration-danger="recovery_result == 'fail'"
                                            decoration-muted="recovery_result == 'na'"
                                            string="Recovery Result"/>
+                                    <field name="recovery_baseline_ok" readonly="1"
+                                           string="Baseline At Class (SOP 1.5)"/>
+                                    <field name="recovery_challenge_ok" readonly="1"
+                                           string="Challenge Valid (SOP 2.2)"/>
+                                    <field name="recovery_sustained_ok" readonly="1"
+                                           string="Class Sustained (SOP 3.3)"/>
                                 </group>
                             </group>
                             <!-- Per-interval data table -->
                             <field name="vl004_line_ids" mode="list">
-                                <list editable="bottom" string="Recovery Monitoring Intervals">
+                                <list editable="bottom" string="Recovery Monitoring Intervals"
+                                      decoration-success="result == 'pass'"
+                                      decoration-danger="result == 'fail'"
+                                      decoration-warning="result == 'recovering'"
+                                      decoration-bf="class_regained">
                                     <field name="sequence" widget="handle"/>
                                     <field name="room_name" string="Room Name &amp; No."
                                            placeholder="e.g. Wash Room - 51"/>
@@ -410,6 +510,20 @@
                                     <field name="count_05um" string="0.5µm Count (p/m³)"/>
                                     <field name="count_50um" string="5.0µm Count (p/m³)"
                                            optional="show"/>
+                                    <field name="limit_05um" string="Class Limit (p/m³)"
+                                           readonly="1" optional="show"/>
+                                    <field name="challenge_limit" string="Min Challenge (p/m³)"
+                                           readonly="1" optional="hide"/>
+                                    <field name="result" string="Result" readonly="1"
+                                           widget="badge"
+                                           decoration-success="result == 'pass'"
+                                           decoration-danger="result == 'fail'"
+                                           decoration-warning="result == 'recovering'"/>
+                                    <field name="class_regained" string="Class Regained (B)"
+                                           readonly="1" optional="show"/>
+                                    <field name="flow_rate" string="Flow Rate" optional="hide"/>
+                                    <field name="sample_volume" string="Sample Volume"
+                                           optional="hide"/>
                                     <field name="remark" string="Remark" optional="show"/>
                                 </list>
                             </field>
@@ -426,7 +540,8 @@
                                 Default limits: 18–27°C, 30–65% RH. Edit per-line as required by protocol.
                                 Standard: EU GMP Annex 1 / Schedule M (Revised) 2023.
                             </div>
-                            <field name="vl005_line_ids" mode="list">
+                            <field name="vl005_line_ids" mode="list"
+                                   context="{'default_temp_min_limit': lim_temp_min, 'default_temp_max_limit': lim_temp_max, 'default_rh_min_limit': lim_rh_min, 'default_rh_max_limit': lim_rh_max, 'default_max_temp_range_limit': lim_max_temp_range, 'default_max_rh_range_limit': lim_max_rh_range}">
                                 <list editable="bottom" string="Temperature &amp; RH Logger Positions"
                                       decoration-success="temp_result == 'pass' and rh_result == 'pass'"
                                       decoration-danger="temp_result == 'fail' or rh_result == 'fail'"

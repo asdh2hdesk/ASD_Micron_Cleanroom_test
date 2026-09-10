@@ -31,4 +31,5 @@ access_hvac_vl004_line_user,hvac.vl004.line user,model_hvac_vl004_line,,1,1,1,0
 access_hvac_vl004_line_manager,hvac.vl004.line manager,model_hvac_vl004_line,base.group_system,1,1,1,1
 access_hvac_vl005_line_user,hvac.vl005.line user,model_hvac_vl005_line,,1,1,1,0
 access_hvac_vl005_line_manager,hvac.vl005.line manager,model_hvac_vl005_line,base.group_system,1,1,1,1
-
+access_hvac_acceptance_criteria_user,hvac.acceptance.criteria user,model_hvac_acceptance_criteria,,1,0,0,0
+access_hvac_acceptance_criteria_manager,hvac.acceptance.criteria manager,model_hvac_acceptance_criteria,base.group_system,1,1,1,1

@@ -1,14 +1,6 @@
 from odoo import models, fields, api
 
-# ISO 14644-1:2015 particle limits (particles/m³)
-# Keys = iso_class selection value
-_ISO_LIMITS = {
-    'iso5': {'05um': 3_520,       '50um': 29},
-    'iso6': {'05um': 35_200,      '50um': 293},
-    'iso7': {'05um': 352_000,     '50um': 2_930},
-    'iso8': {'05um': 3_520_000,   '50um': 29_300},
-    'iso9': {'05um': 35_200_000,  '50um': 293_000},
-}
+from .hvac_criteria import ISO_CLASS_SELECTION, ISO_LIMITS as _ISO_LIMITS
 
 
 class HvacVl003Line(models.Model):
@@ -64,29 +56,26 @@ class HvacVl003Line(models.Model):
 
     # ── ISO class (determines acceptance limits) ─────────────────────────
     iso_class = fields.Selection(
-        [
-            ('iso5', 'ISO Class 5 (Grade A/B)'),
-            ('iso6', 'ISO Class 6'),
-            ('iso7', 'ISO Class 7 (Grade C)'),
-            ('iso8', 'ISO Class 8 (Grade D)'),
-            ('iso9', 'ISO Class 9'),
-        ],
+        ISO_CLASS_SELECTION,
         string='ISO Class',
         default='iso8',
         required=True,
+        help='Choose "Custom" to judge this location against client-specified limits.',
     )
 
-    # ── Limits (computed from iso_class) ─────────────────────────────────
+    # ── Limits (from the ISO class, or typed in when the class is Custom) ──
     limit_05um = fields.Float(
         'Limit 0.5 µm (particles/m³)',
         compute='_compute_limits',
         store=True,
+        readonly=False,
         digits=(14, 0),
     )
     limit_50um = fields.Float(
         'Limit 5.0 µm (particles/m³)',
         compute='_compute_limits',
         store=True,
+        readonly=False,
         digits=(14, 0),
     )
 
@@ -113,9 +102,14 @@ class HvacVl003Line(models.Model):
     @api.depends('iso_class')
     def _compute_limits(self):
         for rec in self:
-            limits = _ISO_LIMITS.get(rec.iso_class, {})
-            rec.limit_05um = limits.get('05um', 0.0)
-            rec.limit_50um = limits.get('50um', 0.0)
+            if rec.iso_class == 'custom':
+                # Client-specified limits — keep whatever was entered
+                rec.limit_05um = rec.limit_05um or 0.0
+                rec.limit_50um = rec.limit_50um or 0.0
+            else:
+                limits = _ISO_LIMITS.get(rec.iso_class, {})
+                rec.limit_05um = limits.get('05um', 0.0)
+                rec.limit_50um = limits.get('50um', 0.0)
 
     @api.depends('count_05um', 'count_50um', 'limit_05um', 'limit_50um')
     def _compute_results(self):

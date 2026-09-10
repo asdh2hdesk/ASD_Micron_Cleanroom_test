@@ -58,6 +58,7 @@
                             <field name="serial_no"/>
                             <field name="purchase_date"/>
                             <field name="location"/>
+                            <field name="responsible_id"/>
                         </group>
                         <group string="Specifications">
                             <field name="range_description" string="Measurement Range"/>

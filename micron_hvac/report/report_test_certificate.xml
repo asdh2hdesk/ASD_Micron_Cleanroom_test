@@ -118,6 +118,15 @@
         <t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else '—'"/>
         <t t-if="doc.sop_revision_id"> <strong><t t-esc="doc.sop_revision_id.version_label"/></strong></t>
       </td></tr>
+      <tr><td>Acceptance Criteria</td><td>
+        <t t-esc="doc.criteria_text or '—'"/>
+      </td></tr>
+      <tr><td>Criteria As Per</td><td>
+        <t t-if="doc.criteria_source == 'client' and doc.criteria_protocol_ref">
+          <strong>PROTOCOL No. <t t-esc="doc.criteria_protocol_ref"/></strong>
+        </t>
+        <t t-else=""><strong><t t-esc="doc.criteria_standard_ref or '—'"/></strong></t>
+      </td></tr>
       <tr><td>Overall Result</td><td>
         <t t-if="doc.overall_result == 'pass'"><strong style="color:#1e8449;">✔ PASS</strong></t>
         <t t-elif="doc.overall_result == 'fail'"><strong style="color:#C0392B;">✘ FAIL</strong></t>
@@ -500,10 +509,27 @@
   </t>
 
   <div class="note-box">
-    All acceptance criteria taken from the referenced SOP revision:
-    <strong><t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else ''"/>
-    <t t-esc="doc.sop_revision_id.version_label if doc.sop_revision_id else ''"/></strong>.
-    Detailed readings are printed above and are also available in the specialised test annexures.
+    <div><strong>ACCEPTANCE CRITERIA :</strong>
+      <strong><t t-esc="doc.criteria_text"/></strong>
+      <t t-if="doc.criteria_source == 'client' and doc.criteria_protocol_ref">
+        AS PER PROTOCOL No. <strong><t t-esc="doc.criteria_protocol_ref"/></strong>
+      </t>
+      <t t-else="">
+        AS PER <strong><t t-esc="doc.criteria_standard_ref"/></strong>
+      </t>
+    </div>
+    <t t-if="doc.criteria_source == 'client' and doc.criteria_protocol_ref">
+      <div><strong>ACCEPTANCE CRITERIA :</strong>
+        <strong><t t-esc="doc.criteria_text"/></strong>
+        AS PER <strong><t t-esc="doc.criteria_standard_ref"/></strong>
+      </div>
+    </t>
+    <div style="margin-top:3px;">
+      Test performed and recorded as per
+      <t t-esc="doc.sop_revision_id.sop_code if doc.sop_revision_id else ''"/>
+      <t t-esc="doc.sop_revision_id.version_label if doc.sop_revision_id else ''"/>.
+      Detailed readings are printed above and are also available in the specialised test annexures.
+    </div>
   </div>
 </div>
 

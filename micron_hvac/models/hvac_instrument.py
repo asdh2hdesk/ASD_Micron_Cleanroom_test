@@ -47,6 +47,11 @@ class HvacInstrument(models.Model):
     latest_cert_no = fields.Char('Latest Certificate No.', compute='_compute_latest_cert', store=True)
     calibration_ids = fields.One2many('hvac.calibration', 'instrument_id', string='Calibration History')
     calibration_count = fields.Integer(compute='_compute_cal_count', string='# Calibrations')
+    responsible_id = fields.Many2one(
+        'res.users', string='Custodian', tracking=True,
+        default=lambda self: self.env.user,
+        help='User alerted when this instrument is due for recalibration.',
+    )
     active = fields.Boolean(default=True)
     notes = fields.Text('Notes')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
@@ -72,6 +77,7 @@ class HvacInstrument(models.Model):
             else:
                 rec.calibration_status = 'valid'
 
+    @api.depends('calibration_ids')
     def _compute_cal_count(self):
         for rec in self:
             rec.calibration_count = len(rec.calibration_ids)
@@ -81,6 +87,61 @@ class HvacInstrument(models.Model):
         for rec in self:
             latest = rec.calibration_ids.sorted('calibration_date')
             rec.latest_cert_no = latest[-1].name if latest else ''
+
+    # ────────────────────────────────────────────────────────────────
+    # Scheduled maintenance of the calibration status
+    # ────────────────────────────────────────────────────────────────
+
+    @api.model
+    def _cron_refresh_calibration_status(self):
+        """Recompute calibration status and raise due-date alerts.
+
+        `calibration_status` is stored but depends on today's date, so without
+        this nightly pass an instrument that expired overnight would keep
+        reading "Valid" — and the job-start gate would let it through.
+        """
+        instruments = self.with_context(active_test=False).search([])
+        if instruments:
+            self.env.add_to_compute(self._fields['calibration_status'], instruments)
+            instruments.flush_recordset(['calibration_status'])
+
+        certificates = self.env['hvac.calibration'].search([])
+        if certificates:
+            self.env.add_to_compute(
+                certificates._fields['state'], certificates)
+            certificates.flush_recordset(['state'])
+
+        instruments.filtered(
+            lambda i: i.active and i.calibration_status in ('due_soon', 'overdue')
+        )._notify_calibration_due()
+        return True
+
+    def _notify_calibration_due(self):
+        """One open to-do per instrument until it is recalibrated."""
+        for rec in self:
+            existing = self.env['mail.activity'].search_count([
+                ('res_model', '=', rec._name),
+                ('res_id', '=', rec.id),
+                ('summary', 'like', 'Calibration due%'),
+            ])
+            if existing:
+                continue
+            if rec.calibration_status == 'overdue':
+                summary = _('Calibration due — OVERDUE')
+                note = _('%s (%s) calibration expired on %s. '
+                         'It cannot be used on a job until recalibrated.') % (
+                    rec.name, rec.asset_code, rec.next_calibration_date or _('never calibrated'))
+            else:
+                summary = _('Calibration due soon')
+                note = _('%s (%s) is due for recalibration on %s.') % (
+                    rec.name, rec.asset_code, rec.next_calibration_date)
+            rec.activity_schedule(
+                act_type_xmlid='mail.mail_activity_data_todo',
+                date_deadline=rec.next_calibration_date or fields.Date.today(),
+                summary=summary,
+                note=note,
+                user_id=(rec.responsible_id or self.env.user).id,
+            )
 
     def action_view_calibrations(self):
         return {
@@ -145,4 +206,10 @@ class HvacCalibration(models.Model):
         for rec in records:
             if rec.result != 'fail':
                 rec.instrument_id.write({'last_calibration_date': rec.calibration_date})
+                # the instrument is calibrated again — clear its due alert
+                self.env['mail.activity'].search([
+                    ('res_model', '=', 'hvac.instrument'),
+                    ('res_id', '=', rec.instrument_id.id),
+                    ('summary', 'like', 'Calibration due%'),
+                ]).unlink()
         return records

@@ -62,6 +62,17 @@
               action="action_hvac_sop_revision"
               sequence="20"/>
 
+    <!-- Acceptance Criteria -->
+    <menuitem id="menu_hvac_criteria_root"
+              name="Acceptance Criteria"
+              parent="menu_micron_hvac_root"
+              sequence="35"/>
+    <menuitem id="menu_hvac_criteria"
+              name="Client / SOP Criteria Sets"
+              parent="menu_hvac_criteria_root"
+              action="action_hvac_criteria"
+              sequence="10"/>
+
     <!-- Calibration -->
     <menuitem id="menu_hvac_calibration_root"
               name="Calibration"

@@ -1,6 +1,17 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+from .hvac_criteria import (
+    DEFAULT_STANDARDS,
+    ISO_CLASS_SELECTION,
+    ISO_LIMITS,
+    PRIMARY_PARAM,
+    STANDARD_LIMITS,
+    looks_like_standard,
+    short_standard,
+    sop_limits,
+)
+
 
 class HvacTestSheet(models.Model):
     _name = 'hvac.test.sheet'
@@ -113,31 +124,130 @@ class HvacTestSheet(models.Model):
         help='Displays acceptance criteria parameters from the selected SOP revision'
     )
 
+    # ══════════════════════════════════════════════════════════════════════
+    #  ACCEPTANCE CRITERIA — SOP / ISO standard vs. client standard
+    # ══════════════════════════════════════════════════════════════════════
+    criteria_id = fields.Many2one(
+        'hvac.acceptance.criteria', string='Client Acceptance Criteria',
+        tracking=True,
+        domain="['&', ('state', '=', 'approved'),"
+               " '|', ('partner_id', '=', False), ('partner_id', '=', partner_id)]",
+        help='Client protocol / URS that overrides the SOP limits. '
+             'Leave empty to test purely against the SOP / ISO standard.',
+    )
+    criteria_source = fields.Selection(
+        [('sop', 'SOP / ISO Standard'), ('client', 'Client Standard')],
+        string='Limits Basis', compute='_compute_criteria_source', store=True,
+        help='Basis actually applied to this test, derived from the selected criteria set.',
+    )
+    criteria_label = fields.Char(
+        'Criteria Reference', compute='_compute_criteria_source', store=True,
+        help='Full line printed on the certificate and annexures.',
+    )
+    criteria_text = fields.Char(
+        'Acceptance Criteria', compute='_compute_criteria_source', store=True,
+        help='The acceptance limits in words, e.g. "0.45 m/s ± 20 %".',
+    )
+    criteria_standard_ref = fields.Char(
+        'Governing Standard', compute='_compute_criteria_source', store=True,
+        help='Standard the criteria are drawn from (ISO / EU GMP / ISPE …).',
+    )
+    criteria_protocol_ref = fields.Char(
+        'Client Protocol No.', compute='_compute_criteria_source', store=True,
+    )
+
+    # ── Effective limits applied to this worksheet ────────────────────────
+    # Resolved as: standard default → SOP revision parameters → client criteria.
+    # Editable so a one-off deviation can be recorded without changing the master.
+    lim_min_vel_ms = fields.Float('Min Velocity (m/s)', digits=(4, 2),
+                                  compute='_compute_limits', store=True, readonly=False)
+    lim_max_vel_ms = fields.Float('Max Velocity (m/s)', digits=(4, 2),
+                                  compute='_compute_limits', store=True, readonly=False)
+    lim_min_acph = fields.Float('Min ACPH', digits=(5, 0),
+                                compute='_compute_limits', store=True, readonly=False)
+    lim_max_leakage_pct = fields.Float('Max Leakage (%)', digits=(6, 4),
+                                       compute='_compute_limits', store=True, readonly=False)
+    lim_min_recovery_pct = fields.Float('Min Upstream Recovery (%)', digits=(5, 1),
+                                        compute='_compute_limits', store=True, readonly=False)
+    lim_max_recovery_pct = fields.Float('Max Upstream Recovery (%)', digits=(5, 1),
+                                        compute='_compute_limits', store=True, readonly=False)
+    lim_iso_class = fields.Selection(ISO_CLASS_SELECTION, string='Particle Count ISO Class',
+                                     compute='_compute_limits', store=True, readonly=False)
+    lim_limit_05um = fields.Float('Limit 0.5 µm (particles/m³)', digits=(14, 0),
+                                  compute='_compute_limits', store=True, readonly=False)
+    lim_limit_50um = fields.Float('Limit 5.0 µm (particles/m³)', digits=(14, 0),
+                                  compute='_compute_limits', store=True, readonly=False)
+    lim_max_recovery_min = fields.Float('Max Recovery Time (min)', digits=(5, 2),
+                                        compute='_compute_limits', store=True, readonly=False)
+    lim_recovery_limit_05um = fields.Float('Class Limit 0.5 µm (particles/m³)', digits=(14, 0),
+                                           compute='_compute_limits', store=True, readonly=False,
+                                           help='Count the room must fall back to for the '
+                                                'recovery study.')
+    lim_challenge_factor = fields.Float('Min Challenge (× class limit)', digits=(6, 2),
+                                        compute='_compute_limits', store=True, readonly=False,
+                                        help='SOP step 2.2 — a valid challenge must reach this '
+                                             'multiple of the class limit.')
+    lim_temp_min = fields.Float('Min Temperature (°C)', digits=(5, 1),
+                                compute='_compute_limits', store=True, readonly=False)
+    lim_temp_max = fields.Float('Max Temperature (°C)', digits=(5, 1),
+                                compute='_compute_limits', store=True, readonly=False)
+    lim_rh_min = fields.Float('Min RH (%)', digits=(5, 1),
+                              compute='_compute_limits', store=True, readonly=False)
+    lim_rh_max = fields.Float('Max RH (%)', digits=(5, 1),
+                              compute='_compute_limits', store=True, readonly=False)
+    lim_max_temp_range = fields.Float('Max Temp Variation (°C)', digits=(4, 2),
+                                      compute='_compute_limits', store=True, readonly=False)
+    lim_max_rh_range = fields.Float('Max RH Variation (%)', digits=(4, 2),
+                                    compute='_compute_limits', store=True, readonly=False)
+    lim_nominal_vel_ms = fields.Float('Nominal Velocity (m/s)', digits=(4, 2),
+                                      compute='_compute_limits', store=True, readonly=False,
+                                      help='Design velocity the tolerance band is built around. '
+                                           'Printed as "0.45 m/s ± 20 %".')
+    lim_tolerance_pct = fields.Float('Velocity Tolerance (± %)', digits=(5, 1),
+                                     compute='_compute_limits', store=True, readonly=False)
+
     # ── VL-004 Recovery Study — sheet-level summary fields ────────────────
     recovery_iso_class = fields.Selection(
-        [
-            ('iso5', 'ISO Class 5'),
-            ('iso6', 'ISO Class 6'),
-            ('iso7', 'ISO Class 7'),
-            ('iso8', 'ISO Class 8'),
-            ('iso9', 'ISO Class 9'),
-        ],
+        ISO_CLASS_SELECTION,
         string='Room ISO Class (Recovery)',
-        default='iso8',
+        compute='_compute_limits', store=True, readonly=False,
         help='ISO class of the room — determines acceptance limit for particle count',
     )
     recovery_time_a = fields.Char(
         'Time A — Challenge Stopped',
-        help='Exact time at which particle challenge (aerosol) was stopped',
+        compute='_compute_recovery_times', store=True, readonly=False,
+        help='End of the last Generation interval. Filled from the rows below; '
+             'type over it if the instrument clock differs.',
     )
     recovery_time_b = fields.Char(
         'Time B — ISO Class Regained',
-        help='Exact time at which particle count fell back to ISO class limit',
+        compute='_compute_recovery_times', store=True, readonly=False,
+        help='End of the first Recovery interval at or below the class limit that '
+             'stays below for two consecutive readings (SOP step 3.3).',
+    )
+    recovery_baseline_ok = fields.Boolean(
+        'Baseline At Class', compute='_compute_recovery_gates', store=True,
+        help='SOP step 1.5 — the Initial count must already be at or below the class limit.',
+    )
+    recovery_challenge_ok = fields.Boolean(
+        'Challenge Valid', compute='_compute_recovery_gates', store=True,
+        help='SOP step 2.2 — the challenge must reach the required multiple of the class limit.',
+    )
+    recovery_sustained_ok = fields.Boolean(
+        'Class Sustained', compute='_compute_recovery_gates', store=True,
+        help='SOP step 3.3 — the count must stay at or below the class limit for two '
+             'consecutive readings.',
+    )
+    recovery_validity_note = fields.Char(
+        'Test Validity', compute='_compute_recovery_gates', store=True,
     )
     recovery_period_min = fields.Float(
         'Recovery Period (min)',
         digits=(5, 2),
-        help='B - A in decimal minutes. Acceptance: NMT 15 min (ISO 14644-3:2019)',
+        compute='_compute_recovery_period', store=True, readonly=False,
+        help='B - A in decimal minutes. Computed from the two times above; '
+             'override manually if needed. Acceptance limit comes from the '
+             'SOP / client criteria (ISO 14644-3:2019 default: NMT 15 min).',
     )
 
     # ── Computed per-test-type Pass/Fail summaries ────────────────────────
@@ -217,12 +327,107 @@ class HvacTestSheet(models.Model):
             else:
                 rec.overall_result = False
 
+    @staticmethod
+    def _clock_to_minutes(value):
+        """'10:35' or '10:35:20' → minutes since midnight. False if unparsable."""
+        parts = (value or '').strip().replace('.', ':').split(':')
+        try:
+            nums = [int(p) for p in parts if p != '']
+        except ValueError:
+            return False
+        if len(nums) < 2:
+            return False
+        hours, minutes = nums[0], nums[1]
+        seconds = nums[2] if len(nums) > 2 else 0
+        if not (0 <= hours < 24 and 0 <= minutes < 60 and 0 <= seconds < 60):
+            return False
+        return hours * 60 + minutes + seconds / 60.0
+
+    def _vl004_regained_line(self):
+        """First recovery interval at/below the class limit, sustained (SOP 3.3)."""
+        self.ensure_one()
+        recovery = self.vl004_line_ids.filtered(lambda l: l.ahu_condition == 'recovery')
+        ordered = recovery.sorted(lambda l: (l.sequence, l.id))
+        for index, line in enumerate(ordered):
+            if not line.limit_05um or not line.count_05um:
+                continue
+            if line.count_05um > line.limit_05um:
+                continue
+            following = ordered[index + 1:index + 2]
+            if not following or following.count_05um <= following.limit_05um:
+                return line
+        return self.env['hvac.vl004.line']
+
+    @api.depends('vl004_line_ids.ahu_condition', 'vl004_line_ids.time_end',
+                 'vl004_line_ids.count_05um', 'vl004_line_ids.limit_05um',
+                 'vl004_line_ids.sequence')
+    def _compute_recovery_times(self):
+        for rec in self:
+            if not rec.vl004_line_ids:
+                rec.recovery_time_a = rec.recovery_time_a or False
+                rec.recovery_time_b = rec.recovery_time_b or False
+                continue
+            generation = rec.vl004_line_ids.filtered(
+                lambda l: l.ahu_condition == 'generation'
+            ).sorted(lambda l: (l.sequence, l.id))
+            rec.recovery_time_a = generation[-1].time_end if generation else False
+            regained = rec._vl004_regained_line()
+            rec.recovery_time_b = regained.time_end if regained else False
+
+    @api.depends('vl004_line_ids.ahu_condition', 'vl004_line_ids.count_05um',
+                 'vl004_line_ids.limit_05um', 'vl004_line_ids.challenge_limit',
+                 'vl004_line_ids.sequence')
+    def _compute_recovery_gates(self):
+        for rec in self:
+            lines = rec.vl004_line_ids
+            if not lines:
+                rec.recovery_baseline_ok = True
+                rec.recovery_challenge_ok = True
+                rec.recovery_sustained_ok = True
+                rec.recovery_validity_note = False
+                continue
+
+            initial = lines.filtered(lambda l: l.ahu_condition == 'initial' and l.count_05um)
+            challenge = lines.filtered(lambda l: l.ahu_condition == 'generation' and l.count_05um)
+            rec.recovery_baseline_ok = (
+                all(l.result == 'pass' for l in initial) if initial else True
+            )
+            rec.recovery_challenge_ok = (
+                any(l.result == 'pass' for l in challenge) if challenge else True
+            )
+            rec.recovery_sustained_ok = bool(rec._vl004_regained_line())
+
+            problems = []
+            if not rec.recovery_baseline_ok:
+                problems.append(_('baseline count above the class limit (SOP 1.5)'))
+            if not rec.recovery_challenge_ok:
+                problems.append(_('challenge below %g\u00d7 the class limit (SOP 2.2)')
+                                % (rec.lim_challenge_factor or 100.0))
+            if not rec.recovery_sustained_ok:
+                problems.append(_('class not regained and held for two readings (SOP 3.3)'))
+            note = '; '.join(problems)
+            rec.recovery_validity_note = (note[0].upper() + note[1:]) if note else False
+
+    @api.depends('recovery_time_a', 'recovery_time_b')
+    def _compute_recovery_period(self):
+        for rec in self:
+            start = rec._clock_to_minutes(rec.recovery_time_a)
+            end = rec._clock_to_minutes(rec.recovery_time_b)
+            if start is False or end is False:
+                rec.recovery_period_min = rec.recovery_period_min or 0.0
+                continue
+            if end < start:          # test ran past midnight
+                end += 24 * 60
+            rec.recovery_period_min = round(end - start, 2)
+
     @api.depends(
         'vl001_line_ids.vel_result', 'vl001_line_ids.acph_result',
         'vl002_line_ids.pao_result',
         'vl003_line_ids.result_05', 'vl003_line_ids.result_50',
         'vl005_line_ids.temp_result', 'vl005_line_ids.rh_result',
-        'recovery_period_min', 'vl001_subtype',
+        'recovery_period_min', 'vl001_subtype', 'lim_max_recovery_min',
+        'recovery_baseline_ok', 'recovery_challenge_ok', 'recovery_sustained_ok',
+        'vl004_line_ids',
     )
     def _compute_specialized_results(self):
         for rec in self:
@@ -262,9 +467,16 @@ class HvacTestSheet(models.Model):
                 rec.particle_result = 'na'
 
             # ── Recovery Study (VL-004) ───────────────────────────────
-            if rec.recovery_period_min:
+            # A test whose baseline, challenge or sustained-class checks fail is
+            # not a valid recovery study, however short the measured period.
+            recovery_limit = rec.lim_max_recovery_min or STANDARD_LIMITS['max_recovery_min']
+            gates_ok = (rec.recovery_baseline_ok and rec.recovery_challenge_ok
+                        and rec.recovery_sustained_ok)
+            if rec.vl004_line_ids and not gates_ok:
+                rec.recovery_result = 'fail'
+            elif rec.recovery_period_min:
                 rec.recovery_result = (
-                    'pass' if rec.recovery_period_min <= 15.0 else 'fail'
+                    'pass' if rec.recovery_period_min <= recovery_limit else 'fail'
                 )
             else:
                 rec.recovery_result = 'na'
@@ -279,6 +491,228 @@ class HvacTestSheet(models.Model):
             else:
                 rec.th_result = 'na'
 
+    # ══════════════════════════════════════════════════════════════════════
+    #  Acceptance criteria resolution
+    # ══════════════════════════════════════════════════════════════════════
+
+    def _resolve_limits(self):
+        """Effective limits for this sheet.
+
+        Resolution order — each layer overrides the previous one:
+          1. house standard defaults
+          2. the numbers held on the selected SOP revision's parameter list
+          3. the client criteria set, for the tests it marks as client standard
+        """
+        self.ensure_one()
+        vals = dict(STANDARD_LIMITS)
+        vals.update(sop_limits(self.sop_revision_id))
+        if self.criteria_id:
+            vals.update(self.criteria_id.get_client_limits())
+        return vals
+
+    def _standard_ref(self):
+        """Standard the acceptance limits are drawn from, for printing.
+
+        The client protocol may name its own; otherwise it comes from the test
+        method on the governing SOP parameter, then the SOP's reference list.
+        """
+        self.ensure_one()
+        if self.criteria_id and self.criteria_id.standard_ref:
+            return self.criteria_id.standard_ref
+        revision = self.sop_revision_id
+        if revision:
+            if revision.standard_ref:
+                return revision.standard_ref
+            # Fall back to the test method, but only when it names a standard
+            # rather than describing the procedure.
+            code = PRIMARY_PARAM.get(self.sop_test_code or '')
+            param = revision.parameter_ids.filtered(lambda p: p.parameter_code == code)
+            if param and looks_like_standard(param[0].test_method):
+                return short_standard(param[0].test_method)
+        default = DEFAULT_STANDARDS.get(self.sop_test_code or '')
+        if default:
+            return default
+        if revision and revision.references:
+            return short_standard(revision.references)
+        return 'ISO 14644'
+
+    def _criteria_text(self):
+        """The acceptance limits in words, as printed on the certificate."""
+        self.ensure_one()
+        code = self.sop_test_code
+        if code == 'VL-001':
+            if self.lim_nominal_vel_ms and self.lim_tolerance_pct:
+                velocity = '%g m/s \u00b1 %g %% (%.2f \u2013 %.2f m/s)' % (
+                    self.lim_nominal_vel_ms, self.lim_tolerance_pct,
+                    self.lim_min_vel_ms, self.lim_max_vel_ms,
+                )
+            else:
+                velocity = '%.2f \u2013 %.2f m/s' % (self.lim_min_vel_ms, self.lim_max_vel_ms)
+            if self.vl001_subtype == 'velocity':
+                return velocity
+            acph = 'ACPH NLT %g' % self.lim_min_acph
+            if self.vl001_subtype == 'cfm':
+                return acph
+            return '%s | %s' % (velocity, acph)
+        if code == 'VL-002':
+            return ('Downstream leakage NMT %g %% | Upstream recovery %g \u2013 %g %%'
+                    % (self.lim_max_leakage_pct, self.lim_min_recovery_pct,
+                       self.lim_max_recovery_pct))
+        if code == 'VL-003':
+            label = dict(self._fields['lim_iso_class'].selection).get(self.lim_iso_class, '')
+            return ('NMT {:,.0f} particles/m\u00b3 at 0.5 \u00b5m and {:,.0f} at 5.0 \u00b5m \u2014 {}'
+                    .format(self.lim_limit_05um, self.lim_limit_50um, label))
+        if code == 'VL-004':
+            label = dict(self._fields['recovery_iso_class'].selection).get(
+                self.recovery_iso_class, '')
+            return 'Recovery to %s within NMT %g minutes' % (label, self.lim_max_recovery_min)
+        if code == 'VL-005':
+            return ('Temperature %.1f \u2013 %.1f \u00b0C | RH %.1f \u2013 %.1f %% | '
+                    'Variation NMT %.1f \u00b0C and %.1f %% RH'
+                    % (self.lim_temp_min, self.lim_temp_max, self.lim_rh_min, self.lim_rh_max,
+                       self.lim_max_temp_range, self.lim_max_rh_range))
+        return ''
+
+    @api.depends('criteria_id', 'criteria_id.state', 'sop_test_code', 'vl001_subtype',
+                 'sop_revision_id', 'criteria_id.vl001_source', 'criteria_id.vl002_source',
+                 'criteria_id.vl003_source', 'criteria_id.vl004_source',
+                 'criteria_id.vl005_source', 'criteria_id.standard_ref',
+                 'criteria_id.document_ref', 'criteria_id.document_rev',
+                 'lim_min_vel_ms', 'lim_max_vel_ms', 'lim_min_acph', 'lim_nominal_vel_ms',
+                 'lim_tolerance_pct', 'lim_max_leakage_pct', 'lim_min_recovery_pct',
+                 'lim_max_recovery_pct', 'lim_iso_class', 'lim_limit_05um', 'lim_limit_50um',
+                 'recovery_iso_class', 'lim_max_recovery_min', 'lim_temp_min', 'lim_temp_max',
+                 'lim_rh_min', 'lim_rh_max', 'lim_max_temp_range', 'lim_max_rh_range')
+    def _compute_criteria_source(self):
+        for rec in self:
+            source = 'sop'
+            if rec.criteria_id and rec.sop_test_code:
+                source = rec.criteria_id.get_source(rec.sop_test_code)
+            rec.criteria_source = source
+            rec.criteria_standard_ref = rec._standard_ref()
+            rec.criteria_protocol_ref = (
+                rec.criteria_id.protocol_ref() if rec.criteria_id else ''
+            )
+            rec.criteria_text = rec._criteria_text()
+
+            reference = (
+                _('PROTOCOL No. %s') % rec.criteria_protocol_ref
+                if source == 'client' and rec.criteria_protocol_ref
+                else rec.criteria_standard_ref
+            )
+            rec.criteria_label = (
+                '%s \u2014 %s' % (rec.criteria_text, _('AS PER %s') % reference)
+                if rec.criteria_text else _('AS PER %s') % reference
+            )
+
+    @api.depends('criteria_id', 'sop_revision_id',
+                 'sop_revision_id.parameter_ids.min_value',
+                 'sop_revision_id.parameter_ids.max_value')
+    def _compute_limits(self):
+        for rec in self:
+            vals = rec._resolve_limits()
+            rec.lim_min_vel_ms = vals['min_vel_ms']
+            rec.lim_max_vel_ms = vals['max_vel_ms']
+            rec.lim_min_acph = vals['min_acph']
+            rec.lim_max_leakage_pct = vals['max_leakage_pct']
+            rec.lim_min_recovery_pct = vals['min_recovery_pct']
+            rec.lim_max_recovery_pct = vals['max_recovery_pct']
+            rec.lim_iso_class = vals['iso_class']
+            rec.lim_limit_05um = vals['limit_05um']
+            rec.lim_limit_50um = vals['limit_50um']
+            rec.lim_max_recovery_min = vals['max_recovery_min']
+            rec.recovery_iso_class = vals['recovery_iso_class']
+            recovery_limit = vals.get('recovery_limit_05um') or 0.0
+            if not recovery_limit and vals['recovery_iso_class'] != 'custom':
+                recovery_limit = float(ISO_LIMITS.get(
+                    vals['recovery_iso_class'], ISO_LIMITS['iso8'])['05um'])
+            rec.lim_recovery_limit_05um = recovery_limit
+            rec.lim_challenge_factor = vals.get('challenge_factor') or 100.0
+            rec.lim_temp_min = vals['temp_min']
+            rec.lim_temp_max = vals['temp_max']
+            rec.lim_rh_min = vals['rh_min']
+            rec.lim_rh_max = vals['rh_max']
+            rec.lim_max_temp_range = vals['max_temp_range']
+            rec.lim_max_rh_range = vals['max_rh_range']
+
+            # Velocity stated as nominal ± tolerance where the basis says so;
+            # otherwise derive the tolerance from a symmetric min/max band.
+            nominal = vals.get('nominal_vel_ms') or 0.0
+            tolerance = vals.get('tolerance_pct') or 0.0
+            if nominal and not tolerance and vals['max_vel_ms']:
+                tolerance = (vals['max_vel_ms'] - nominal) / nominal * 100.0
+                symmetric = abs(nominal * (1 - tolerance / 100.0) - vals['min_vel_ms']) < 0.005
+                tolerance = round(tolerance, 1) if symmetric and tolerance > 0 else 0.0
+            rec.lim_nominal_vel_ms = nominal
+            rec.lim_tolerance_pct = tolerance
+
+    def _line_limit_defaults(self, test_code=None):
+        """Limit values to stamp on newly created reading rows of a given test."""
+        self.ensure_one()
+        code = test_code or self.sop_test_code
+        if code == 'VL-001':
+            return {
+                'min_vel_ms': self.lim_min_vel_ms,
+                'max_vel_ms': self.lim_max_vel_ms,
+                'min_acph': self.lim_min_acph,
+            }
+        if code == 'VL-002':
+            return {
+                'max_leakage_pct': self.lim_max_leakage_pct,
+                'min_recovery_pct': self.lim_min_recovery_pct,
+                'max_recovery_pct': self.lim_max_recovery_pct,
+            }
+        if code == 'VL-003':
+            vals = {'iso_class': self.lim_iso_class or 'iso8'}
+            if self.lim_iso_class == 'custom':
+                vals.update({
+                    'limit_05um': self.lim_limit_05um,
+                    'limit_50um': self.lim_limit_50um,
+                })
+            return vals
+        if code == 'VL-005':
+            return {
+                'temp_min_limit': self.lim_temp_min,
+                'temp_max_limit': self.lim_temp_max,
+                'rh_min_limit': self.lim_rh_min,
+                'rh_max_limit': self.lim_rh_max,
+                'max_temp_range_limit': self.lim_max_temp_range,
+                'max_rh_range_limit': self.lim_max_rh_range,
+            }
+        return {}
+
+    def action_apply_criteria(self):
+        """Push the current limits onto reading rows that are already entered."""
+        self.ensure_one()
+        sheet = self
+        if sheet.state in ('done', 'verified'):
+            raise UserError(_(
+                'This worksheet is already completed — reopen it before '
+                'changing the acceptance limits.'
+            ))
+        updated = 0
+        for code, lines in (
+            ('VL-001', sheet.vl001_line_ids),
+            ('VL-002', sheet.vl002_line_ids),
+            ('VL-003', sheet.vl003_line_ids),
+            ('VL-005', sheet.vl005_line_ids),
+        ):
+            defaults = sheet._line_limit_defaults(code)
+            if lines and defaults:
+                lines.write(defaults)
+                updated += len(lines)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Acceptance limits applied'),
+                'message': _('%s reading row(s) updated to: %s') % (updated, self.criteria_label or ''),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
+    @api.depends('ncr_ids')
     def _compute_ncr_count(self):
         for rec in self:
             rec.ncr_count = len(rec.ncr_ids)
@@ -559,41 +993,28 @@ class HvacTestSheet(models.Model):
         """Create hvac.vl001.line rows from parsed data, converting m/s to FPM."""
         for sheet in self:
             sheet.vl001_line_ids.unlink()
-            
-            # Fetch dynamic limits from selected SOP parameters if available
-            sop = sheet.sop_revision_id
-            min_vel = 0.36
-            max_vel = 0.54
-            min_ac = 20.0
-            if sop:
-                p_vel = sop.parameter_ids.filtered(lambda p: p.parameter_code == 'FACE-VEL')
-                if p_vel:
-                    min_vel = p_vel[0].min_value or 0.36
-                    max_vel = p_vel[0].max_value or 0.54
-                p_acph = sop.parameter_ids.filtered(lambda p: p.parameter_code == 'ACPH')
-                if p_acph:
-                    min_ac = p_acph[0].min_value or 20.0
+
+            # Limits follow the sheet's acceptance criteria
+            # (SOP / ISO standard, or the client's standard)
+            limits = sheet._line_limit_defaults('VL-001')
 
             seq_counter = 10
             for row in parsed_rows:
                 readings = row["readings"]
                 # Convert m/s readings to FPM by multiplying by 196.85
-                self.env["hvac.vl001.line"].create(
-                    {
-                        "sheet_id": sheet.id,
-                        "sequence": seq_counter,
-                        "room_name": sheet.ahu_tag or "Room",
-                        "filter_id": row["filter_no"],
-                        "vel_1": readings[0] * 196.85,
-                        "vel_2": readings[1] * 196.85,
-                        "vel_3": readings[2] * 196.85,
-                        "vel_4": readings[3] * 196.85,
-                        "vel_5": readings[4] * 196.85,
-                        "min_vel_ms": min_vel,
-                        "max_vel_ms": max_vel,
-                        "min_acph": min_ac,
-                    }
-                )
+                vals = {
+                    "sheet_id": sheet.id,
+                    "sequence": seq_counter,
+                    "room_name": sheet.ahu_tag or "Room",
+                    "filter_id": row["filter_no"],
+                    "vel_1": readings[0] * 196.85,
+                    "vel_2": readings[1] * 196.85,
+                    "vel_3": readings[2] * 196.85,
+                    "vel_4": readings[3] * 196.85,
+                    "vel_5": readings[4] * 196.85,
+                }
+                vals.update(limits)
+                self.env["hvac.vl001.line"].create(vals)
                 seq_counter += 10
 
     def _extract_text_from_binary_file(self, binary_file, filename):
@@ -686,7 +1107,8 @@ class HvacTestSheet(models.Model):
     def _load_pao_rows_from_parsed(self, parsed_rows):
         for sheet in self:
             sheet.vl002_line_ids.unlink()
-            
+
+            limits = sheet._line_limit_defaults('VL-002')
             leakage_scans = [r for r in parsed_rows if r['is_leakage_scan']]
             upstream_scans = [r for r in parsed_rows if not r['is_leakage_scan']]
 
@@ -698,7 +1120,7 @@ class HvacTestSheet(models.Model):
                 elif upstream_scans:
                     upstream_after = upstream_scans[-1]['actual_conc']
 
-                self.env["hvac.vl002.line"].create({
+                vals = {
                     "sheet_id": sheet.id,
                     "sequence": seq_counter,
                     "room_name": sheet.ahu_tag or "Room",
@@ -707,7 +1129,9 @@ class HvacTestSheet(models.Model):
                     "upstream_before": row['actual_conc'],
                     "downstream_pct": row['max_pen'],
                     "upstream_after": upstream_after,
-                })
+                }
+                vals.update(limits)
+                self.env["hvac.vl002.line"].create(vals)
                 seq_counter += 10
 
     def action_import_pao_from_text(self):
@@ -765,6 +1189,7 @@ class HvacTestSheet(models.Model):
     def _load_nvpc_rows_from_parsed(self, parsed_rows):
         for sheet in self:
             sheet.vl003_line_ids.unlink()
+            limits = sheet._line_limit_defaults('VL-003')
             seq_counter = 10
             for row in parsed_rows:
                 loc = row['location']
@@ -776,7 +1201,7 @@ class HvacTestSheet(models.Model):
                         room = parts[0]
                         loc_id = parts[1].upper()
                 
-                self.env["hvac.vl003.line"].create({
+                vals = {
                     "sheet_id": sheet.id,
                     "sequence": seq_counter,
                     "room_name": room,
@@ -785,8 +1210,9 @@ class HvacTestSheet(models.Model):
                     "test_condition": "in_operation" if "operation" in (sheet.remarks or "").lower() else "at_rest",
                     "count_05um": row['count_05'],
                     "count_50um": row['count_50'],
-                    "iso_class": sheet.recovery_iso_class or "iso8",
-                })
+                }
+                vals.update(limits)
+                self.env["hvac.vl003.line"].create(vals)
                 seq_counter += 10
 
     def action_import_nvpc_from_text(self):
@@ -858,28 +1284,13 @@ class HvacTestSheet(models.Model):
                     max_05_idx = idx
 
             seq_counter = 10
-            generation_end = ""
-            recovery_regained = ""
-            
-            _ISO_LIMIT_05UM = {
-                'iso5': 3520.0,
-                'iso6': 35200.0,
-                'iso7': 352000.0,
-                'iso8': 3520000.0,
-                'iso9': 35200000.0,
-            }
-            iso_limit = _ISO_LIMIT_05UM.get(sheet.recovery_iso_class or 'iso8', 3520000.0)
-
             for idx, row in enumerate(parsed_rows):
                 if idx < max_05_idx:
                     condition = 'initial'
                 elif idx == max_05_idx:
                     condition = 'generation'
-                    generation_end = row['time_end']
                 else:
                     condition = 'recovery'
-                    if row['count_05'] <= iso_limit and not recovery_regained:
-                        recovery_regained = row['time_end']
 
                 self.env["hvac.vl004.line"].create({
                     "sheet_id": sheet.id,
@@ -893,13 +1304,8 @@ class HvacTestSheet(models.Model):
                 })
                 seq_counter += 10
 
-            if generation_end:
-                sheet.recovery_time_a = ":".join(generation_end.split(":")[:2])
-            if recovery_regained:
-                sheet.recovery_time_b = ":".join(recovery_regained.split(":")[:2])
-            elif parsed_rows:
-                last_time = parsed_rows[-1]['time_end']
-                sheet.recovery_time_b = ":".join(last_time.split(":")[:2])
+            # Time A, Time B, the per-row results and the recovery period are
+            # all derived from the rows themselves — nothing to set here.
 
     def action_import_recovery_from_text(self):
         for sheet in self:
@@ -924,3 +1330,10 @@ class HvacTestSheet(models.Model):
                 # Auto-fill instrument list from instruments taken on job
                 instruments = sheet.job_id.instrument_line_ids.mapped('instrument_id')
                 sheet.instrument_used_ids = instruments
+
+                # Pick up the client's approved acceptance criteria, if any
+                if not sheet.criteria_id and sheet.job_id.partner_id:
+                    sheet.criteria_id = self.env['hvac.acceptance.criteria'].search([
+                        ('state', '=', 'approved'),
+                        ('partner_id', '=', sheet.job_id.partner_id.id),
+                    ], order='effective_date desc, id desc', limit=1)

@@ -49,7 +49,8 @@ class HvacJob(models.Model):
     calibration_valid = fields.Boolean(
         'Instruments Calibration OK', compute='_compute_cal_valid', store=True
     )
-    calibration_warning = fields.Char(compute='_compute_cal_valid', string='Cal. Warning')
+    calibration_warning = fields.Char(
+        compute='_compute_cal_valid', store=True, string='Cal. Warning')
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -62,6 +63,7 @@ class HvacJob(models.Model):
     notes = fields.Text('Internal Notes')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
 
+    @api.depends('test_sheet_ids', 'ncr_ids')
     def _compute_counts(self):
         for rec in self:
             rec.test_sheet_count = len(rec.test_sheet_ids)

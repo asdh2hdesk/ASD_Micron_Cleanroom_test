@@ -158,7 +158,10 @@
     <!-- Limits / References -->
     <tr>
       <td colspan="15" class="L" style="font-size:7.5pt;">
-        <strong>ACCEPTANCE LIMITS :</strong> TEMPERATURE: 18.0°C TO 27.0°C | RELATIVE HUMIDITY: 30.0% TO 65.0% RH | LOGGER TEMPERATURE VARIATION: NMT 2.0°C | LOGGER RH VARIATION: NMT 5.0%
+        <strong>ACCEPTANCE LIMITS :</strong>
+        <t t-esc="o.criteria_text"/>
+        <t t-if="o.criteria_source == 'client' and o.criteria_protocol_ref">AS PER PROTOCOL No. <t t-esc="o.criteria_protocol_ref"/></t>
+        <t t-else="">AS PER <t t-esc="o.criteria_standard_ref"/></t>
       </td>
     </tr>
     <tr>
